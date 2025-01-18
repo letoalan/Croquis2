@@ -1,0 +1,2653 @@
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\index.html --- #
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.pm/2.2.0/leaflet.pm.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        console.log('Chargement des fichiers CSS...');
+        console.log('Fichier CSS local (styles.css) :', document.querySelector('link[href="css/styles.css"]').href);
+    </script>
+</head>
+<body>
+<div id="app" class="d-flex vh-100">
+    <!-- Sidebar -->
+    <div class="sidebar bg-light border-end p-3">
+        <h5 class="fw-bold">Mode édition</h5>
+        <div class="mb-3">
+            <label for="tileSelector" class="form-label">Sélectionnez un fond</label>
+            <select id="tileSelector" class="form-select">
+                <option value="osm">OpenStreetMap</option>
+                <option value="cartodb">CartoDB Positron</option>
+                <option value="dark">CartoDB Dark</option>
+                <option value="satellite">Esri Satellite</option>
+            </select>
+        </div>
+        <div id="geometryList"></div>
+    </div>
+
+    <!-- Carte -->
+    <div id="map" class="map"></div>
+</div>
+
+<!-- Conteneur du titre de la carte -->
+<div id="map-title-container" class="map-title-container">
+    <div id="mapTitleDisplay" class="map-title-display"></div>
+    <div class="map-title-input-container">
+        <input type="text" id="mapTitleInput" class="form-control map-title-input" placeholder="Entrez un titre pour la carte" />
+        <button id="saveMapTitleBtn" class="btn btn-primary btn-sm">Enregistrer</button>
+    </div>
+    <i id="toggleTitleIcon" class="bi bi-chevron-up"></i>
+</div>
+
+<!-- Menu contextuel pour modifier le style -->
+<div id="contextMenu" class="context-menu">
+    <div class="context-menu-content">
+        <div class="mb-3">
+            <label for="contextColorPicker" class="form-label">Couleur de remplissage</label>
+            <input type="color" id="contextColorPicker" class="form-control" value="#007bff">
+        </div>
+        <div class="mb-3">
+            <label for="contextLineColorPicker" class="form-label">Couleur de la ligne</label>
+            <input type="color" id="contextLineColorPicker" class="form-control" value="#000000">
+        </div>
+        <div class="mb-3">
+            <label for="contextOpacitySlider" class="form-label">Transparence</label>
+            <input type="range" id="contextOpacitySlider" class="form-range" min="0" max="1" step="0.1" value="1">
+        </div>
+        <div class="mb-3">
+            <label for="contextLineDash" class="form-label">Style de ligne</label>
+            <select id="contextLineDash" class="form-select">
+                <option value="solid">Continue</option>
+                <option value="dashed">Pointillés</option>
+                <option value="dotted">Pointillés fins</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="contextLineWeight" class="form-label">Épaisseur de la ligne</label>
+            <input type="range" id="contextLineWeight" class="form-range" min="1" max="10" step="1" value="2">
+        </div>
+        <div class="mb-3">
+            <label for="contextMarkerSize" class="form-label">Taille du marqueur</label>
+            <input type="range" id="contextMarkerSize" class="form-range" min="10" max="50" step="1" value="24">
+        </div>
+        <div class="d-flex justify-content-between">
+            <button id="contextApplyBtn" class="btn btn-primary btn-sm">Appliquer</button>
+            <button id="contextCancelBtn" class="btn btn-secondary btn-sm">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.pm/2.2.0/leaflet.pm.min.js"></script>
+<script type="module">
+    import { GeometryManager } from './js/modules/GeometryManager.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const geometryManager = new GeometryManager();
+        geometryManager.init();
+    });
+</script>
+</body>
+</html>
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\index.html --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\css\styles.css --- #
+
+/* styles.css */
+
+/* Styles de base pour l'application */
+.vh-100 {
+    height: 100vh;
+}
+
+/* Styles de la sidebar */
+.sidebar {
+    width: 300px;
+    overflow-y: auto;
+}
+
+/* Styles de la carte */
+.map {
+    flex: 1;
+    z-index: 0;
+    width: 70%; /* Le panneau de la carte occupe 70% de la largeur */
+    background: transparent; /* Fond transparent */
+    opacity: 1; /* Opacité à 100% */
+}
+
+/* Styles pour les éléments de liste */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.list-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-item.selected {
+    background-color: #e9ecef;
+}
+
+.list-item .btn-light {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.list-item input.form-control {
+    height: auto;
+    padding: 2px 6px;
+    font-size: 14px;
+}
+
+/* Styles pour le menu contextuel */
+.context-menu {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.context-menu-content {
+    width: 200px;
+}
+
+.context-menu label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.context-menu input[type="range"] {
+    width: 100%;
+}
+
+.context-menu select {
+    width: 100%;
+}
+
+.custom-marker {
+    pointer-events: all; /* Permet les interactions avec le marqueur */
+    z-index: 1000; /* Assure que le marqueur est au-dessus des autres éléments */
+    position: absolute; /* Assure un positionnement correct */
+    transform: translate(-50%, -50%); /* Centre le marqueur sur les coordonnées */
+}
+
+.cursor-marker {
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+
+.cursor-marker .cross {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+}
+
+.cursor-marker .cross::before,
+.cursor-marker .cross::after {
+    content: '';
+    position: absolute;
+    background-color: #000;
+}
+
+.cursor-marker .cross::before {
+    width: 12px;
+    height: 2px;
+    top: 5px;
+}
+
+.cursor-marker .cross::after {
+    width: 2px;
+    height: 12px;
+    left: 5px;
+}
+
+/* Styles pour les contrôles de la carte */
+.leaflet-control-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: white;
+    border-bottom: 1px solid #ccc;
+}
+
+.leaflet-control-custom:last-child {
+    border-bottom: none;
+}
+
+.leaflet-control-custom svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Styles pour le conteneur du titre de la carte */
+.map-title-container {
+    position: absolute;
+    top: 10px;
+    left: 65%; /* Positionné à 70% de la largeur de l'écran */
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.5); /* Fond blanc transparent à 50% */
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    text-align: center;
+    width: 70%; /* Le conteneur s'étale sur 50% de la largeur */
+    max-width: 70%; /* Limite la largeur maximale à 50% */
+    min-width: 200px; /* Largeur minimale pour éviter un conteneur trop étroit */
+    word-wrap: break-word; /* Permet au texte de passer à la ligne si nécessaire */
+    white-space: normal; /* Permet au texte de s'étendre sur plusieurs lignes */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espace entre les éléments */
+    overflow: hidden; /* Empêche le contenu de déborder */
+}
+
+/* Styles pour l'affichage du titre */
+.map-title-display {
+    flex-grow: 1; /* Prend l'espace disponible */
+    white-space: normal; /* Permet au texte de passer à la ligne */
+    overflow: hidden; /* Cache le texte qui dépasse */
+    word-wrap: break-word; /* Permet au texte de passer à la ligne si nécessaire */
+    text-overflow: ellipsis; /* Ajoute des points de suspension si le texte est trop long */
+    display: -webkit-box; /* Permet de limiter le nombre de lignes */
+    -webkit-line-clamp: 3; /* Limite à 3 lignes maximum */
+    -webkit-box-orient: vertical; /* Orientation verticale */
+}
+
+/* Styles pour le conteneur de l'input et du bouton */
+.map-title-input-container {
+    display: flex;
+    gap: 10px; /* Espace entre l'input et le bouton */
+    flex-shrink: 0; /* Empêche le conteneur de rétrécir */
+}
+
+/* Styles pour l'input du titre */
+.map-title-input {
+    width: 150px; /* Largeur de l'input */
+    flex-shrink: 0; /* Empêche l'input de rétrécir */
+}
+
+/* Styles pour l'icône de retrait/développement */
+#toggleTitleIcon {
+    cursor: pointer;
+    font-size: 20px;
+    color: #007bff;
+    flex-shrink: 0; /* Empêche l'icône de rétrécir */
+}
+
+/* Styles pour le panneau du titre réduit */
+.map-title-container.collapsed {
+    height: 40px; /* Hauteur réduite */
+    overflow: hidden; /* Cache le contenu */
+    transition: height 0.3s ease; /* Animation fluide */
+}
+
+/* Styles pour le panneau du titre développé */
+.map-title-container.expanded {
+    height: auto; /* Hauteur automatique */
+    transition: height 0.3s ease; /* Animation fluide */
+}
+
+/* Styles pour la légende */
+.legend-control {
+    background-color: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    max-height: 300px;
+    overflow-y: auto;
+    min-width: 200px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.legend-symbol {
+    display: inline-block;
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* Par défaut, forme circulaire */
+}
+
+.legend-symbol.circle {
+    border-radius: 50%;
+}
+
+.legend-symbol.square {
+    border-radius: 0%;
+}
+
+.legend-symbol.triangle {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.legend-symbol.hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.legend-symbol.polyline {
+    border-top: 2px solid #000000;
+    margin-top: 8px;
+}
+
+.legend-symbol.polygon {
+    border: 2px solid #000000;
+}
+
+/* Styles pour les marqueurs personnalisés dans la légende */
+.legend-symbol.custom-marker {
+    background-color: #007bff;
+    border: 2px solid #000000;
+}
+
+/* Styles pour les contrôles Leaflet */
+.leaflet-control {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-control a {
+    color: #007bff;
+}
+
+.leaflet-control a:hover {
+    color: #0056b3;
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\css\styles.css --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\main.js --- #
+
+// js/main.js
+console.log('Début du chargement de main.js');
+import { GeometryManager } from './modules/GeometryManager.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialiser le GeometryManager
+    const geometryManager = new GeometryManager();
+    geometryManager.init();
+
+    // Exemple d'utilisation : créer un marqueur en SVG
+    const exampleMarker = {
+        type: 'hexagon',
+        coordinates: [48.8566, 2.3522], // Paris
+        color: '#007bff',
+        lineColor: '#000000',
+        opacity: 1,
+        lineWeight: 2,
+        markerSize: 24,
+    };
+
+    // Ajouter le marqueur à la carte
+    geometryManager.addGeometry(exampleMarker);
+});
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\main.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\GeometryManager.js --- #
+
+// GeometryManager.js
+import { LegendManager } from './mapping/legend/LegendManager.js';
+import { StateManager } from './StateManager.js';
+import { MapManager } from './MapManager.js';
+import { UIManager } from './UIManager.js';
+
+export class GeometryManager {
+    constructor() {
+        console.log('Début du chargement de GeometryManager.js');
+
+        // Initialiser le StateManager en premier
+        this.stateManager = new StateManager();
+
+        // Initialiser le MapManager avec le StateManager
+        this.mapManager = new MapManager(this.stateManager);
+
+        // Passer le MapManager au StateManager
+        this.stateManager.setMapManager(this.mapManager);
+
+        // Initialiser la carte
+        this.mapManager.initMap();
+
+        // Maintenant que la carte est initialisée, on peut initialiser le LegendManager
+        this.legendManager = new LegendManager(this.mapManager.map, this.stateManager);
+
+        // Passer le LegendManager au StateManager
+        this.stateManager.setLegendManager(this.legendManager);
+
+        // Initialiser UIManager avec StateManager
+        this.uiManager = new UIManager(this.stateManager);
+    }
+
+    init() {
+        this.uiManager.initUI();
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\GeometryManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\MapManager.js --- #
+
+// MapManager.js
+import { TileLayerManager } from './mapping/layers/TileLayerManager.js'; // Import correct de TileLayerManager
+import { LayerGroupManager } from './mapping/layers/LayerGroupManager.js';
+import { MarkerControlManager } from './mapping/markers/MarkerControlManager.js';
+import { EventManager } from './mapping/events/EventManager.js';
+import { EventHandlers } from './mapping/events/EventHandlers.js';
+import { GeometryHandler } from './mapping/geometry/GeometryHandler.js';
+import { LegendManager } from './mapping/legend/LegendManager.js';
+import { SVGUtils } from './utils/SVGUtils.js';
+
+export class MapManager {
+    constructor(stateManager) {
+        if (!stateManager) {
+            console.error('[MapManager] StateManager is required for initialization.');
+            throw new Error('StateManager is required for MapManager initialization.');
+        }
+
+        console.log('[MapManager] Initializing MapManager...');
+        this.stateManager = stateManager;
+        this.map = null;
+        this.tileLayerManager = null;
+        this.layerGroupManager = null;
+        this.geometryHandler = null;
+        this.eventManager = null;
+        this.legendManager = null;
+        this.markerControlManager = null;
+
+        // Définir les sources de tuiles disponibles
+        this.tileSources = {
+            osm: {
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            },
+            cartodb: {
+                url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+            },
+            dark: {
+                url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+            },
+            satellite: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+            }
+        };
+    }
+
+    initMap() {
+        console.log('[MapManager] Initializing the map...');
+        try {
+            this._initializeMapElement(); // Initialise la carte (this.map)
+            this._initializeTileLayer(); // Initialise la couche de tuiles
+            this._initializeLayerGroup(); // Initialise le gestionnaire de groupes de couches
+            this._initializeGeometryHandler(); // Initialise le gestionnaire de géométries
+            this._initializeEventHandlers(); // Initialise les gestionnaires d'événements
+
+            // Initialiser le MarkerControlManager après que la carte et le StateManager soient prêts
+            this.markerControlManager = new MarkerControlManager(this.map, ['circle', 'square', 'triangle', 'hexagon'], this.stateManager);
+            this._initializeMarkerControls(); // Ajouter les contrôles de marqueurs personnalisés
+
+            this._initializeEditingControls(); // Initialiser les contrôles d'édition
+            //this._initializeLegend(); // Initialiser la légende
+
+            console.log('[MapManager] Map initialization completed.');
+        } catch (error) {
+            console.error('[MapManager] Error during map initialization:', error);
+        }
+    }
+
+    _initializeMapElement() {
+        console.log('[MapManager] Initializing map element...');
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error('[MapManager] Map element not found in the DOM.');
+            throw new Error('Map element not found in the DOM.');
+        }
+        this.map = L.map('map').setView([37.0902, -95.7129], 4);
+        console.log('[MapManager] Map element initialized.');
+    }
+
+    _initializeTileLayer() {
+        console.log('[MapManager] Initializing tile layer...');
+        this.tileLayerManager = new TileLayerManager(this.map, this.tileSources);
+        this.tileLayerManager.setTileLayer('osm'); // Définir la couche de tuiles par défaut
+        console.log('[MapManager] Tile layer initialized with "osm".');
+    }
+
+    _initializeLayerGroup() {
+        console.log('[MapManager] Initializing layer group manager...');
+        this.layerGroupManager = new LayerGroupManager(this.map);
+        console.log('[MapManager] Layer group manager initialized.');
+    }
+
+    _initializeGeometryHandler() {
+        console.log('[MapManager] Initializing geometry handler...');
+        this.geometryHandler = new GeometryHandler(this.map, this.layerGroupManager);
+        console.log('[MapManager] Geometry handler initialized.');
+    }
+
+    _initializeEventHandlers() {
+        console.log('[MapManager] Initializing event handlers...');
+        const eventHandlers = new EventHandlers(this);
+        this.eventManager = new EventManager(this.map, eventHandlers);
+        this.eventManager.initEvents();
+        console.log('[MapManager] Event handlers initialized.');
+    }
+
+    _initializeMarkerControls() {
+        console.log('[MapManager] Adding custom marker controls...');
+        this.markerControlManager.addCustomMarkerControls();
+        console.log('[MapManager] Custom marker controls added.');
+    }
+
+    _initializeEditingControls() {
+        if (!this.map.pm) {
+            console.error('[MapManager] Leaflet.PM plugin is not loaded.');
+            throw new Error('Leaflet.PM plugin is not loaded.');
+        }
+
+        console.log('[MapManager] Initializing editing controls...');
+
+        // Configuration globale des modes d'édition
+        this.map.pm.enableGlobalEditMode({
+            allowEditing: true,
+            allowAddingIntersections: true,
+            allowRemoval: true,
+            editMode: true,
+            dragMode: true,
+        });
+
+        console.log('[MapManager] Global edit mode enabled.');
+
+        // Configuration des contrôles
+        this.map.pm.addControls({
+            position: 'topleft',
+            drawMarker: false,
+            drawCircle: true,
+            drawPolygon: true,
+            drawPolyline: true,
+            drawRectangle: true,
+            drawCircleMarker: false,
+            editMode: true,
+            dragMode: true,
+            cutPolygon: false,
+            removalMode: false,
+            customControls: true,
+            editControls: {
+                edit: 'Editer la forme',
+                cancel: 'Annuler',
+                save: 'Enregistrer',
+            },
+        });
+
+        console.log('[MapManager] Editing controls added.');
+
+        // Configuration des options de chemin
+        this.map.pm.setPathOptions({
+            allowEditing: true,
+        });
+
+        // Gestion des événements d'édition
+        this._setupEditingEventListeners();
+    }
+
+    _setupEditingEventListeners() {
+        // Événement pour intercepter la création d'un rectangle
+        this.map.on('pm:create', (e) => {
+            if (e.shape === 'Rectangle') {
+                console.log('[MapManager] Rectangle created, converting to polygon...');
+                const rectangle = e.layer;
+
+                // Convertir le rectangle en polygone
+                const latLngs = rectangle.getLatLngs();
+                const polygon = L.polygon(latLngs, rectangle.options);
+
+                // Supprimer le rectangle de la carte
+                this.map.removeLayer(rectangle);
+
+                // Ajouter le polygone à la carte
+                this.map.addLayer(polygon);
+
+                // Ajouter le polygone au StateManager
+                const geometry = {
+                    type: 'Polygon',
+                    coordinates: latLngs,
+                    color: rectangle.options.fillColor || '#007bff',
+                    lineColor: rectangle.options.color || '#000000',
+                    opacity: rectangle.options.fillOpacity || 0.5,
+                    lineWeight: rectangle.options.weight || 2,
+                    lineDash: rectangle.options.dashArray ? 'dashed' : 'solid',
+                    layer: polygon
+                };
+
+                this.stateManager.addGeometry(geometry);
+
+                console.log('[MapManager] Rectangle converted to polygon and added to state:', geometry);
+            }
+        });
+
+        // Événement pour activer l'édition sur une forme spécifique
+        this.map.on('pm:editstart', (e) => {
+            console.log('[MapManager] pm:editstart event triggered:', e);
+
+            // Activer l'édition uniquement sur la forme sélectionnée
+            const layer = e.layer;
+            if (layer.pm) {
+                layer.pm.enable({
+                    snappable: true,
+                    snapDistance: 20,
+                    allowSelfIntersection: true,
+                    addVertexOn: 'midpoint', // Activation des vertex midpoints
+                    preventMarkerRemoval: false,
+                    removeLayerOnEmpty: true,
+                });
+            }
+
+            // Désactiver l'édition sur toutes les autres formes
+            this.map.eachLayer((otherLayer) => {
+                if (otherLayer !== layer && otherLayer.pm) {
+                    otherLayer.pm.disable();
+                }
+            });
+        });
+
+        // Événement pour désactiver l'édition après la fin de l'édition
+        this.map.on('pm:editcomplete', (e) => {
+            console.log('[MapManager] pm:editcomplete event triggered:', e);
+
+            // Désactiver l'édition sur la forme
+            const layer = e.layer;
+            if (layer.pm) {
+                layer.pm.disable();
+            }
+        });
+
+        // Événement pour gérer la suppression des vertex midpoints
+        this.map.on('pm:vertexremoved', (e) => {
+            console.log('[MapManager] pm:vertexremoved event triggered:', e);
+            this.stateManager.updateGeometryCoordinates(
+                this.stateManager.geometries.findIndex(g => g.layer === e.layer),
+                e.layer.getLatLngs()
+            );
+        });
+
+        // Événement pour gérer l'ajout de vertex midpoints
+        this.map.on('pm:vertexadded', (e) => {
+            console.log('[MapManager] pm:vertexadded event triggered:', e);
+            this.stateManager.updateGeometryCoordinates(
+                this.stateManager.geometries.findIndex(g => g.layer === e.layer),
+                e.layer.getLatLngs()
+            );
+        });
+
+        // Événement pour gérer la suppression d'une couche
+        this.map.on('pm:removelayer', (e) => {
+            console.log('[MapManager] pm:removelayer event triggered:', e);
+            const index = this.stateManager.geometries.findIndex(g => g.layer === e.layer);
+            if (index !== -1) {
+                this.stateManager.deleteGeometry(index);
+            }
+        });
+    }
+
+    _handleLayerCreation(layer) {
+        if (layer.pm) {
+            console.log('[MapManager] Setting up newly created layer:', layer);
+
+            // Convert rectangles to polygons
+            if (layer instanceof L.Rectangle) {
+                const latLngs = layer.getLatLngs();
+                const originalOptions = {
+                    color: layer.options.color || '#000000',
+                    fillColor: layer.options.fillColor || '#000000',
+                    fillOpacity: layer.options.fillOpacity || 0.5,
+                    weight: layer.options.weight || 2,
+                    dashArray: layer.options.dashArray || ''
+                };
+
+                // Create a polygon with the same style options
+                const polygon = L.polygon(latLngs, originalOptions);
+
+                // Remove the rectangle layer from the map
+                this.map.removeLayer(layer);
+
+                // Add the polygon layer to the map
+                this.map.addLayer(polygon);
+
+                // Add the polygon geometry to the state manager
+                const geometry = {
+                    type: 'Polygon',
+                    coordinates: latLngs,
+                    color: originalOptions.fillColor,
+                    lineColor: originalOptions.color,
+                    opacity: originalOptions.fillOpacity,
+                    lineWeight: originalOptions.weight,
+                    lineDash: originalOptions.dashArray ? 'dashed' : 'solid',
+                    layer: polygon
+                };
+
+                // Ensure the rectangle is not added to the state
+                this.stateManager.addGeometry(geometry);
+            } else {
+                // Determine the type of the layer based on its instance
+                let type;
+                if (layer instanceof L.Circle) {
+                    type = 'Circle';
+                } else if (layer instanceof L.Polygon) {
+                    type = 'Polygon';
+                } else if (layer instanceof L.Polyline) {
+                    type = 'Polyline';
+                } else if (layer instanceof L.Marker) {
+                    type = 'Marker';
+                } else {
+                    console.error('[MapManager] Unsupported layer type:', layer);
+                    return;
+                }
+
+                // For other layers, add them directly to the state
+                this.stateManager.addGeometry({
+                    type: type,
+                    coordinates: layer.getLatLngs ? layer.getLatLngs() : layer.getLatLng(),
+                    color: layer.options.fillColor || '#000000',
+                    lineColor: layer.options.color || '#000000',
+                    opacity: layer.options.fillOpacity || 0.5,
+                    lineWeight: layer.options.weight || 2,
+                    lineDash: layer.options.dashArray ? 'dashed' : 'solid',
+                    layer: layer
+                });
+            }
+        }
+    }
+
+    _handleVertexAddition(layer, marker) {
+        const geometry = this.stateManager.geometries.find(g => g.layer === layer);
+        if (!geometry) {
+            console.error('[MapManager] Geometry not found for layer');
+            return;
+        }
+
+        let newCoordinates;
+        if (layer.getLatLngs) {
+            newCoordinates = layer.getLatLngs();
+        } else if (layer.getLatLng) {
+            newCoordinates = layer.getLatLng();
+        }
+
+        // Désactiver l'édition avant de supprimer la couche
+        if (layer.pm) {
+            layer.pm.disable();
+        }
+
+        // Supprimer l'ancienne couche de la carte
+        this.map.removeLayer(layer);
+
+        // Créer et ajouter la nouvelle couche
+        const newLayer = this._createLayerFromGeometry(geometry, newCoordinates);
+        if (!newLayer) return;
+
+        newLayer.addTo(this.map);
+
+        // Mettre à jour les références dans la géométrie
+        geometry.layer = newLayer;
+        geometry.coordinates = newCoordinates;
+
+        // Réactiver l'édition sur la nouvelle couche si nécessaire
+        if (this.map.pm.globalEditEnabled()) {
+            this._enableLayerEditing(newLayer);
+        }
+
+        // Forcer la mise à jour du StateManager
+        this.stateManager.updateGeometryCoordinates(
+            this.stateManager.geometries.indexOf(geometry),
+            newCoordinates
+        );
+    }
+
+    _enableLayerEditing(layer) {
+        if (!layer.pm) {
+            console.warn('[MapManager] Layer does not support editing');
+            return;
+        }
+
+        layer.pm.enable({
+            snappable: true,
+            snapDistance: 20,
+            allowSelfIntersection: true,
+            addVertexOn: 'midpoint', // Activation des vertex midpoints
+            preventMarkerRemoval: false,
+            removeLayerOnEmpty: true,
+        });
+    }
+
+    _createLayerFromGeometry(geometry, coordinates) {
+        const type = geometry.type.toLowerCase(); // Convertir en minuscules
+
+        if (type === 'rectangle') {
+            // Convertir le rectangle en polygone pour activer les vertex midpoints
+            return L.polygon(coordinates, geometry.options);
+        } else if (type === 'polygon') {
+            return L.polygon(coordinates, geometry.options);
+        } else if (type === 'polyline') {
+            return L.polyline(coordinates, geometry.options);
+        } else if (type === 'circle') {
+            return L.circle(geometry.center, geometry.radius, geometry.options);
+        } else {
+            console.error('[MapManager] Unsupported geometry type:', geometry.type);
+            return null;
+        }
+    }
+
+    _initializeLegend() {
+        console.log('[MapManager] Initializing legend...');
+        this.legendManager = new LegendManager(this.map, this.stateManager);
+        this.stateManager.setLegendManager(this.legendManager); // Passer LegendManager à StateManager
+        console.log('[MapManager] Legend initialized.');
+    }
+
+    // MapManager.js
+    updateMap() {
+        console.log('[MapManager] Updating map...');
+
+        // Ajouter un log pour afficher les paramètres de chaque couche
+        this.map.eachLayer(layer => {
+            if (layer.options) {
+                // Ignorer les couches par défaut (noires)
+                if (layer.options.color === '#000000' && layer.options.fillColor === '#000000') {
+                    console.log('[MapManager] Ignoring default black layer:', layer);
+                    return;
+                }
+
+                console.log('[MapManager] Layer options:', {
+                    color: layer.options.color,
+                    fillColor: layer.options.fillColor,
+                    fillOpacity: layer.options.fillOpacity,
+                    weight: layer.options.weight,
+                    dashArray: layer.options.dashArray
+                });
+            }
+        });
+
+        console.log('[MapManager] Map update complete.');
+    }
+
+    addSVGMarker(svgMarker) {
+        if (!svgMarker) {
+            console.error('[MapManager] SVG marker is undefined.');
+            return;
+        }
+        console.log('[MapManager] Adding SVG marker:', svgMarker);
+        svgMarker.addTo(this.map);
+    }
+
+    removeSVGMarker(svgMarker) {
+        if (!svgMarker) {
+            console.error('[MapManager] SVG marker is undefined.');
+            return;
+        }
+        console.log('[MapManager] Removing SVG marker:', svgMarker);
+        this.map.removeLayer(svgMarker);
+    }
+
+    addLayer(layer) {
+        if (!layer) {
+            console.error('[MapManager] Layer is undefined.');
+            return;
+        }
+        console.log('[MapManager] Adding layer:', layer);
+        layer.addTo(this.map);
+    }
+
+    removeLayer(layer) {
+        if (!layer) {
+            console.error('[MapManager] Layer is undefined.');
+            return;
+        }
+        console.log('[MapManager] Removing layer:', layer);
+        this.map.removeLayer(layer);
+    }
+
+    setTileLayer(tileType) {
+        if (!this.tileSources[tileType]) {
+            console.error(`[MapManager] Tile type "${tileType}" is not defined.`);
+            return;
+        }
+
+        console.log(`[MapManager] Setting tile layer to "${tileType}".`);
+        if (this.tileLayer) {
+            this.map.removeLayer(this.tileLayer);
+        }
+
+        const tileConfig = this.tileSources[tileType];
+        this.tileLayer = L.tileLayer(tileConfig.url, {
+            attribution: tileConfig.attribution,
+        });
+
+        this.tileLayer.addTo(this.map);
+        console.log('[MapManager] Tile layer updated.');
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\MapManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\StateManager.js --- #
+
+// StateManager.js
+import { SVGUtils } from './utils/SVGUtils.js'; // Assurez-vous que le chemin est correct
+
+export class StateManager {
+    constructor() {
+        this.geometries = []; // Liste des géométries (marqueurs, polygones, etc.)
+        this.selectedIndex = null; // Index de la géométrie sélectionnée
+        this.mapManager = null; // Référence au MapManager
+        this.legendManager = null; // Référence au LegendManager
+        this.mapTitle = ''; // Titre de la carte
+        this.isTitlePanelCollapsed = false; // État du panneau de titre
+        this.temporarySVGs = new Map(); // Stocke les SVG temporaires pendant l'édition
+    }
+
+    /**
+     * Définit le titre de la carte.
+     * @param {string} title - Le nouveau titre de la carte.
+     */
+    setMapTitle(title) {
+        if (typeof title !== 'string') {
+            console.error('[StateManager] Invalid title type:', title);
+            return;
+        }
+
+        this.mapTitle = title; // Mettre à jour le titre de la carte
+        this.updateUI(); // Mettre à jour l'interface utilisateur
+
+        console.log('[StateManager] Map title updated:', title);
+    }
+
+
+    /**
+     * Définit le MapManager.
+     * @param {MapManager} mapManager - L'instance de MapManager.
+     */
+    setMapManager(mapManager) {
+        if (!mapManager) {
+            throw new Error('MapManager is required for StateManager initialization.');
+        }
+        this.mapManager = mapManager;
+    }
+
+
+
+    /**
+     * Définit le LegendManager.
+     * @param {LegendManager} legendManager - L'instance de LegendManager.
+     */
+    setLegendManager(legendManager) {
+        if (!legendManager) {
+            throw new Error('LegendManager is required for StateManager initialization.');
+        }
+        this.legendManager = legendManager;
+    }
+
+    /**
+     * Ajoute une géométrie à la liste.
+     * @param {Object} geometry - La géométrie à ajouter.
+     */
+    // Dans StateManager.js, méthode addGeometry
+    addGeometry(geometry) {
+        if (!geometry || !geometry.layer) {
+            console.error('[StateManager] Geometry or layer is undefined in addGeometry.');
+            return;
+        }
+
+        // Vérifier si la géométrie existe déjà
+        const existingGeometry = this.geometries.find(g => g.layer === geometry.layer);
+        if (existingGeometry) {
+            console.warn('[StateManager] Geometry already exists:', existingGeometry);
+            return;
+        }
+
+        // Ajouter la géométrie à la liste
+        this.geometries.push(geometry);
+
+        // Mettre à jour la légende et l'interface utilisateur
+        if (this.legendManager) {
+            this.legendManager.updateLegend();
+        }
+        this.updateUI();
+
+        console.log('[StateManager] Geometry added:', geometry);
+    }
+
+
+    /**
+     * Sélectionne une forme et active l'édition.
+     * @param {number} index - L'index de la géométrie à sélectionner.
+     */
+    selectGeometryForEditing(index) {
+        if (index < 0 || index >= this.geometries.length) {
+            console.error('[StateManager] Invalid index in selectGeometryForEditing:', index);
+            return;
+        }
+
+        const geometry = this.geometries[index];
+        if (!geometry || !geometry.layer) {
+            console.error('[StateManager] Geometry or layer is undefined.');
+            return;
+        }
+
+        // Activer l'édition sur la forme sélectionnée
+        if (geometry.layer.pm) {
+            geometry.layer.pm.enable({
+                snappable: true,
+                snapDistance: 20,
+                allowSelfIntersection: true,
+                addVertexOn: 'midpoint', // Activation des vertex midpoints
+                preventMarkerRemoval: false,
+                removeLayerOnEmpty: true,
+            });
+        }
+
+        // Désactiver l'édition sur toutes les autres formes
+        this.mapManager.map.eachLayer((layer) => {
+            if (layer !== geometry.layer && layer.pm) {
+                layer.pm.disable();
+            }
+        });
+
+        // Mettre à jour l'interface utilisateur
+        this.updateUI();
+
+        console.log('[StateManager] Geometry selected for editing:', geometry);
+    }
+
+    /**
+     * Supprime une géométrie de la liste.
+     * @param {number} index - L'index de la géométrie à supprimer.
+     */
+    deleteGeometry(index) {
+        if (index < 0 || index >= this.geometries.length) {
+            console.error('[StateManager] Invalid index in deleteGeometry:', index);
+            return;
+        }
+
+        const geometry = this.geometries[index];
+        if (geometry && geometry.layer) {
+            this.mapManager.map.removeLayer(geometry.layer); // Supprimer la couche de la carte
+        }
+
+        this.geometries.splice(index, 1); // Supprimer la géométrie de la liste
+
+        if (this.selectedIndex === index) {
+            this.selectedIndex = null; // Réinitialiser l'index sélectionné
+        } else if (this.selectedIndex > index) {
+            this.selectedIndex--; // Ajuster l'index sélectionné si nécessaire
+        }
+
+        // Mettre à jour la légende après la suppression de la géométrie
+        if (this.legendManager) {
+            this.legendManager.updateLegend();
+        }
+
+        // Mettre à jour l'interface utilisateur
+        this.updateUI();
+    }
+
+    /**
+     * Met à jour le nom d'une géométrie.
+     * @param {number} index - L'index de la géométrie à mettre à jour.
+     * @param {string} newName - Le nouveau nom de la géométrie.
+     */
+    updateGeometryName(index, newName) {
+        if (index < 0 || index >= this.geometries.length) {
+            console.error('[StateManager] Invalid index in updateGeometryName:', index);
+            return;
+        }
+
+        const geometry = this.geometries[index];
+        if (geometry) {
+            geometry.name = newName; // Mettre à jour le nom de la géométrie
+            this.updateUI(); // Mettre à jour l'interface utilisateur
+            if (this.legendManager) {
+                this.legendManager.updateLegend(); // Rafraîchir la légende
+            }
+        }
+    }
+
+    /**
+     * Applique les styles à la géométrie sélectionnée.
+     * @param {string} color - La couleur de remplissage.
+     * @param {string} lineColor - La couleur de la ligne.
+     * @param {number} opacity - L'opacité.
+     * @param {string} lineDash - Le style de ligne (solid, dashed, dotted).
+     * @param {number} lineWeight - L'épaisseur de la ligne.
+     * @param {number} markerSize - La taille du marqueur (si applicable).
+     * @param {string} shape - La forme du marqueur (si applicable).
+     */
+    applyStyle(color, lineColor, opacity, lineDash, lineWeight, markerSize) {
+        if (this.selectedIndex === null || this.selectedIndex < 0 || this.selectedIndex >= this.geometries.length) {
+            console.error('[StateManager] No geometry selected or invalid index.');
+            return;
+        }
+
+        const geometry = this.geometries[this.selectedIndex];
+        if (!geometry || !geometry.layer) {
+            console.error('[StateManager] Geometry or layer is undefined.');
+            return;
+        }
+
+        // Appliquer les styles à la couche Leaflet
+        const style = {
+            color: lineColor,
+            fillColor: color,
+            fillOpacity: opacity,
+            weight: lineWeight,
+            dashArray: lineDash === 'dashed' ? '5,5' : lineDash === 'dotted' ? '2,2' : ''
+        };
+
+        if (geometry.layer.setStyle) {
+            geometry.layer.setStyle(style);
+        } else if (geometry.type === 'CustomMarker') {
+            // Mise à jour du style pour les marqueurs SVG
+            SVGUtils.updateMarkerStyle(geometry.layer, {
+                color: color,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                opacity: opacity,
+                markerSize: markerSize // Ajouter la taille du marqueur
+            });
+        } else {
+            console.error('[StateManager] Layer does not support setStyle method:', geometry.layer);
+        }
+
+        // Mettre à jour les propriétés de la géométrie
+        geometry.color = color;
+        geometry.lineColor = lineColor;
+        geometry.opacity = opacity;
+        geometry.lineDash = lineDash;
+        geometry.lineWeight = lineWeight;
+
+        // Si c'est un marqueur personnalisé, mettre à jour la taille
+        if (geometry.type === 'CustomMarker') {
+            geometry.markerSize = markerSize;
+        }
+
+        // Mettre à jour la légende et l'interface utilisateur
+        if (this.legendManager) {
+            this.legendManager.updateLegend();
+        }
+        this.updateUI();
+    }
+
+    /**
+     * Termine l'édition d'une géométrie.
+     * @param {number} index - L'index de la géométrie à finaliser.
+     */
+    finishEditingGeometry(index) {
+        if (index < 0 || index >= this.geometries.length) {
+            console.error('[StateManager] Invalid index in finishEditingGeometry:', index);
+            return;
+        }
+
+        const geometry = this.geometries[index];
+        if (!geometry || !geometry.layer) {
+            console.error('[StateManager] Geometry or layer is undefined.');
+            return;
+        }
+
+        // Désactiver l'édition de la couche si nécessaire
+        if (geometry.layer.pm) {
+            geometry.layer.pm.disable();
+        }
+
+        // Mettre à jour l'interface utilisateur
+        this.updateUI();
+
+        console.log('[StateManager] Editing finished for geometry at index:', index);
+    }
+
+    /**
+     * Met à jour l'interface utilisateur.
+     */
+    updateUI() {
+        console.log('[StateManager] Updating UI');
+
+        // Mettre à jour l'affichage du titre de la carte
+        const mapTitleDisplay = document.getElementById('mapTitleDisplay');
+        if (mapTitleDisplay) {
+            mapTitleDisplay.textContent = this.mapTitle;
+        }
+
+        // Mettre à jour la liste des géométries dans la sidebar
+        this.updateList();
+
+        // Mettre à jour la carte avec les géométries actuelles
+        if (this.mapManager && this.mapManager.updateMap) {
+            this.mapManager.updateMap();
+        } else {
+            console.error('[StateManager] mapManager.updateMap is not a function');
+        }
+
+        console.log('[StateManager] UI update complete');
+    }
+
+    /**
+     * Met à jour la liste des géométries dans l'interface utilisateur.
+     */
+    updateList() {
+        console.log('[StateManager] Updating geometry list');
+        const container = document.getElementById('geometryList');
+        if (!container) {
+            console.error('[StateManager] Geometry list container not found in the DOM.');
+            return;
+        }
+
+        container.innerHTML = '';
+
+        // Supprimer les géométries obsolètes
+        this.geometries = this.geometries.filter(geometry => geometry && geometry.type && geometry.layer);
+
+        // Renommer les géométries pour éviter les doublons
+        this.geometries.forEach((geometry, index) => {
+            geometry.name = geometry.name || `Geometry ${index + 1}`; // Utiliser un nom par défaut si aucun nom n'est défini
+        });
+
+        // Afficher les géométries dans la sidebar
+        this.geometries.forEach((geometry, index) => {
+            const item = document.createElement('div');
+            item.className = `list-item ${this.selectedIndex === index ? 'selected' : ''}`;
+            const nameContainer = document.createElement('div');
+            nameContainer.className = 'd-flex align-items-center flex-grow-1';
+
+            // Ajouter un champ d'édition de texte pour le nom
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'form-control me-2';
+            nameInput.value = geometry.name || `Geometry ${index + 1}`;
+            nameInput.addEventListener('change', (e) => {
+                const newName = e.target.value;
+                this.updateGeometryName(index, newName); // Mettre à jour le nom dans le StateManager
+            });
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-warning btn-sm me-2';
+            editBtn.textContent = 'Éditer';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.openContextMenu(index, e);
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-danger btn-sm';
+            deleteBtn.textContent = 'Supprimer';
+            deleteBtn.onclick = () => {
+                this.deleteGeometry(index); // Appeler la méthode deleteGeometry du StateManager
+            };
+
+            nameContainer.appendChild(nameInput);
+            item.appendChild(nameContainer);
+            item.appendChild(editBtn);
+            item.appendChild(deleteBtn);
+            container.appendChild(item);
+        });
+    }
+
+    /**
+     * Ouvre le menu contextuel pour une géométrie spécifique.
+     * @param {number} index - L'index de la géométrie.
+     * @param {Event} event - L'événement de clic.
+     */
+    openContextMenu(index, event) {
+        console.log('[StateManager] Opening context menu for geometry at index:', index);
+
+        if (index < 0 || index >= this.geometries.length) {
+            console.error('[StateManager] Invalid index in openContextMenu:', index);
+            return;
+        }
+
+        const geometry = this.geometries[index];
+        if (!geometry) {
+            console.error('[StateManager] Geometry not found at index:', index);
+            return;
+        }
+
+        this.selectedIndex = index;
+
+        // Vérifiez si tous les éléments du menu contextuel existent
+        const requiredElements = [
+            'contextColorPicker', 'contextLineColorPicker', 'contextOpacitySlider',
+            'contextLineDash', 'contextLineWeight', 'contextMarkerSize'
+        ];
+
+        const contextElements = requiredElements.reduce((elements, id) => {
+            const el = document.getElementById(id);
+            if (!el) console.warn(`[StateManager] Missing element: ${id}`);
+            elements[id] = el;
+            return elements;
+        }, {});
+
+        // Si des éléments requis sont manquants, arrêtez l'exécution
+        if (Object.values(contextElements).some(el => !el)) {
+            console.error('[StateManager] Some context menu elements are missing.');
+            return;
+        }
+
+        // Remplissez les champs du menu contextuel avec les valeurs actuelles
+        contextElements.contextColorPicker.value = geometry.color || "#000000";
+        contextElements.contextLineColorPicker.value = geometry.lineColor || "#000000";
+        contextElements.contextOpacitySlider.value = geometry.opacity || 1;
+        contextElements.contextLineDash.value = geometry.lineDash || "solid";
+        contextElements.contextLineWeight.value = geometry.lineWeight || 2;
+        contextElements.contextMarkerSize.value = geometry.markerSize || 24;
+
+
+        // Désactivez les champs si nécessaire
+        if (geometry.type !== 'CustomMarker') {
+            contextElements.contextMarkerSize.disabled = true;
+            contextElements.contextMarkerSize.title = "La taille ne peut pas être modifiée pour ce type de géométrie.";
+        } else {
+            contextElements.contextMarkerSize.disabled = false;
+            contextElements.contextMarkerSize.title = "";
+        }
+
+        // Affichez le menu contextuel
+        const contextMenu = document.getElementById('contextMenu');
+        if (contextMenu) {
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${event.clientX}px`;
+            contextMenu.style.top = `${event.clientY}px`;
+        } else {
+            console.error('[StateManager] Context menu not found in the DOM.');
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\StateManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\UIManager.js --- #
+
+// UIManager.js
+export class UIManager {
+    constructor(stateManager) {
+        if (!stateManager) {
+            throw new Error('StateManager is required for UIManager initialization.');
+        }
+        this.stateManager = stateManager;
+    }
+
+    /**
+     * Initialise l'interface utilisateur.
+     */
+    initUI() {
+        // Gestionnaire pour le sélecteur de fond de carte
+        const tileSelector = document.getElementById('tileSelector');
+        if (tileSelector) {
+            tileSelector.addEventListener('change', (e) => {
+                const selectedTile = e.target.value;
+                this.stateManager.mapManager.setTileLayer(selectedTile);
+            });
+        }
+
+        // Gestionnaire pour le bouton "Enregistrer" du titre de la carte
+        const saveMapTitleBtn = document.getElementById('saveMapTitleBtn');
+        if (saveMapTitleBtn) {
+            saveMapTitleBtn.addEventListener('click', () => {
+                const mapTitleInput = document.getElementById('mapTitleInput');
+                if (mapTitleInput) {
+                    const newTitle = mapTitleInput.value;
+                    this.stateManager.setMapTitle(newTitle); // Mettre à jour le titre dans le StateManager
+                    const mapTitleDisplay = document.getElementById('mapTitleDisplay');
+                    if (mapTitleDisplay) {
+                        mapTitleDisplay.textContent = newTitle; // Afficher le nouveau titre
+                    }
+                }
+            });
+        }
+
+        // Gestionnaire pour le bouton "Appliquer" du menu contextuel
+        const contextApplyBtn = document.getElementById('contextApplyBtn');
+        if (contextApplyBtn) {
+            contextApplyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const color = document.getElementById('contextColorPicker').value;
+                const lineColor = document.getElementById('contextLineColorPicker').value;
+                const opacity = parseFloat(document.getElementById('contextOpacitySlider').value);
+                const lineDash = document.getElementById('contextLineDash').value;
+                const lineWeight = parseInt(document.getElementById('contextLineWeight').value);
+                const markerSize = parseInt(document.getElementById('contextMarkerSize').value);
+
+                // Appeler la méthode applyStyle du StateManager
+                this.stateManager.applyStyle(color, lineColor, opacity, lineDash, lineWeight, markerSize);
+
+                this.closeContextMenu(); // Fermer le menu contextuel après application
+            });
+        }
+
+        // Gestionnaire pour le bouton "Annuler" du menu contextuel
+        const contextCancelBtn = document.getElementById('contextCancelBtn');
+        if (contextCancelBtn) {
+            contextCancelBtn.addEventListener('click', () => {
+                this.closeContextMenu(); // Fermer le menu contextuel sans appliquer les modifications
+            });
+        }
+
+        // Fermer le menu contextuel en cliquant à l'extérieur
+        document.addEventListener('click', (event) => {
+            const contextMenu = document.getElementById('contextMenu');
+            if (contextMenu && !contextMenu.contains(event.target)) {
+                this.closeContextMenu(); // Fermer le menu contextuel
+            }
+        });
+
+        // Gestionnaire pour l'icône de retrait/développement du titre
+        const toggleTitleIcon = document.getElementById('toggleTitleIcon');
+        if (toggleTitleIcon) {
+            toggleTitleIcon.addEventListener('click', () => {
+                const mapTitleContainer = document.getElementById('map-title-container');
+                if (mapTitleContainer) {
+                    mapTitleContainer.classList.toggle('collapsed');
+                    mapTitleContainer.classList.toggle('expanded');
+                    toggleTitleIcon.classList.toggle('bi-chevron-up');
+                    toggleTitleIcon.classList.toggle('bi-chevron-down');
+                }
+            });
+        }
+    }
+
+    /**
+     * Ouvre le menu contextuel pour une géométrie.
+     * @param {number} index - L'index de la géométrie.
+     * @param {Event} event - L'événement de clic.
+     */
+    openContextMenu(index, event) {
+        console.log('[UIManager] Opening context menu for geometry at index:', index);
+        if (index < 0 || index >= this.stateManager.geometries.length) {
+            console.error('[UIManager] Invalid index in openContextMenu:', index);
+            return;
+        }
+
+        this.stateManager.selectedIndex = index;
+        const geometry = this.stateManager.geometries[index];
+
+        // Remplir les champs du menu contextuel avec les valeurs actuelles de la géométrie
+        const colorPicker = document.getElementById('contextColorPicker');
+        const lineColorPicker = document.getElementById('contextLineColorPicker');
+        const opacitySlider = document.getElementById('contextOpacitySlider');
+        const lineDashSelect = document.getElementById('contextLineDash');
+        const lineWeightSlider = document.getElementById('contextLineWeight');
+        const markerSizeSlider = document.getElementById('contextMarkerSize');
+
+        if (!colorPicker || !lineColorPicker || !opacitySlider || !lineDashSelect || !lineWeightSlider || !markerSizeSlider) {
+            console.error('[UIManager] Context menu elements not found in the DOM.');
+            return;
+        }
+
+        colorPicker.value = geometry.color || "#007bff";
+        lineColorPicker.value = geometry.lineColor || "#000000";
+        opacitySlider.value = geometry.opacity || 1;
+        lineDashSelect.value = geometry.lineDash || "solid";
+        lineWeightSlider.value = geometry.lineWeight || 2;
+        markerSizeSlider.value = geometry.markerSize || 24;
+
+        // Désactiver les champs si nécessaire
+        if (geometry.type !== 'CustomMarker') {
+            markerSizeSlider.disabled = true;
+            markerSizeSlider.title = "La taille ne peut pas être modifiée pour ce type de géométrie.";
+        } else {
+            markerSizeSlider.disabled = false;
+            markerSizeSlider.title = "";
+        }
+
+        // Afficher le menu contextuel
+        const contextMenu = document.getElementById('contextMenu');
+        if (contextMenu) {
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${event.clientX}px`;
+            contextMenu.style.top = `${event.clientY}px`;
+        } else {
+            console.error('[UIManager] Context menu not found in the DOM.');
+        }
+    }
+
+    /**
+     * Ferme le menu contextuel.
+     */
+    closeContextMenu() {
+        const contextMenu = document.getElementById('contextMenu');
+        if (contextMenu) {
+            contextMenu.style.display = 'none';
+        }
+
+        // Terminer l'édition de la géométrie
+        const selectedIndex = this.stateManager.selectedIndex;
+        if (selectedIndex !== null) {
+            this.stateManager.finishEditingGeometry(selectedIndex);
+            this.stateManager.selectedIndex = null; // Réinitialiser l'index sélectionné
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\UIManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\events\EventHandlers.js --- #
+
+// js/modules/mapping/events/EventHandlers.js
+
+export class EventHandlers {
+    constructor(mapManager) {
+        if (!mapManager) {
+            throw new Error('MapManager is required for EventHandlers initialization.');
+        }
+        this.mapManager = mapManager; // Référence au MapManager
+    }
+
+    /**
+     * Gère la création de géométries (marqueurs, polygones, etc.).
+     * @param {Object} e - L'événement de création.
+     */
+    // Dans EventHandlers.js, méthode handleGeometryCreation
+    handleGeometryCreation(e) {
+        console.log('[EventHandlers] Handling geometry creation:', e);
+
+        // Pour les rectangles, on laisse MapManager._handleLayerCreation s'en occuper
+        if (e.shape === 'Rectangle') {
+            console.log('[EventHandlers] Skipping rectangle creation, will be handled by MapManager');
+            return;
+        }
+
+        // Vérifier si la couche existe déjà dans le StateManager
+        const existingGeometry = this.mapManager.stateManager.geometries.find(g => g.layer === e.layer);
+        if (existingGeometry) {
+            console.warn('[EventHandlers] Layer already exists in state:', e.layer);
+            return;
+        }
+
+        // Créer un objet géométrique à partir de la couche Leaflet
+        const geometry = this.mapManager.geometryHandler.createGeometryObject(e.layer);
+        if (!geometry) {
+            console.error('[EventHandlers] Failed to create geometry object.');
+            return;
+        }
+
+        // Ajouter la géométrie au StateManager
+        this.mapManager.stateManager.addGeometry(geometry);
+
+        console.log('[EventHandlers] Geometry added:', geometry);
+    }
+
+    /**
+     * Gère l'édition de couches (géométries).
+     * @param {Object} e - L'événement d'édition.
+     */
+    handleLayerEdit(e) {
+        console.log('[EventHandlers] Handling layer edit:', e);
+
+        // Trouver l'index de la géométrie correspondant à la couche éditée
+        const index = this.mapManager.stateManager.geometries.findIndex(
+            geometry => geometry.layer === e.layer
+        );
+
+        if (index !== -1) {
+            // Mettre à jour les coordonnées de la géométrie
+            const newCoordinates = e.layer.getLatLngs();
+            this.mapManager.stateManager.updateGeometryCoordinates(index, newCoordinates);
+            console.log('[EventHandlers] Geometry updated at index:', index);
+        } else {
+            console.error('[EventHandlers] Layer not found in geometries list.');
+        }
+    }
+
+    /**
+     * Gère l'ajout de vertex aux couches (géométries).
+     * @param {Object} e - L'événement d'ajout de vertex.
+     */
+    handleVertexAdded(e) {
+        console.log('[EventHandlers] Handling vertex added:', e);
+
+        // Trouver l'index de la géométrie correspondant à la couche modifiée
+        const index = this.mapManager.stateManager.geometries.findIndex(
+            geometry => geometry.layer === e.layer
+        );
+
+        if (index !== -1) {
+            // Mettre à jour les coordonnées de la géométrie
+            const newCoordinates = e.layer.getLatLngs();
+            this.mapManager.stateManager.updateGeometryCoordinates(index, newCoordinates);
+            console.log('[EventHandlers] Geometry updated at index:', index);
+        } else {
+            console.error('[EventHandlers] Layer not found in geometries list.');
+        }
+    }
+
+    /**
+     * Gère la fin de l'édition d'une couche.
+     * @param {Object} e - L'événement de fin d'édition.
+     */
+    handleEditComplete(e) {
+        console.log('[EventHandlers] Handling edit complete:', e);
+
+        // Trouver l'index de la géométrie correspondant à la couche éditée
+        const index = this.mapManager.stateManager.geometries.findIndex(
+            geometry => geometry.layer === e.layer
+        );
+
+        if (index !== -1) {
+            // Mettre à jour les coordonnées de la géométrie
+            const newCoordinates = e.layer.getLatLngs();
+            this.mapManager.stateManager.updateGeometryCoordinates(index, newCoordinates);
+            console.log('[EventHandlers] Geometry updated at index:', index);
+        } else {
+            console.error('[EventHandlers] Layer not found in geometries list.');
+        }
+    }
+
+    /**
+     * Gère le début de l'édition d'une couche.
+     * @param {Object} e - L'événement de début d'édition.
+     */
+    handleEditStart(e) {
+        console.log('[EventHandlers] Handling edit start:', e);
+
+        // Trouver l'index de la géométrie correspondant à la couche éditée
+        const index = this.mapManager.stateManager.geometries.findIndex(
+            geometry => geometry.layer === e.layer
+        );
+
+        if (index !== -1) {
+            // Mettre à jour l'interface utilisateur pour refléter l'édition
+            this.mapManager.stateManager.selectedIndex = index;
+            this.mapManager.stateManager.updateUI();
+            console.log('[EventHandlers] Editing started for geometry at index:', index);
+        } else {
+            console.error('[EventHandlers] Layer not found in geometries list.');
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\events\EventHandlers.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\events\EventManager.js --- #
+
+// js/modules/mapping/events/EventManager.js
+
+export class EventManager {
+    constructor(map, eventHandlers) {
+        if (!map) {
+            throw new Error('Map is required for EventManager initialization.');
+        }
+        if (!eventHandlers) {
+            throw new Error('EventHandlers is required for EventManager initialization.');
+        }
+
+        this.map = map; // Référence à la carte Leaflet
+        this.eventHandlers = eventHandlers; // Référence aux gestionnaires d'événements
+    }
+
+    /**
+     * Initialise les gestionnaires d'événements pour la carte.
+     */
+    // EventManager.js
+    initEvents() {
+        if (!this.map) {
+            console.error('[EventManager] Map is not defined.');
+            return;
+        }
+
+        // Événement de création de géométries
+        this.map.on('pm:create', (e) => {
+            this.eventHandlers.handleGeometryCreation(e);
+        });
+
+        // Événement de suppression de couches
+        this.map.on('pm:removelayer', (e) => {
+            this.eventHandlers.handleLayerRemoval(e);
+        });
+
+        // Événement d'édition de couches
+        this.map.on('pm:edit', (e) => {
+            this.eventHandlers.handleLayerEdit(e);
+        });
+
+        // Événement d'ajout de vertex aux couches
+        this.map.on('pm:vertexadded', (e) => {
+            this.eventHandlers.handleVertexAdded(e);
+        });
+
+        // Événement de fin d'édition d'une couche
+        this.map.on('pm:editcomplete', (e) => {
+            this.eventHandlers.handleEditComplete(e);
+        });
+
+        // Événement de début d'édition d'une couche
+        this.map.on('pm:editstart', (e) => {
+            this.eventHandlers.handleEditStart(e);
+        });
+
+        console.log('[EventManager] Events initialized.');
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\events\EventManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\geometry\GeometryHandler.js --- #
+
+// js/modules/mapping/geometry/GeometryHandler.js
+export class GeometryHandler {
+    constructor(map, layerGroupManager) {
+        if (!map) {
+            throw new Error('Map is required for GeometryHandler initialization.');
+        }
+        if (!layerGroupManager) {
+            throw new Error('LayerGroupManager is required for GeometryHandler initialization.');
+        }
+
+        this.map = map; // Référence à la carte Leaflet
+        this.layerGroupManager = layerGroupManager; // Référence au LayerGroupManager
+    }
+
+    /**
+     * Crée un objet géométrique à partir d'une couche Leaflet.
+     * @param {L.Layer} layer - La couche Leaflet à convertir en objet géométrique.
+     * @returns {Object} - L'objet géométrique créé.
+     * @throws {Error} Si le type de couche n'est pas reconnu.
+     */
+    createGeometryObject(layer) {
+        if (!layer) {
+            throw new Error('Layer is undefined in createGeometryObject.');
+        }
+
+        // Récupérer les propriétés de style de la couche
+        const color = layer.options.color || "#007bff";
+        const opacity = layer.options.opacity || 1;
+        const lineColor = layer.options.lineColor || "#000000";
+        const lineWeight = layer.options.lineWeight || 2;
+        const lineDash = layer.options.lineDash || "solid";
+
+        // Créer l'objet géométrique en fonction du type de couche
+        if (layer instanceof L.Circle) {
+            return {
+                type: 'Circle',
+                coordinates: layer.getLatLng(),
+                radius: layer.getRadius(),
+                color: color,
+                opacity: opacity,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                lineDash: lineDash,
+                layer: layer
+            };
+        } else if (layer instanceof L.Polygon) {
+            return {
+                type: 'Polygon',
+                coordinates: layer.getLatLngs()[0] || layer.getLatLngs(),
+                color: color,
+                opacity: opacity,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                lineDash: lineDash,
+                layer: layer
+            };
+        } else if (layer instanceof L.Polyline) {
+            return {
+                type: 'Polyline',
+                coordinates: layer.getLatLngs(),
+                color: color,
+                opacity: opacity,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                lineDash: lineDash,
+                layer: layer
+            };
+        } else if (layer instanceof L.SVGOverlay) {
+            // Gestion des marqueurs SVG personnalisés
+            return {
+                type: 'CustomMarker',
+                coordinates: layer.getLatLngs()[0], // ou layer.getLatLng() selon votre implémentation
+                color: color,
+                opacity: opacity,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                lineDash: lineDash,
+                layer: layer
+            };
+        } else {
+            throw new Error('Layer type not recognized.');
+        }
+    }
+
+    handleGeometryCreation(e) {
+        console.log('[EventHandlers] Handling geometry creation:', e);
+
+        // Vérifier si la couche existe déjà dans le StateManager
+        const existingGeometry = this.mapManager.stateManager.geometries.find(g => g.layer === e.layer);
+        if (existingGeometry) {
+            console.warn('[EventHandlers] Geometry already exists:', existingGeometry);
+            return;
+        }
+
+        // Créer un objet géométrique à partir de la couche Leaflet
+        const geometry = this.mapManager.geometryHandler.createGeometryObject(e.layer);
+        if (!geometry) {
+            console.error('[EventHandlers] Failed to create geometry object.');
+            return;
+        }
+
+        // Ajouter la géométrie au StateManager
+        this.mapManager.stateManager.addGeometry(geometry);
+
+        console.log('[EventHandlers] Geometry added:', geometry);
+    }
+
+
+    /**
+     * Retire une géométrie de la carte.
+     * @param {L.Layer} layer - La couche à retirer.
+     */
+    removeGeometry(layer) {
+        if (!layer) {
+            console.error('[GeometryHandler] Layer is undefined.');
+            return;
+        }
+        this.layerGroupManager.removeLayer(layer);
+    }
+
+    /**
+     * Met à jour les styles d'une géométrie.
+     * @param {L.Layer} layer - La couche à mettre à jour.
+     * @param {Object} style - Les nouveaux styles à appliquer.
+     */
+    // GeometryHandler.js
+    updateGeometryStyle(layer, style) {
+        if (!layer || !style) {
+            console.error('[GeometryHandler] Layer or style is undefined.');
+            return;
+        }
+
+        if (typeof layer.setStyle === 'function') {
+            layer.setStyle(style);
+        } else {
+            console.error('[GeometryHandler] Layer does not have setStyle method:', layer);
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\geometry\GeometryHandler.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\layers\LayerGroupManager.js --- #
+
+// js/modules/mapping/layers/LayerGroupManager.js
+
+export class LayerGroupManager {
+    constructor(map) {
+        if (!map) {
+            throw new Error('Map is required for LayerGroupManager initialization.');
+        }
+
+        this.map = map; // Référence à la carte Leaflet
+        this.layerGroup = L.layerGroup().addTo(this.map); // Groupe de couches principal
+    }
+
+    /**
+     * Ajoute une couche au groupe de couches.
+     * @param {L.Layer} layer - La couche à ajouter.
+     */
+    addLayer(layer) {
+        if (!layer) {
+            console.error('[LayerGroupManager] Layer is undefined.');
+            return;
+        }
+        this.layerGroup.addLayer(layer);
+    }
+
+    /**
+     * Retire une couche du groupe de couches.
+     * @param {L.Layer} layer - La couche à retirer.
+     */
+    removeLayer(layer) {
+        if (!layer) {
+            console.error('[LayerGroupManager] Layer is undefined.');
+            return;
+        }
+        this.layerGroup.removeLayer(layer);
+    }
+
+    /**
+     * Supprime toutes les couches du groupe de couches.
+     */
+    clearLayers() {
+        this.layerGroup.clearLayers();
+    }
+
+    /**
+     * Retourne le groupe de couches.
+     * @returns {L.LayerGroup} - Le groupe de couches.
+     */
+    getLayerGroup() {
+        return this.layerGroup;
+    }
+
+    /**
+     * Ajoute un marqueur SVG au groupe de couches.
+     * @param {L.SVGOverlay} svgMarker - Le marqueur SVG à ajouter.
+     */
+    addSVGMarker(svgMarker) {
+        if (!svgMarker) {
+            console.error('[LayerGroupManager] SVG marker is undefined.');
+            return;
+        }
+        this.layerGroup.addLayer(svgMarker);
+    }
+
+    /**
+     * Retire un marqueur SVG du groupe de couches.
+     * @param {L.SVGOverlay} svgMarker - Le marqueur SVG à retirer.
+     */
+    removeSVGMarker(svgMarker) {
+        if (!svgMarker) {
+            console.error('[LayerGroupManager] SVG marker is undefined.');
+            return;
+        }
+        this.layerGroup.removeLayer(svgMarker);
+    }
+
+    /**
+     * Met à jour les styles d'une couche dans le groupe de couches.
+     * @param {L.Layer} layer - La couche à mettre à jour.
+     * @param {Object} style - Les nouveaux styles à appliquer.
+     */
+    updateLayerStyle(layer, style) {
+        if (!layer || !style) {
+            console.error('[LayerGroupManager] Layer or style is undefined.');
+            return;
+        }
+        if (typeof layer.setStyle === 'function') {
+            layer.setStyle(style);
+        } else {
+            console.error('[LayerGroupManager] Layer does not have setStyle method:', layer);
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\layers\LayerGroupManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\layers\TileLayerManager.js --- #
+
+// js/modules/mapping/layers/TileLayerManager.js
+
+export class TileLayerManager {
+    constructor(map, tileSources) {
+        if (!map) {
+            throw new Error('Map is required for TileLayerManager initialization.');
+        }
+        if (!tileSources) {
+            throw new Error('Tile sources are required for TileLayerManager initialization.');
+        }
+
+        this.map = map; // Référence à la carte Leaflet
+        this.tileSources = tileSources; // Sources de tuiles disponibles
+        this.currentTileLayer = null; // Couche de tuiles actuellement affichée
+    }
+
+    /**
+     * Définit la couche de tuiles à afficher sur la carte.
+     * @param {string} tileType - Le type de tuile à afficher (osm, cartodb, dark, satellite).
+     */
+    setTileLayer(tileType) {
+        if (!this.tileSources[tileType]) {
+            console.error(`[TileLayerManager] Tile type "${tileType}" is not defined.`);
+            return;
+        }
+
+        // Retirer la couche de tuiles actuelle si elle existe
+        if (this.currentTileLayer) {
+            this.map.removeLayer(this.currentTileLayer);
+        }
+
+        // Récupérer la configuration de la couche de tuiles sélectionnée
+        const tileConfig = this.tileSources[tileType];
+
+        // Créer et ajouter la nouvelle couche de tuiles
+        this.currentTileLayer = L.tileLayer(tileConfig.url, {
+            attribution: tileConfig.attribution
+        });
+
+        this.currentTileLayer.addTo(this.map);
+
+        console.log(`[TileLayerManager] Tile layer "${tileType}" set successfully.`);
+    }
+
+    /**
+     * Retourne la couche de tuiles actuellement affichée.
+     * @returns {L.TileLayer} - La couche de tuiles actuelle.
+     */
+    getCurrentTileLayer() {
+        return this.currentTileLayer;
+    }
+
+    /**
+     * Retourne les sources de tuiles disponibles.
+     * @returns {Object} - Les sources de tuiles.
+     */
+    getTileSources() {
+        return this.tileSources;
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\layers\TileLayerManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\legend\LegendManager.js --- #
+
+// js/modules/mapping/legend/LegendManager.js
+
+export class LegendManager {
+    /**
+     * Constructeur de LegendManager.
+     * @param {L.Map} map - La carte Leaflet.
+     * @param {StateManager} stateManager - Le gestionnaire d'état de l'application.
+     * @throws {Error} Si la carte ou le StateManager n'est pas fourni.
+     */
+    constructor(map, stateManager) {
+        if (!map) {
+            throw new Error('Map is required for LegendManager initialization.');
+        }
+        if (!stateManager) {
+            throw new Error('StateManager is required for LegendManager initialization.');
+        }
+
+        this.map = map; // Référence à la carte Leaflet
+        this.stateManager = stateManager; // Référence au StateManager
+        this.legendControl = null; // Contrôle de légende Leaflet
+        this.initLegend(); // Initialiser la légende
+    }
+
+    /**
+     * Initialise la légende de la carte.
+     */
+    initLegend() {
+        // Créer un contrôle Leaflet pour la légende
+        const LegendControl = L.Control.extend({
+            options: {
+                position: 'bottomright' // Position de la légende sur la carte
+            },
+
+            onAdd: () => {
+                const container = L.DomUtil.create('div', 'legend-control');
+                container.style.backgroundColor = 'white';
+                container.style.padding = '10px';
+                container.style.borderRadius = '4px';
+                container.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
+                container.style.maxHeight = '300px';
+                container.style.overflowY = 'auto';
+                container.style.minWidth = '200px';
+                return container;
+            }
+        });
+
+        // Ajouter le contrôle de légende à la carte
+        this.legendControl = new LegendControl();
+        this.map.addControl(this.legendControl);
+
+        console.log('[LegendManager] Legend initialized');
+    }
+
+    /**
+     * Met à jour la légende avec les géométries actuelles.
+     */
+    updateLegend() {
+        console.log('[LegendManager] Updating legend');
+
+        const container = this.legendControl.getContainer();
+        if (!container) {
+            console.error('[LegendManager] Legend container not found.');
+            return;
+        }
+
+        // Réinitialiser le contenu de la légende
+        container.innerHTML = '<h6 class="mb-2">Légende</h6>';
+
+        // Vérifier s'il y a des géométries à afficher
+        if (this.stateManager.geometries.length === 0) {
+            container.innerHTML += '<p class="text-muted small mb-0">Aucun élément sur la carte</p>';
+            console.log('[LegendManager] No geometries found, legend updated with empty state');
+            return;
+        }
+
+        // Parcourir toutes les géométries pour les ajouter à la légende
+        this.stateManager.geometries.forEach((geometry, index) => {
+            console.log('[LegendManager] Adding geometry to legend:', geometry);
+
+            const item = document.createElement('div');
+            item.className = 'legend-item d-flex align-items-center mb-2';
+
+            // Créer le symbole de la légende
+            const symbol = document.createElement('div');
+            symbol.className = 'legend-symbol me-2';
+
+            // Appliquer les styles du marqueur ou de la zone
+            let legendSize;
+            if (geometry.type === 'CustomMarker') {
+                // Pour les marqueurs, appliquer un rapport *1.5
+                const markerSize = geometry.markerSize || 24;
+                legendSize = markerSize / 1.5; // Rapport /1.5 pour les marqueurs
+            } else {
+                const height = 24; // Hauteur fixe
+                const width = height * 1.5; // Largeur = 1.5 * hauteur
+                symbol.style.width = `${width}px`; // Largeur du rectangle
+                symbol.style.height = `${height}px`; // Hauteur du rectangle
+            }
+
+            symbol.style.width = `${legendSize}px`; // Taille ajustée pour la légende
+            symbol.style.height = `${legendSize}px`;
+            symbol.style.backgroundColor = geometry.color || '#007bff'; // Couleur de fond
+            symbol.style.border = `${geometry.lineWeight || 2}px ${this._getLineStyle(geometry.lineDash)} ${geometry.lineColor || '#000000'}`; // Bordure avec style de ligne
+            symbol.style.opacity = geometry.opacity || 1; // Opacité du fond
+
+            // Appliquer la forme en fonction du type de géométrie
+            if (geometry.type === 'CustomMarker') {
+                // Pour les marqueurs, utiliser la forme spécifique (cercle, carré, triangle, hexagone)
+                switch (geometry.shape) {
+                    case 'circle':
+                        symbol.style.borderRadius = '50%'; // Cercle
+                        break;
+                    case 'square':
+                        symbol.style.borderRadius = '0%'; // Carré
+                        symbol.style.clipPath = 'none'; // Désactiver clip-path pour le carré
+                        break;
+                    case 'triangle':
+                        symbol.style.borderRadius = '0%'; // Désactiver border-radius pour le triangle
+                        symbol.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)'; // Triangle
+                        break;
+                    case 'hexagon':
+                        symbol.style.borderRadius = '0%'; // Désactiver border-radius pour l'hexagone
+                        symbol.style.clipPath = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'; // Hexagone
+                        break;
+                    default:
+                        symbol.style.borderRadius = '0%'; // Par défaut, un carré
+                        symbol.style.clipPath = 'none'; // Désactiver clip-path
+                }
+            } else {
+                // Pour les zones (layers), utiliser un rectangle
+                symbol.style.borderRadius = '0%'; // Rectangle
+                symbol.style.clipPath = 'none'; // Désactiver clip-path
+            }
+
+            // Ajouter le nom de la géométrie
+            const name = document.createElement('span');
+            name.className = 'small';
+            name.textContent = geometry.name || `Geometry ${index + 1}`; // Utiliser un nom par défaut si aucun nom n'est défini
+
+            // Ajouter le symbole et le nom à l'élément de la légende
+            item.appendChild(symbol);
+            item.appendChild(name);
+
+            // Ajouter l'élément à la légende
+            container.appendChild(item);
+        });
+
+        console.log('[LegendManager] Legend updated with current geometries');
+    }
+
+    /**
+     * Retourne le style de ligne CSS en fonction du type de ligne (solid, dashed, dotted).
+     * @param {string} lineDash - Le type de ligne (solid, dashed, dotted).
+     * @returns {string} - Le style de ligne CSS.
+     */
+    _getLineStyle(lineDash) {
+        switch (lineDash) {
+            case 'solid':
+                return 'solid';
+            case 'dashed':
+                return 'dashed';
+            case 'dotted':
+                return 'dotted';
+            default:
+                return 'solid'; // Par défaut, une ligne continue
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\legend\LegendManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\markers\MarkerControlManager.js --- #
+
+import { SVGUtils } from '../../utils/SVGUtils.js';
+
+export class MarkerControlManager {
+    constructor(map, markerTypes, stateManager) {
+        if (!map) {
+            throw new Error('Map is required for MarkerControlManager initialization.');
+        }
+        if (!markerTypes) {
+            throw new Error('Marker types are required for MarkerControlManager initialization.');
+        }
+        if (!stateManager) {
+            throw new Error('StateManager is required for MarkerControlManager initialization.');
+        }
+
+        this.map = map; // Référence à la carte Leaflet
+        this.markerTypes = markerTypes; // Types de marqueurs disponibles (cercle, carré, triangle, hexagone)
+        this.activeMarkerType = null; // Type de marqueur actuellement sélectionné
+        this.stateManager = stateManager; // Référence au StateManager
+    }
+
+    /**
+     * Ajoute les contrôles personnalisés pour les marqueurs.
+     */
+    addCustomMarkerControls() {
+        const markerControl = L.Control.extend({
+            options: {
+                position: 'topleft'
+            },
+
+            onAdd: (map) => {
+                const container = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+
+                this.markerTypes.forEach(type => {
+                    const button = L.DomUtil.create('a', 'leaflet-control-custom', container);
+                    button.href = '#'; // Lien vide pour le style
+                    button.title = `Dessiner un marqueur ${type}`;
+
+                    // Création de l'icône SVG pour le bouton
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('width', '24');
+                    svg.setAttribute('height', '24');
+                    svg.setAttribute('viewBox', '0 0 24 24');
+
+                    let path;
+                    switch (type) {
+                        case 'circle':
+                            path = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            path.setAttribute('cx', '12');
+                            path.setAttribute('cy', '12');
+                            path.setAttribute('r', '10');
+                            break;
+                        case 'square':
+                            path = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            path.setAttribute('x', '2');
+                            path.setAttribute('y', '2');
+                            path.setAttribute('width', '20');
+                            path.setAttribute('height', '20');
+                            break;
+                        case 'triangle':
+                            path = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                            path.setAttribute('points', '12,2 22,20 2,20');
+                            break;
+                        case 'hexagon':
+                            path = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                            path.setAttribute('points', '12,2 20,6 20,18 12,22 4,18 4,6');
+                            break;
+                        default:
+                            console.error(`[MarkerControlManager] Type de marqueur non supporté : ${type}`);
+                            return;
+                    }
+
+                    // Configuration des styles SVG
+                    path.setAttribute('fill', 'transparent'); // Remplissage transparent
+                    path.setAttribute('stroke', '#000'); // Bordure noire
+                    path.setAttribute('stroke-width', '2'); // Épaisseur de la bordure
+                    svg.appendChild(path);
+                    button.appendChild(svg);
+
+                    // Gestion du clic sur le bouton
+                    L.DomEvent.on(button, 'click', (e) => {
+                        console.log(`[MarkerControlManager] Bouton cliqué pour le type de marqueur : ${type}`);
+                        L.DomEvent.stopPropagation(e); // Empêcher la propagation de l'événement
+                        L.DomEvent.preventDefault(e); // Empêcher le comportement par défaut
+                        this.activeMarkerType = type; // Définir le type de marqueur actif
+
+                        // Gestion du clic sur la carte pour placer le marqueur
+                        const clickHandler = (e) => {
+                            console.log(`[MarkerControlManager] Clic sur la carte à : ${e.latlng}`);
+
+                            // Créer un marqueur SVG
+                            const svgMarker = SVGUtils.createMarkerSVG(type, e.latlng, {
+                                color: "#007bff", // Couleur de remplissage
+                                lineColor: "#000000", // Couleur de la bordure
+                                opacity: 1, // Opacité
+                                lineWeight: 2, // Épaisseur de la bordure
+                                markerSize: 24 // Taille du marqueur
+                            });
+
+                            if (svgMarker) {
+                                console.log('[MarkerControlManager] Marqueur SVG créé :', svgMarker);
+                                svgMarker.addTo(map); // Ajouter le marqueur à la carte
+                                console.log('[MarkerControlManager] Marqueur SVG ajouté à la carte');
+
+                                // Ajouter la géométrie au StateManager
+                                const geometry = {
+                                    type: 'CustomMarker', // Type de géométrie
+                                    coordinates: e.latlng, // Coordonnées du marqueur
+                                    color: "#007bff", // Couleur de remplissage
+                                    lineColor: "#000000", // Couleur de la bordure
+                                    opacity: 1, // Opacité
+                                    lineWeight: 2, // Épaisseur de la bordure
+                                    markerSize: 24, // Taille du marqueur
+                                    shape: type, // Stocker la forme du marqueur (cercle, carré, triangle, hexagone)
+                                    layer: svgMarker // Référence à la couche Leaflet
+
+                                };
+
+                                this.stateManager.addGeometry(geometry); // Ajouter la géométrie au StateManager
+
+                                // Centrer la carte sur le marqueur
+                                map.setView(e.latlng, map.getZoom());
+                            } else {
+                                console.error('[MarkerControlManager] Échec de la création du marqueur SVG');
+                            }
+
+                            // Une fois le marqueur ajouté, on supprime l'écouteur de clic
+                            map.off('click', clickHandler);
+                        };
+
+                        // Activer l'écouteur de clic sur la carte
+                        map.on('click', clickHandler);
+                    });
+                });
+
+                return container;
+            }
+        });
+
+        // Ajouter le contrôle à la carte
+        this.map.addControl(new markerControl());
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\markers\MarkerControlManager.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\utils\SVGUtils.js --- #
+
+export class SVGUtils {
+    static createMarkerSVG(type, latlng, options = {}) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svgElement = document.createElementNS(svgNS, "svg");
+        svgElement.setAttribute("width", options.markerSize || 24);
+        svgElement.setAttribute("height", options.markerSize || 24);
+        svgElement.setAttribute("viewBox", "0 0 24 24");
+
+        let path;
+        switch (type) {
+            case 'circle':
+                path = document.createElementNS(svgNS, "circle");
+                path.setAttribute("cx", "12");
+                path.setAttribute("cy", "12");
+                path.setAttribute("r", "10");
+                break;
+            case 'square':
+                path = document.createElementNS(svgNS, "rect");
+                path.setAttribute("x", "2");
+                path.setAttribute("y", "2");
+                path.setAttribute("width", "20");
+                path.setAttribute("height", "20");
+                break;
+            case 'triangle':
+                path = document.createElementNS(svgNS, "polygon");
+                path.setAttribute("points", "12,2 22,20 2,20");
+                break;
+            case 'hexagon':
+                path = document.createElementNS(svgNS, "polygon");
+                path.setAttribute("points", "12,2 20,6 20,18 12,22 4,18 4,6");
+                break;
+            default:
+                console.error('[SVGUtils] Invalid marker type:', type);
+                return null;
+        }
+
+        path.setAttribute("fill", options.color || "#007bff");
+        path.setAttribute("stroke", options.lineColor || "#000000");
+        path.setAttribute("stroke-width", options.lineWeight || 2);
+        path.setAttribute("opacity", options.opacity || 1);
+
+        svgElement.appendChild(path);
+
+        const svgOverlay = L.svgOverlay(svgElement, [latlng, latlng], {
+            interactive: true,
+            className: 'custom-marker'
+        });
+
+        return svgOverlay;
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\mapping\utils\SVGUtils.js --- #
+
+
+# --- Début du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\utils\SVGUtils.js --- #
+
+export class SVGUtils {
+    static createMarkerSVG(type, latlng, options = {}) {
+        try {
+            console.log(`[SVGUtils] Création d'un marqueur SVG de type : ${type}, Options :`, options);
+
+            // Namespace SVG
+            const svgNS = "http://www.w3.org/2000/svg";
+
+            // Création de l'élément SVG
+            const svgElement = document.createElementNS(svgNS, "svg");
+            const markerSize = options.markerSize || 24;
+            svgElement.setAttribute("width", markerSize);
+            svgElement.setAttribute("height", markerSize);
+            svgElement.setAttribute("viewBox", "0 0 24 24");
+
+            let path;
+
+            // Sélection du type de marqueur
+            switch (type) {
+                case 'circle':
+                    path = document.createElementNS(svgNS, "circle");
+                    path.setAttribute("cx", "12");
+                    path.setAttribute("cy", "12");
+                    path.setAttribute("r", "10");
+                    break;
+                case 'square':
+                    path = document.createElementNS(svgNS, "rect");
+                    path.setAttribute("x", "2");
+                    path.setAttribute("y", "2");
+                    path.setAttribute("width", "20");
+                    path.setAttribute("height", "20");
+                    break;
+                case 'triangle':
+                    path = document.createElementNS(svgNS, "polygon");
+                    path.setAttribute("points", "12,2 22,20 2,20");
+                    break;
+                case 'hexagon':
+                    path = document.createElementNS(svgNS, "polygon");
+                    path.setAttribute("points", "12,2 20,6 20,18 12,22 4,18 4,6");
+                    break;
+                default:
+                    console.error(`[SVGUtils] Type de marqueur non supporté : ${type}`);
+                    throw new Error(`Le type de marqueur "${type}" n'est pas pris en charge.`);
+            }
+
+            // Configuration des styles SVG
+            path.setAttribute("fill", options.color || "#007bff");
+            path.setAttribute("stroke", options.lineColor || "#000000");
+            path.setAttribute("stroke-width", options.lineWeight || 2);
+            path.setAttribute("opacity", options.opacity || 1);
+            svgElement.appendChild(path);
+
+            // Conversion du SVG en string pour l'URL data
+            const svgString = new XMLSerializer().serializeToString(svgElement);
+            const svgBase64 = btoa(svgString);
+            const dataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+
+            // Création de l'icône pour le marker
+            const icon = L.icon({
+                iconUrl: dataUrl,
+                iconSize: [markerSize, markerSize],
+                iconAnchor: [markerSize / 2, markerSize / 2], // Centre du marqueur
+                className: 'custom-marker'
+            });
+
+            // Création du marker avec l'icône SVG
+            const marker = L.marker(latlng, {
+                icon: icon,
+                draggable: options.draggable || false,
+                interactive: true
+            });
+
+            // Stockage des propriétés originales pour la conversion
+            marker.originalOptions = {
+                type: type,
+                color: options.color || "#007bff",
+                lineColor: options.lineColor || "#000000",
+                opacity: options.opacity || 1,
+                lineWeight: options.lineWeight || 2,
+                markerSize: markerSize
+            };
+
+            console.log('[SVGUtils] Marqueur créé et prêt à être ajouté à la carte :', marker);
+
+            return marker;
+        } catch (error) {
+            console.error('[SVGUtils] Erreur lors de la création du marqueur SVG :', error);
+            throw error;
+        }
+    }
+
+    static updateMarkerStyle(marker, options = {}) {
+        try {
+            const icon = marker.getIcon();
+            const svgString = atob(icon.options.iconUrl.split(',')[1]);
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgString, "image/svg+xml");
+            const path = svgDoc.querySelector('circle, rect, polygon');
+
+            if (path) {
+                path.setAttribute("fill", options.color || path.getAttribute("fill"));
+                path.setAttribute("stroke", options.lineColor || path.getAttribute("stroke"));
+                path.setAttribute("stroke-width", options.lineWeight || path.getAttribute("stroke-width"));
+                path.setAttribute("opacity", options.opacity || path.getAttribute("opacity"));
+            }
+
+            // Mettre à jour la taille du marqueur
+            const markerSize = options.markerSize || 24;
+            const svgElement = svgDoc.querySelector('svg');
+            svgElement.setAttribute("width", markerSize);
+            svgElement.setAttribute("height", markerSize);
+
+            const updatedSvgString = new XMLSerializer().serializeToString(svgDoc);
+            const updatedSvgBase64 = btoa(updatedSvgString);
+            const updatedDataUrl = `data:image/svg+xml;base64,${updatedSvgBase64}`;
+
+            icon.options.iconUrl = updatedDataUrl;
+            icon.options.iconSize = [markerSize, markerSize];
+            icon.options.iconAnchor = [markerSize / 2, markerSize / 2]; // Mettre à jour l'ancre pour centrer le marqueur
+            marker.setIcon(icon);
+
+            console.log('[SVGUtils] Style du marqueur mis à jour :', marker);
+        } catch (error) {
+            console.error('[SVGUtils] Erreur lors de la mise à jour du style du marqueur :', error);
+            throw error;
+        }
+    }
+
+    static convertMarkerToPolygon(marker) {
+        try {
+            const latlng = marker.getLatLng();
+            const options = marker.originalOptions;
+            const size = options.markerSize / 1000; // Conversion en degrés approximative
+
+            // Création des points du polygone selon le type
+            let points;
+            switch (options.type) {
+                case 'square':
+                    points = [
+                        [latlng.lat + size, latlng.lng + size],
+                        [latlng.lat + size, latlng.lng - size],
+                        [latlng.lat - size, latlng.lng - size],
+                        [latlng.lat - size, latlng.lng + size]
+                    ];
+                    break;
+                case 'triangle':
+                    points = [
+                        [latlng.lat + size, latlng.lng],
+                        [latlng.lat - size, latlng.lng + size],
+                        [latlng.lat - size, latlng.lng - size]
+                    ];
+                    break;
+                case 'hexagon':
+                    const hexSize = size * 0.866; // cos(30°)
+                    points = [
+                        [latlng.lat + size, latlng.lng],
+                        [latlng.lat + size / 2, latlng.lng + hexSize],
+                        [latlng.lat - size / 2, latlng.lng + hexSize],
+                        [latlng.lat - size, latlng.lng],
+                        [latlng.lat - size / 2, latlng.lng - hexSize],
+                        [latlng.lat + size / 2, latlng.lng - hexSize]
+                    ];
+                    break;
+                case 'circle':
+                default:
+                    // Pour un cercle, on crée un polygone avec 32 points
+                    points = [];
+                    for (let i = 0; i < 32; i++) {
+                        const angle = (i / 32) * Math.PI * 2;
+                        points.push([
+                            latlng.lat + Math.sin(angle) * size,
+                            latlng.lng + Math.cos(angle) * size
+                        ]);
+                    }
+            }
+
+            return L.polygon(points, {
+                color: options.lineColor,
+                fillColor: options.color,
+                fillOpacity: options.opacity,
+                weight: options.lineWeight
+            });
+        } catch (error) {
+            console.error('[SVGUtils] Erreur lors de la conversion Marker -> Polygone :', error);
+            throw error;
+        }
+    }
+}
+
+# --- Fin du fichier : C:\Users\alano\WebstormProjects\Croquis3\js\modules\utils\SVGUtils.js --- #

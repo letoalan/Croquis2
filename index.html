@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.pm/2.2.0/leaflet.pm.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        console.log('Chargement des fichiers CSS...');
+        console.log('Fichier CSS local (styles.css) :', document.querySelector('link[href="css/styles.css"]').href);
+    </script>
+</head>
+<body>
+<div id="app" class="d-flex vh-100">
+    <!-- Sidebar -->
+    <div class="sidebar bg-light border-end p-3">
+        <h5 class="fw-bold">Mode édition</h5>
+        <div class="mb-3">
+            <label for="tileSelector" class="form-label">Sélectionnez un fond</label>
+            <select id="tileSelector" class="form-select">
+                <option value="osm">OpenStreetMap</option>
+                <option value="cartodb">CartoDB Positron</option>
+                <option value="dark">CartoDB Dark</option>
+                <option value="satellite">Esri Satellite</option>
+            </select>
+        </div>
+        <div id="geometryList"></div>
+    </div>
+
+    <!-- Carte -->
+    <div id="map" class="map"></div>
+</div>
+
+<!-- Conteneur du titre de la carte -->
+<div id="map-title-container" class="map-title-container">
+    <div id="mapTitleDisplay" class="map-title-display"></div>
+    <div class="map-title-input-container">
+        <input type="text" id="mapTitleInput" class="form-control map-title-input" placeholder="Entrez un titre pour la carte" />
+        <button id="saveMapTitleBtn" class="btn btn-primary btn-sm">Enregistrer</button>
+    </div>
+    <i id="toggleTitleIcon" class="bi bi-chevron-up"></i>
+</div>
+
+<!-- Menu contextuel pour modifier le style -->
+<div id="contextMenu" class="context-menu">
+    <div class="context-menu-content">
+        <div class="mb-3">
+            <label for="contextColorPicker" class="form-label">Couleur de remplissage</label>
+            <input type="color" id="contextColorPicker" class="form-control" value="#007bff">
+        </div>
+        <div class="mb-3">
+            <label for="contextLineColorPicker" class="form-label">Couleur de la ligne</label>
+            <input type="color" id="contextLineColorPicker" class="form-control" value="#000000">
+        </div>
+        <div class="mb-3">
+            <label for="contextOpacitySlider" class="form-label">Transparence</label>
+            <input type="range" id="contextOpacitySlider" class="form-range" min="0" max="1" step="0.1" value="1">
+        </div>
+        <div class="mb-3">
+            <label for="contextLineDash" class="form-label">Style de ligne</label>
+            <select id="contextLineDash" class="form-select">
+                <option value="solid">Continue</option>
+                <option value="dashed">Pointillés</option>
+                <option value="dotted">Pointillés fins</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="contextLineWeight" class="form-label">Épaisseur de la ligne</label>
+            <input type="range" id="contextLineWeight" class="form-range" min="1" max="10" step="1" value="2">
+        </div>
+        <div class="mb-3">
+            <label for="contextMarkerSize" class="form-label">Taille du marqueur</label>
+            <input type="range" id="contextMarkerSize" class="form-range" min="10" max="50" step="1" value="24">
+        </div>
+        <div class="d-flex justify-content-between">
+            <button id="contextApplyBtn" class="btn btn-primary btn-sm">Appliquer</button>
+            <button id="contextCancelBtn" class="btn btn-secondary btn-sm">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.pm/2.2.0/leaflet.pm.min.js"></script>
+<script type="module">
+    import { GeometryManager } from './js/modules/GeometryManager.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const geometryManager = new GeometryManager();
+        geometryManager.init();
+    });
+</script>
+</body>
+</html>
