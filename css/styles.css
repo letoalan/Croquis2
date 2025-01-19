@@ -1,0 +1,283 @@
+/* styles.css */
+
+/* Styles de base pour l'application */
+.vh-100 {
+    height: 100vh;
+}
+
+/* Styles de la sidebar */
+.sidebar {
+    width: 300px;
+    overflow-y: auto;
+}
+
+/* Styles de la carte */
+.map {
+    flex: 1;
+    z-index: 0;
+    width: 70%; /* Le panneau de la carte occupe 70% de la largeur */
+    background: transparent; /* Fond transparent */
+    opacity: 1; /* Opacité à 100% */
+}
+
+/* Styles pour les éléments de liste */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.list-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-item.selected {
+    background-color: #e9ecef;
+}
+
+.list-item .btn-light {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.list-item input.form-control {
+    height: auto;
+    padding: 2px 6px;
+    font-size: 14px;
+}
+
+/* Styles pour le menu contextuel */
+.context-menu {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.context-menu-content {
+    width: 200px;
+}
+
+.context-menu label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.context-menu input[type="range"] {
+    width: 100%;
+}
+
+.context-menu select {
+    width: 100%;
+}
+
+.custom-marker {
+    pointer-events: all; /* Permet les interactions avec le marqueur */
+    z-index: 1000; /* Assure que le marqueur est au-dessus des autres éléments */
+    position: absolute; /* Assure un positionnement correct */
+    transform: translate(-50%, -50%); /* Centre le marqueur sur les coordonnées */
+}
+
+.cursor-marker {
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+
+.cursor-marker .cross {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+}
+
+.cursor-marker .cross::before,
+.cursor-marker .cross::after {
+    content: '';
+    position: absolute;
+    background-color: #000;
+}
+
+.cursor-marker .cross::before {
+    width: 12px;
+    height: 2px;
+    top: 5px;
+}
+
+.cursor-marker .cross::after {
+    width: 2px;
+    height: 12px;
+    left: 5px;
+}
+
+/* Styles pour les contrôles de la carte */
+.leaflet-control-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: white;
+    border-bottom: 1px solid #ccc;
+}
+
+.leaflet-control-custom:last-child {
+    border-bottom: none;
+}
+
+.leaflet-control-custom svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Styles pour le conteneur du titre de la carte */
+.map-title-container {
+    position: absolute;
+    top: 10px;
+    left: 65%; /* Positionné à 70% de la largeur de l'écran */
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.5); /* Fond blanc transparent à 50% */
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    text-align: center;
+    width: 70%; /* Le conteneur s'étale sur 50% de la largeur */
+    max-width: 70%; /* Limite la largeur maximale à 50% */
+    min-width: 200px; /* Largeur minimale pour éviter un conteneur trop étroit */
+    word-wrap: break-word; /* Permet au texte de passer à la ligne si nécessaire */
+    white-space: normal; /* Permet au texte de s'étendre sur plusieurs lignes */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espace entre les éléments */
+    overflow: hidden; /* Empêche le contenu de déborder */
+}
+
+/* Styles pour l'affichage du titre */
+.map-title-display {
+    flex-grow: 1; /* Prend l'espace disponible */
+    white-space: normal; /* Permet au texte de passer à la ligne */
+    overflow: hidden; /* Cache le texte qui dépasse */
+    word-wrap: break-word; /* Permet au texte de passer à la ligne si nécessaire */
+    text-overflow: ellipsis; /* Ajoute des points de suspension si le texte est trop long */
+    display: -webkit-box; /* Permet de limiter le nombre de lignes */
+    -webkit-line-clamp: 3; /* Limite à 3 lignes maximum */
+    -webkit-box-orient: vertical; /* Orientation verticale */
+}
+
+/* Styles pour le conteneur de l'input et du bouton */
+.map-title-input-container {
+    display: flex;
+    gap: 10px; /* Espace entre l'input et le bouton */
+    flex-shrink: 0; /* Empêche le conteneur de rétrécir */
+}
+
+/* Styles pour l'input du titre */
+.map-title-input {
+    width: 150px; /* Largeur de l'input */
+    flex-shrink: 0; /* Empêche l'input de rétrécir */
+}
+
+/* Styles pour l'icône de retrait/développement */
+#toggleTitleIcon {
+    cursor: pointer;
+    font-size: 20px;
+    color: #007bff;
+    flex-shrink: 0; /* Empêche l'icône de rétrécir */
+}
+
+/* Styles pour le panneau du titre réduit */
+.map-title-container.collapsed {
+    height: 40px; /* Hauteur réduite */
+    overflow: hidden; /* Cache le contenu */
+    transition: height 0.3s ease; /* Animation fluide */
+}
+
+/* Styles pour le panneau du titre développé */
+.map-title-container.expanded {
+    height: auto; /* Hauteur automatique */
+    transition: height 0.3s ease; /* Animation fluide */
+}
+
+/* Styles pour la légende */
+.legend-control {
+    background-color: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    max-height: 300px;
+    overflow-y: auto;
+    min-width: 200px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.legend-symbol {
+    display: inline-block;
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* Par défaut, forme circulaire */
+}
+
+.legend-symbol.circle {
+    border-radius: 50%;
+}
+
+.legend-symbol.square {
+    border-radius: 0%;
+}
+
+.legend-symbol.triangle {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.legend-symbol.hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.legend-symbol.polyline {
+    border-top: 2px solid #000000;
+    margin-top: 8px;
+}
+
+.legend-symbol.polygon {
+    border: 2px solid #000000;
+}
+
+/* Styles pour les marqueurs personnalisés dans la légende */
+.legend-symbol.custom-marker {
+    background-color: #007bff;
+    border: 2px solid #000000;
+}
+
+/* Styles pour les contrôles Leaflet */
+.leaflet-control {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-control a {
+    color: #007bff;
+}
+
+.leaflet-control a:hover {
+    color: #0056b3;
+}
