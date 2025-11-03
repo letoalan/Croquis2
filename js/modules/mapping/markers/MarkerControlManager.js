@@ -1,21 +1,18 @@
 import { SVGUtils } from '../../utils/SVGUtils.js';
 
 export class MarkerControlManager {
-    constructor(map, markerTypes, stateManager) {
-        if (!map) {
-            throw new Error('Map is required for MarkerControlManager initialization.');
-        }
-        if (!markerTypes) {
-            throw new Error('Marker types are required for MarkerControlManager initialization.');
-        }
-        if (!stateManager) {
-            throw new Error('StateManager is required for MarkerControlManager initialization.');
-        }
+    constructor(map, markerTypes, stateManager, geometryHandler) {
+        if (!map || !markerTypes || !stateManager || !geometryHandler)
+            throw new Error('Map, markerTypes, StateManager et GeometryHandler sont requis');
 
         this.map = map; // Référence à la carte Leaflet
         this.markerTypes = markerTypes; // Types de marqueurs disponibles (cercle, carré, triangle, hexagone)
         this.activeMarkerType = null; // Type de marqueur actuellement sélectionné
         this.stateManager = stateManager; // Référence au StateManager
+        this.geometryHandler = geometryHandler; // ✅ Stocker la référence
+
+        // ✅ CORRECTION : Lier le contexte 'this'
+        this._handleMapClick = this._handleMapClick.bind(this);
     }
 
     /**
@@ -83,52 +80,8 @@ export class MarkerControlManager {
                         L.DomEvent.preventDefault(e); // Empêcher le comportement par défaut
                         this.activeMarkerType = type; // Définir le type de marqueur actif
 
-                        // Gestion du clic sur la carte pour placer le marqueur
-                        const clickHandler = (e) => {
-                            console.log(`[MarkerControlManager] Clic sur la carte à : ${e.latlng}`);
-
-                            // Créer un marqueur SVG
-                            const svgMarker = SVGUtils.createMarkerSVG(type, e.latlng, {
-                                color: "#007bff", // Couleur de remplissage
-                                lineColor: "#000000", // Couleur de la bordure
-                                opacity: 1, // Opacité
-                                lineWeight: 2, // Épaisseur de la bordure
-                                markerSize: 24 // Taille du marqueur
-                            });
-
-                            if (svgMarker) {
-                                console.log('[MarkerControlManager] Marqueur SVG créé :', svgMarker);
-                                svgMarker.addTo(map); // Ajouter le marqueur à la carte
-                                console.log('[MarkerControlManager] Marqueur SVG ajouté à la carte');
-
-                                // Ajouter la géométrie au StateManager
-                                const geometry = {
-                                    type: 'CustomMarker', // Type de géométrie
-                                    coordinates: e.latlng, // Coordonnées du marqueur
-                                    color: "#007bff", // Couleur de remplissage
-                                    lineColor: "#000000", // Couleur de la bordure
-                                    opacity: 1, // Opacité
-                                    lineWeight: 2, // Épaisseur de la bordure
-                                    markerSize: 24, // Taille du marqueur
-                                    shape: type, // Stocker la forme du marqueur (cercle, carré, triangle, hexagone)
-                                    layer: svgMarker // Référence à la couche Leaflet
-
-                                };
-
-                                this.stateManager.addGeometry(geometry); // Ajouter la géométrie au StateManager
-
-                                // Centrer la carte sur le marqueur
-                                map.setView(e.latlng, map.getZoom());
-                            } else {
-                                console.error('[MarkerControlManager] Échec de la création du marqueur SVG');
-                            }
-
-                            // Une fois le marqueur ajouté, on supprime l'écouteur de clic
-                            map.off('click', clickHandler);
-                        };
-
                         // Activer l'écouteur de clic sur la carte
-                        map.on('click', clickHandler);
+                        map.on('click', this._handleMapClick);
                     });
                 });
 
@@ -139,4 +92,51 @@ export class MarkerControlManager {
         // Ajouter le contrôle à la carte
         this.map.addControl(new markerControl());
     }
+
+    /**
+     * ✅ Gère le clic sur la carte pour placer un marqueur
+     */
+    _handleMapClick(e) {
+        if (!this.activeMarkerType) return;
+
+        console.log(`[MarkerControlManager] Clic sur la carte à : ${e.latlng}`);
+
+        const markerOptions = {
+            color: "#007bff",
+            lineColor: "#000000",
+            opacity: 1,
+            lineWeight: 2,
+            lineDash: "solid",
+            markerSize: 24,
+            draggable: false
+        };
+
+        // ✅ createMarkerSVG retourne DÉJÀ un L.marker !
+        const marker = SVGUtils.createMarkerSVG(this.activeMarkerType, e.latlng, markerOptions);
+
+        if (!marker) {
+            console.error('[MarkerControlManager] ❌ Erreur création marqueur SVG');
+            return;
+        }
+
+        // ✅ Ajouter le marqueur à la carte
+        marker.addTo(this.map);
+
+        // ✅ Stocker le type personnalisé pour la sérialisation
+        marker._markerType = this.activeMarkerType;
+        marker._markerOptions = markerOptions;
+
+        console.log(`[MarkerControlManager] ✅ Marqueur SVG créé et ajouté: ${this.activeMarkerType}`);
+
+        // ✅ Créer l'objet géométrie avec le marqueur Leaflet
+        const geometryObject = this.geometryHandler.createGeometryObject(marker);
+        this.stateManager.addGeometry(geometryObject);
+
+        console.log(`[MarkerControlManager] ✅ Géométrie enregistrée pour le marqueur: ${this.activeMarkerType}`);
+
+        // ✅ Désactiver l'écouteur après un seul clic
+        this.map.off('click', this._handleMapClick);
+        this.activeMarkerType = null;
+    }
+
 }

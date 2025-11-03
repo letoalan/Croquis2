@@ -23,10 +23,8 @@ export class EventManager {
             return;
         }
 
-        // Événement de création de géométries
-        this.map.on('pm:create', (e) => {
-            this.eventHandlers.handleGeometryCreation(e);
-        });
+        // ✅ Événement de création de géométries - DÉSACTIVÉ
+        // La logique est maintenant centralisée dans MapManager.js pour éviter les conflits.
 
         // Événement de suppression de couches
         this.map.on('pm:removelayer', (e) => {

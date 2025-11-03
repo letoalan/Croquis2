@@ -2,97 +2,329 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geometry Manager</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.pm/2.2.0/leaflet.pm.css">
+    <meta name="viewport" content="width=2000px, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes">
+    <title>Carte Interactive avec Géométries</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet.PM CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <script>
         console.log('Chargement des fichiers CSS...');
-        console.log('Fichier CSS local (styles.css) :', document.querySelector('link[href="css/styles.css"]').href);
+        console.log('Fichier CSS local (styles.css) :', new URL('css/styles.css', window.location.href).href);
     </script>
+
 </head>
 <body>
-<div id="app" class="d-flex vh-100">
-    <!-- Sidebar -->
-    <div class="sidebar bg-light border-end p-3">
-        <h5 class="fw-bold">Mode édition</h5>
-        <div class="mb-3">
-            <label for="tileSelector" class="form-label">Sélectionnez un fond</label>
-            <select id="tileSelector" class="form-select">
-                <option value="osm">OpenStreetMap</option>
-                <option value="cartodb">CartoDB Positron</option>
-                <option value="dark">CartoDB Dark</option>
-                <option value="satellite">Esri Satellite</option>
-            </select>
+<div class="d-flex vh-100">
+    <!-- SIDEBAR RÉTRACTABLE GAUCHE -->
+    <div class="sidebar-container position-relative">
+        <!-- SIDEBAR RÉTRACTABLE GAUCHE -->
+        <div class="sidebar" id="editionPanel">
+            <!-- CONTENU DE LA SIDEBAR -->
+            <div style="padding: 15px;">
+                <!-- Titre centré -->
+                <h5>
+                    <span>🗺️</span>
+                    Croquis interactif
+                    <span>🌍</span>
+                </h5>
+
+                <!-- Le reste de votre contenu reste identique -->
+                <div class="d-flex gap-2 mb-3">
+                    <button id="exportBtn" class="btn btn-primary flex-fill">
+                        📤 Exporter
+                    </button>
+                    <button id="importBtn" class="btn btn-secondary flex-fill">
+                        📥 Importer
+                    </button>
+                </div>
+
+                <button id="exportPdfBtn" class="btn btn-danger w-100 mb-3">
+                    📄 Exporter PDF
+                </button>
+
+                <!-- Panneau d'édition -->
+                <h5 class="mt-4">✏️ Panneau d'édition</h5>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Liste des géométries</label>
+                    <div id="geometryList"></div>
+                </div>
+            </div>
         </div>
-        <div id="geometryList"></div>
+
+        <!-- BOUTON DE TOGGLE EN DEHORS DE LA SIDEBAR -->
+        <button class="sidebar-toggle-left" id="sidebarToggle" title="Ouvrir/Fermer le panneau">
+            <span class="toggle-icon">➤</span>
+        </button>
     </div>
 
-    <!-- Carte -->
-    <div id="map" class="map"></div>
-</div>
+    <!-- ==================== CARTE ==================== -->
+    <div class="map position-relative">
+        <div id="map" style="height: 100%; width: 100%;"></div>
 
-<!-- Conteneur du titre de la carte -->
-<div id="map-title-container" class="map-title-container">
-    <div id="mapTitleDisplay" class="map-title-display"></div>
-    <div class="map-title-input-container">
-        <input type="text" id="mapTitleInput" class="form-control map-title-input" placeholder="Entrez un titre pour la carte" />
-        <button id="saveMapTitleBtn" class="btn btn-primary btn-sm">Enregistrer</button>
+        <!-- Conteneur du titre de la carte -->
+        <div class="map-title-container collapsed" id="mapTitleContainer">
+            <span id="toggleTitleIcon" class="toggle-icon" style="cursor: pointer; font-size: 20px; color: #007bff;">▼</span>
+            <div class="map-title-display" id="mapTitleDisplay">Sans titre</div>
+            <div class="map-title-input-container" id="mapTitleInputContainer" style="display: none;">
+                <input type="text" id="mapTitleInput" class="form-control map-title-input" placeholder="Titre de la carte">
+                <button id="saveMapTitleBtn" class="btn btn-primary btn-sm">Enregistrer</button>
+            </div>
+        </div>
+        <div class="legend-header">
+            <h3>📦 Légende</h3>
+            <button id="addPartBtn" class="btn btn-sm btn-success" title="Ajouter une nouvelle partie">
+                ➕ Nouvelle partie
+            </button>
+        </div>
+
     </div>
-    <i id="toggleTitleIcon" class="bi bi-chevron-up"></i>
-</div>
 
-<!-- Menu contextuel pour modifier le style -->
-<div id="contextMenu" class="context-menu">
-    <div class="context-menu-content">
-        <div class="mb-3">
-            <label for="contextColorPicker" class="form-label">Couleur de remplissage</label>
-            <input type="color" id="contextColorPicker" class="form-control" value="#007bff">
-        </div>
-        <div class="mb-3">
-            <label for="contextLineColorPicker" class="form-label">Couleur de la ligne</label>
-            <input type="color" id="contextLineColorPicker" class="form-control" value="#000000">
-        </div>
-        <div class="mb-3">
-            <label for="contextOpacitySlider" class="form-label">Transparence</label>
-            <input type="range" id="contextOpacitySlider" class="form-range" min="0" max="1" step="0.1" value="1">
-        </div>
-        <div class="mb-3">
-            <label for="contextLineDash" class="form-label">Style de ligne</label>
-            <select id="contextLineDash" class="form-select">
-                <option value="solid">Continue</option>
-                <option value="dashed">Pointillés</option>
-                <option value="dotted">Pointillés fins</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="contextLineWeight" class="form-label">Épaisseur de la ligne</label>
-            <input type="range" id="contextLineWeight" class="form-range" min="1" max="10" step="1" value="2">
-        </div>
-        <div class="mb-3">
-            <label for="contextMarkerSize" class="form-label">Taille du marqueur</label>
-            <input type="range" id="contextMarkerSize" class="form-range" min="10" max="50" step="1" value="24">
-        </div>
-        <div class="d-flex justify-content-between">
-            <button id="contextApplyBtn" class="btn btn-primary btn-sm">Appliquer</button>
-            <button id="contextCancelBtn" class="btn btn-secondary btn-sm">Annuler</button>
+    <!-- ========== MENU CONTEXTUEL ========== -->
+    <div id="contextMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-content">
+            <!-- En-tête du menu contextuel -->
+            <div class="context-menu-header" id="contextMenuHeader">
+                <span class="drag-handle">⋮⋮</span>
+                <h6>Édition de la géométrie</h6>
+                <button class="context-menu-close" id="contextCloseBtn" title="Fermer">×</button>
+            </div>
+
+            <!-- Corps du menu contextuel -->
+            <div class="context-menu-body">
+                <!-- Couleur de remplissage -->
+                <div class="context-menu-field">
+                    <label>
+                        <span class="label-icon">🎨</span>
+                        Couleur de remplissage
+                    </label>
+                    <input type="color" id="contextColorPicker" class="color-input" value="#3388ff">
+                </div>
+
+                <!-- Couleur du contour -->
+                <div class="context-menu-field">
+                    <label>
+                        <span class="label-icon">🖊️</span>
+                        Couleur du contour
+                    </label>
+                    <input type="color" id="contextLineColorPicker" class="color-input" value="#000000">
+                </div>
+
+                <!-- Opacité -->
+                <div class="context-menu-field">
+                    <label>
+                        <span class="label-icon">💧</span>
+                        Opacité
+                        <span class="value-badge" id="contextOpacityValue">1.0</span>
+                    </label>
+                    <input type="range" id="contextOpacitySlider" class="styled-range" min="0" max="1" step="0.1" value="1">
+                </div>
+
+                <!-- Style de ligne -->
+                <div class="context-menu-field">
+                    <label>
+                        <span class="label-icon">📐</span>
+                        Style de ligne
+                    </label>
+                    <select id="contextLineDash" class="styled-select">
+                        <option value="solid">Solide</option>
+                        <option value="dashed">Pointillé</option>
+                        <option value="dotted">Points</option>
+                    </select>
+                </div>
+
+                <!-- Épaisseur de ligne -->
+                <div class="context-menu-field">
+                    <label>
+                        <span class="label-icon">📏</span>
+                        Épaisseur
+                        <span class="value-badge" id="contextLineWeightValue">2</span>px
+                    </label>
+                    <input type="range" id="contextLineWeight" class="styled-range" min="1" max="10" step="1" value="2">
+                </div>
+
+                <!-- ✅ TAILLE DU MARQUEUR (conditionnel) -->
+                <div id="contextMarkerSizeContainer" class="context-menu-field" style="display: none;">
+                    <label>
+                        <span class="label-icon">📍</span>
+                        Taille du marqueur
+                        <span class="value-badge" id="contextMarkerSizeValue">24</span>px
+                    </label>
+                    <input type="range" id="contextMarkerSize" class="styled-range" min="12" max="48" step="4" value="24">
+                </div>
+            </div>
+
+            <!-- Pied du menu contextuel -->
+            <div class="context-menu-footer">
+                <button id="contextApplyBtn" class="btn-context-apply">✓ Appliquer</button>
+                <button id="contextDeleteBtn" class="btn-context-delete">🗑️ Supprimer</button>
+                <button id="contextResetBtn" class="btn-context-reset">↺ Réinitialiser</button>
+            </div>
         </div>
     </div>
+
+
+
+
+    <!-- SIDEBAR DROITE - ÉDITEUR DE TEXTE -->
+    <div class="sidebar-container-right position-relative">
+        <!-- SIDEBAR RÉTRACTABLE DROITE -->
+        <div class="sidebar-right" id="textEditorPanel">
+            <!-- CONTENU DE LA SIDEBAR DROITE -->
+            <div style="padding: 15px">
+                <!-- Titre centré -->
+                <h5><span>✏️</span> Éditeur de texte <span>📝</span></h5>
+
+                <!-- Barre d'outils de formatage -->
+                <div class="formatting-toolbar mb-3">
+                    <!-- Groupe 1 : Formatage de base -->
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-outline-primary format-btn" data-command="bold" title="Gras (Ctrl+B)">
+                            <strong>B</strong>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary format-btn" data-command="italic" title="Italique (Ctrl+I)">
+                            <em>I</em>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary format-btn" data-command="underline" title="Souligné (Ctrl+U)">
+                            <u>U</u>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary format-btn" data-command="strikeThrough" title="Barré">
+                            <s>S</s>
+                        </button>
+                    </div>
+
+                    <!-- Groupe 2 : Surbrillance avec sélecteur de couleur -->
+                    <div class="btn-group w-100 mt-2" role="group" style="display: flex; align-items: center; gap: 5px;">
+                        <!-- ✅ SÉLECTEUR DE COULEUR FLUO -->
+                        <input
+                                type="color"
+                                id="highlightColorPicker"
+                                value="#FFFF00"
+                                title="Couleur de surbrillance"
+                                class="highlight-color-picker"
+                                style="width: 38px; height: 38px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; padding: 2px;"
+                        >
+
+                        <!-- Bouton Fluo avec aperçu de couleur -->
+                        <button
+                                type="button"
+                                class="btn btn-outline-success format-btn flex-grow-1"
+                                data-command="highlight"
+                                id="highlightBtn"
+                                title="Surligner avec la couleur choisie (Ctrl+H)"
+                                style="background: linear-gradient(to right, #FFFF00 0%, #FFFF00 100%); border: 1px solid #ccc; position: relative;"
+                        >
+                            <span style="position: relative; z-index: 1; color: #000; font-weight: bold; text-shadow: 0 0 2px rgba(255,255,255,0.8);">🖍️ Fluo</span>
+                        </button>
+
+                        <button
+                                type="button"
+                                class="btn btn-outline-info format-btn"
+                                data-command="removeFormat"
+                                title="Effacer le formatage"
+                        >
+                            🧹
+                        </button>
+                    </div>
+
+                    <!-- ✅ AFFICHAGE DE LA COULEUR ACTUELLE -->
+                    <div class="mt-2 p-2" style="background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #dee2e6;">
+                        <span style="font-size: 11px; color: #666; font-weight: 500;">Couleur fluo :</span>
+                        <span
+                                id="highlightColorDisplay"
+                                style="display: inline-block; padding: 4px 10px; border-radius: 3px; font-size: 11px; font-weight: bold; border: 1px solid #ddd; background: #FFFF00; color: #000;"
+                        >
+                        #FFFF00
+                    </span>
+                    </div>
+
+                    <!-- Groupe 3 : Listes -->
+                    <div class="btn-group w-100 mt-2" role="group">
+                        <button type="button" class="btn btn-outline-secondary format-btn" data-command="insertUnorderedList" title="Liste à puces">• Liste</button>
+                        <button type="button" class="btn btn-outline-secondary format-btn" data-command="insertOrderedList" title="Liste numérotée">1. Liste</button>
+                    </div>
+                </div>
+
+                <!-- ÉDITEUR 2 COLONNES SYNCHRONISÉES + PALETTE 3 -->
+                <div class="editor-layout-container">
+                    <!-- Section supérieure : 3 colonnes (Symboles | Texte | Palette) -->
+                    <!-- ÉDITEUR 2 COLONNES SYNCHRONISÉES -->
+                    <div class="two-column-editor">
+                        <!-- Colonne 1 : Drop zones pour aligner les symboles -->
+                        <div class="symbol-drop-column" id="symbolDropColumn">
+                            <label class="form-label fw-bold">📍 Symboles</label>
+                            <div class="drop-zones-container synchronized-scroll" id="dropZonesContainer">
+                                <!-- Les zones de drop seront générées dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- Colonne 2 : Texte éditable -->
+                        <div class="text-content-column" id="textContentColumn">
+                            <label class="form-label fw-bold">📄 Votre texte</label>
+                            <div id="textEditor" class="text-editor-multiline synchronized-scroll" contenteditable="true">
+                                Collez ou tapez votre texte ici...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section inférieure : Conteneur de stockage -->
+                    <div class="symbols-storage-legend">
+                        <div class="storage-header">
+                            <h6 class="storage-title">📦 Figurés utilisés</h6>
+                        </div>
+                        <div class="storage-columns" id="usedSymbolsStorage">
+                            <!-- Les symboles seront affichés en colonnes -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Stats -->
+                <div class="text-editor-stats" id="textEditorStats">
+                    Caractères : 0 | Mots : 0
+                </div>
+
+                <!-- Actions -->
+                <div class="text-editor-actions">
+                    <button id="clearTextBtn" class="btn btn-warning">Effacer</button>
+                    <button id="copyTextBtn" class="btn btn-success">Copier</button>
+                </div>
+
+                <!-- Export du texte formaté -->
+                <button id="exportTextBtn" class="btn text-editor-export">Exporter HTML</button>
+            </div>
+        </div>
+
+        <!-- BOUTON DE TOGGLE DROITE -->
+        <button class="sidebar-toggle-right" id="textEditorToggle" title="Fermer l'éditeur de texte">
+            <span class="toggle-icon">◀</span>
+        </button>
+    </div>
+
+
 </div>
 
-<!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.pm/2.2.0/leaflet.pm.min.js"></script>
-<script type="module">
-    import { GeometryManager } from './js/modules/GeometryManager.js';
+    <!-- ==================== SCRIPTS ==================== -->
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet.PM JS -->
+<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const geometryManager = new GeometryManager();
-        geometryManager.init();
-    });
-</script>
+<!-- Bibliothèques pour l'export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-image@0.4.0/leaflet-image.min.js"></script>
+
+<!-- Main JS (Module) -->
+<script type="module" src="js/main.js"></script>
+
 </body>
 </html>

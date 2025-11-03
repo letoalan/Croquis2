@@ -13,7 +13,8 @@ export class GeometryHandler {
     }
 
     /**
-     * Crée un objet géométrique à partir d'une couche Leaflet.
+     * ✅ CORRIGÉ - Crée un objet géométrique à partir d'une couche Leaflet
+     * Distinction STRICTE Circle (mètres) vs CircleMarker (pixels)
      * @param {L.Layer} layer - La couche Leaflet à convertir en objet géométrique.
      * @returns {Object} - L'objet géométrique créé.
      * @throws {Error} Si le type de couche n'est pas reconnu.
@@ -23,19 +24,47 @@ export class GeometryHandler {
             throw new Error('Layer is undefined in createGeometryObject.');
         }
 
+        console.log('[GeometryHandler] 🔨 Creating geometry object for layer:', layer._leaflet_id);
+        console.log('[GeometryHandler] Layer type:', layer.constructor.name);
+        console.log('[GeometryHandler] Layer._markerType:', layer._markerType);
+        console.log('[GeometryHandler] Layer._arrowType:', layer._arrowType);
+
         // Récupérer les propriétés de style de la couche
-        const color = layer.options.color || "#007bff";
-        const opacity = layer.options.opacity || 1;
-        const lineColor = layer.options.lineColor || "#000000";
-        const lineWeight = layer.options.lineWeight || 2;
+        const color = layer.options.fillColor || layer.options.color || "#007bff";
+        const opacity = layer.options.fillOpacity || layer.options.opacity || 1;
+        const lineColor = layer.options.color || "#000000";
+        const lineWeight = layer.options.weight || 2;
         const lineDash = layer.options.lineDash || "solid";
 
-        // Créer l'objet géométrique en fonction du type de couche
-        if (layer instanceof L.Circle) {
+        // ========================================
+        // ✅ CAS 1 : MARQUEURS SVG PERSONNALISÉS
+        // ========================================
+        if (layer instanceof L.Marker && layer._markerType) {
+            console.log('[GeometryHandler] ✅ Custom SVG Marker detected:', layer._markerType);
+            const originalOptions = layer.originalOptions || {};
+
             return {
-                type: 'Circle',
+                type: `Marker_${layer._markerType}`,
                 coordinates: layer.getLatLng(),
-                radius: layer.getRadius(),
+                color: originalOptions.color || color,
+                opacity: originalOptions.opacity || opacity,
+                lineColor: originalOptions.lineColor || lineColor,
+                lineWeight: originalOptions.lineWeight || lineWeight,
+                lineDash: originalOptions.lineDash || lineDash,
+                markerSize: originalOptions.markerSize || 24,
+                markerType: layer._markerType,
+                layer: layer
+            };
+        }
+
+        // ========================================
+        // ✅ CAS 2 : MARQUEURS LEAFLET STANDARDS
+        // ========================================
+        if (layer instanceof L.Marker) {
+            console.log('[GeometryHandler] ✅ Standard Leaflet Marker detected');
+            return {
+                type: 'Marker',
+                coordinates: layer.getLatLng(),
                 color: color,
                 opacity: opacity,
                 lineColor: lineColor,
@@ -43,7 +72,58 @@ export class GeometryHandler {
                 lineDash: lineDash,
                 layer: layer
             };
-        } else if (layer instanceof L.Polygon) {
+        }
+
+        // ========================================
+        // ✅ CAS 3 : CIRCLE MARKERS (L.CircleMarker) - TESTER AVANT Circle
+        // ========================================
+        // IMPORTANT : CircleMarker hérite de Circle, donc tester EN PREMIER !
+        if (layer instanceof L.CircleMarker && !(layer instanceof L.Circle)) {
+            console.log('[GeometryHandler] ✅ CircleMarker (pixels) detected');
+            return {
+                type: 'CircleMarker',
+                coordinates: {
+                    lat: layer.getLatLng().lat,
+                    lng: layer.getLatLng().lng
+                },
+                radius: layer.getRadius(),  // ✅ Rayon EN PIXELS à la racine
+                color: color,
+                opacity: opacity,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                lineDash: lineDash,
+                layer: layer
+            };
+        }
+
+        // ========================================
+        // ✅ CAS 4 : CERCLES LEAFLET (L.Circle) - APRÈS CircleMarker
+        // ========================================
+        if (layer instanceof L.Circle) {
+            console.log('[GeometryHandler] ✅ Leaflet Circle (meters) detected');
+            return {
+                type: 'Circle',
+                coordinates: {
+                    center: {
+                        lat: layer.getLatLng().lat,
+                        lng: layer.getLatLng().lng
+                    },
+                    radius: layer.getRadius()  // ✅ Rayon EN MÈTRES dans coordinates
+                },
+                color: color,
+                opacity: opacity,
+                lineColor: lineColor,
+                lineWeight: lineWeight,
+                lineDash: lineDash,
+                layer: layer
+            };
+        }
+
+        // ========================================
+        // ✅ CAS 5 : POLYGONES (L.Polygon)
+        // ========================================
+        if (layer instanceof L.Polygon) {
+            console.log('[GeometryHandler] ✅ Polygon detected');
             return {
                 type: 'Polygon',
                 coordinates: layer.getLatLngs()[0] || layer.getLatLngs(),
@@ -54,7 +134,19 @@ export class GeometryHandler {
                 lineDash: lineDash,
                 layer: layer
             };
-        } else if (layer instanceof L.Polyline) {
+        }
+
+        // ========================================
+        // ✅ CAS 6 : POLYLINES (L.Polyline, mais pas Polygon)
+        // ========================================
+        if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+            console.log('[GeometryHandler] ✅ Polyline detected');
+
+            const arrowType = layer._arrowType || null;
+            if (arrowType) {
+                console.log('[GeometryHandler] 🎯 Arrow type detected:', arrowType);
+            }
+
             return {
                 type: 'Polyline',
                 coordinates: layer.getLatLngs(),
@@ -63,24 +155,20 @@ export class GeometryHandler {
                 lineColor: lineColor,
                 lineWeight: lineWeight,
                 lineDash: lineDash,
+                arrowType: arrowType,
                 layer: layer
             };
-        } else if (layer instanceof L.SVGOverlay) {
-            // Gestion des marqueurs SVG personnalisés
-            return {
-                type: 'CustomMarker',
-                coordinates: layer.getLatLngs()[0], // ou layer.getLatLng() selon votre implémentation
-                color: color,
-                opacity: opacity,
-                lineColor: lineColor,
-                lineWeight: lineWeight,
-                lineDash: lineDash,
-                layer: layer
-            };
-        } else {
-            throw new Error('Layer type not recognized.');
         }
+
+        // ========================================
+        // ❌ TYPE NON RECONNU
+        // ========================================
+        console.error('[GeometryHandler] ❌ Layer type not recognized:', layer.constructor.name);
+        console.error('[GeometryHandler] Layer details:', layer);
+        throw new Error(`Layer type not recognized: ${layer.constructor.name}`);
     }
+
+
 
     handleGeometryCreation(e) {
         console.log('[EventHandlers] Handling geometry creation:', e);

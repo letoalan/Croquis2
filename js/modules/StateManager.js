@@ -1,427 +1,1397 @@
 // StateManager.js
-import { SVGUtils } from './utils/SVGUtils.js'; // Assurez-vous que le chemin est correct
+
+
+
+import { SVGUtils } from './utils/SVGUtils.js';
+
+
 
 export class StateManager {
+
+
+
     constructor() {
-        this.geometries = []; // Liste des géométries (marqueurs, polygones, etc.)
-        this.selectedIndex = null; // Index de la géométrie sélectionnée
-        this.mapManager = null; // Référence au MapManager
-        this.legendManager = null; // Référence au LegendManager
-        this.mapTitle = ''; // Titre de la carte
-        this.isTitlePanelCollapsed = false; // État du panneau de titre
-        this.temporarySVGs = new Map(); // Stocke les SVG temporaires pendant l'édition
+
+        console.log('[StateManager] Initializing StateManager...');
+
+        this.geometries = [];
+
+        this.selectedIndex = null;
+
+        this.mapManager = null;
+
+        this.legendManager = null;
+
+        this.mapTitle = '';
+
+        this.isTitlePanelCollapsed = false;
+
+        this.temporarySVGs = new Map();
+
+        this.isEditMarkersMode = false;
+
+
+
+        // ✅ Gestion des parties de légende
+
+        this.legendParts = [];
+
+        this.geometryToPart = new Map();
+
+        this.exportImportManager = null;
+        this.curveControlManager = null;
+
+
     }
 
+
+
     /**
-     * Définit le titre de la carte.
-     * @param {string} title - Le nouveau titre de la carte.
+
+     * Active ou désactive le mode d'édition des marqueurs.
+
      */
-    setMapTitle(title) {
-        if (typeof title !== 'string') {
-            console.error('[StateManager] Invalid title type:', title);
-            return;
+
+    toggleEditMarkersMode() {
+
+        this.isEditMarkersMode = !this.isEditMarkersMode;
+
+        console.log('[StateManager] Edit Markers mode toggled:', this.isEditMarkersMode);
+
+        if (this.isEditMarkersMode) {
+
+            this.mapManager.enableEditMarkersMode();
+
+        } else {
+
+            this.mapManager.disableEditMarkersMode();
+
         }
 
-        this.mapTitle = title; // Mettre à jour le titre de la carte
-        this.updateUI(); // Mettre à jour l'interface utilisateur
-
-        console.log('[StateManager] Map title updated:', title);
     }
 
 
+
     /**
-     * Définit le MapManager.
-     * @param {MapManager} mapManager - L'instance de MapManager.
+
+     * Définit la référence au MapManager.
+
      */
+
     setMapManager(mapManager) {
-        if (!mapManager) {
-            throw new Error('MapManager is required for StateManager initialization.');
-        }
+
         this.mapManager = mapManager;
+
+        console.log('[StateManager] MapManager set:', mapManager);
+
     }
 
 
 
     /**
-     * Définit le LegendManager.
-     * @param {LegendManager} legendManager - L'instance de LegendManager.
+
+     * Définit la référence au LegendManager.
+
      */
+
     setLegendManager(legendManager) {
-        if (!legendManager) {
-            throw new Error('LegendManager is required for StateManager initialization.');
-        }
+
         this.legendManager = legendManager;
+
+        console.log('[StateManager] LegendManager set:', legendManager);
+
     }
 
-    /**
-     * Ajoute une géométrie à la liste.
-     * @param {Object} geometry - La géométrie à ajouter.
-     */
-    // Dans StateManager.js, méthode addGeometry
-    addGeometry(geometry) {
-        if (!geometry || !geometry.layer) {
-            console.error('[StateManager] Geometry or layer is undefined in addGeometry.');
+
+    addGeometry(geometryObject) {
+        // ✅ CORRECTION ARCHITECTURALE : La méthode accepte maintenant un seul objet géométrie.
+        if (!geometryObject || !geometryObject.layer || !geometryObject.type) {
+            console.error('[StateManager] ❌ addGeometry called with invalid object:', geometryObject);
             return;
         }
 
-        // Vérifier si la géométrie existe déjà
-        const existingGeometry = this.geometries.find(g => g.layer === geometry.layer);
-        if (existingGeometry) {
-            console.warn('[StateManager] Geometry already exists:', existingGeometry);
-            return;
+        const finalName = geometryObject.name || `Géométrie ${this.geometries.length + 1}`;
+        geometryObject.name = finalName;
+
+        // ✅ GÉNÉRER UN ID STABLE
+        const stableId = geometryObject.layer._leaflet_id || `geom_${Date.now()}_${this.geometries.length}`;
+        if (!geometryObject.layer._leaflet_id) {
+            geometryObject.layer._leaflet_id = stableId;
         }
 
-        // Ajouter la géométrie à la liste
-        this.geometries.push(geometry);
+        geometryObject.id = stableId;
 
-        // Mettre à jour la légende et l'interface utilisateur
-        if (this.legendManager) {
-            this.legendManager.updateLegend();
+        // ✅ CRITIQUE : Copier arrowType depuis layer vers geometry
+        if (geometryObject.layer._arrowType) {
+            geometryObject.arrowType = geometryObject.layer._arrowType;
+            console.log('[StateManager] 🎯 Arrow type detected and copied:', geometryObject.arrowType);
         }
+
+        this.geometries.push(geometryObject);
+        console.log('[StateManager] 🆕 Geometry added:', finalName, 'type:', geometryObject.type, 'arrowType:', geometryObject.arrowType || 'none', 'ID:', stableId);
+
+        // ✅ FIX CRITIQUE: Utiliser 'geometryObject' et non 'geometry'
+        if (this.symbolPaletteManager) {
+            this.symbolPaletteManager.onGeometryAdded(geometryObject);
+        }
+
         this.updateUI();
-
-        console.log('[StateManager] Geometry added:', geometry);
     }
 
 
     /**
-     * Sélectionne une forme et active l'édition.
-     * @param {number} index - L'index de la géométrie à sélectionner.
+     * ✅ Supprime une géométrie complètement
      */
-    selectGeometryForEditing(index) {
-        if (index < 0 || index >= this.geometries.length) {
-            console.error('[StateManager] Invalid index in selectGeometryForEditing:', index);
-            return;
+    deleteGeometry(index) {
+        console.log('[StateManager] ========== deleteGeometry() START ==========');
+        console.log('[StateManager] Deleting geometry at index:', index);
+
+        if (index >= 0 && index < this.geometries.length) {
+            const geometry = this.geometries[index];
+            const geometryName = geometry.name || 'Sans nom';
+            const geometryType = geometry.type;
+
+            console.log('[StateManager] Geometry to delete:', geometryName, 'type:', geometryType);
+
+            // ========================================
+            // ÉTAPE 1 : NOTIFIER LE SYMBOL PALETTE MANAGER
+            // ========================================
+            console.log('[StateManager] 📍 Step 1: Notifying SymbolPaletteManager...');
+            if (this.symbolPaletteManager && geometry) {
+                console.log('[StateManager] 🔄 Calling onGeometryRemoved()');
+                this.symbolPaletteManager.onGeometryRemoved(geometry);
+                console.log('[StateManager] ✅ SymbolPaletteManager notified');
+            }
+
+            // ========================================
+            // ÉTAPE 2 : RETIRER LA LAYER DE LA CARTE
+            // ========================================
+            console.log('[StateManager] 📍 Step 2: Removing layer from map...');
+            if (geometry.layer) {
+                // Retirer du LayerGroupManager
+                if (this.mapManager && this.mapManager.layerGroupManager) {
+                    this.mapManager.layerGroupManager.removeLayer(geometry.layer);
+                    console.log('[StateManager] ✅ Layer removed from LayerGroupManager');
+                }
+
+                // Retirer de la carte Leaflet
+                if (this.mapManager && this.mapManager.map) {
+                    if (this.mapManager.map.hasLayer(geometry.layer)) {
+                        this.mapManager.map.removeLayer(geometry.layer);
+                        console.log('[StateManager] ✅ Layer removed from Leaflet map');
+                    }
+                }
+            }
+
+            // ========================================
+            // ÉTAPE 3 : RETIRER DE LA LÉGENDE
+            // ========================================
+            console.log('[StateManager] 📍 Step 3: Removing from legend parts...');
+            if (this.geometryToPart.has(index)) {
+                const partId = this.geometryToPart.get(index);
+                const part = this.legendParts.find(p => p.id === partId);
+
+                if (part) {
+                    const oldLength = part.geometries.length;
+                    part.geometries = part.geometries.filter(i => i !== index);
+                    console.log('[StateManager] ✅ Removed from part:', part.title, `(${oldLength} → ${part.geometries.length})`);
+                }
+
+                this.geometryToPart.delete(index);
+                console.log('[StateManager] ✅ Removed from geometryToPart mapping');
+            }
+
+            // ========================================
+            // ÉTAPE 4 : SUPPRIMER DU TABLEAU PRINCIPAL
+            // ========================================
+            console.log('[StateManager] 📍 Step 4: Removing from geometries array...');
+            this.geometries.splice(index, 1);
+            console.log('[StateManager] ✅ Geometry removed from array');
+
+            // ========================================
+            // ÉTAPE 5 : RÉINDEXER geometryToPart
+            // ========================================
+            console.log('[StateManager] 📍 Step 5: Reindexing geometryToPart...');
+            const updatedMap = new Map();
+
+            this.geometryToPart.forEach((partId, geomIndex) => {
+                if (geomIndex > index) {
+                    updatedMap.set(geomIndex - 1, partId);
+                    console.log('[StateManager]   - Index', geomIndex, '→', geomIndex - 1);
+                } else if (geomIndex < index) {
+                    updatedMap.set(geomIndex, partId);
+                }
+            });
+
+            this.geometryToPart = updatedMap;
+            console.log('[StateManager] ✅ geometryToPart reindexed');
+
+            // ========================================
+            // ÉTAPE 6 : RÉINDEXER LES PARTIES
+            // ========================================
+            console.log('[StateManager] 📍 Step 6: Reindexing legend parts...');
+            this.legendParts.forEach(part => {
+                const oldGeometries = [...part.geometries];
+                part.geometries = part.geometries
+                    .filter(i => i !== index)
+                    .map(i => i > index ? i - 1 : i);
+
+                console.log('[StateManager]   - Part:', part.title, `(${oldGeometries} → ${part.geometries})`);
+            });
+            console.log('[StateManager] ✅ Legend parts reindexed');
+
+            // ========================================
+            // ÉTAPE 7 : METTRE À JOUR L'INTERFACE
+            // ========================================
+            console.log('[StateManager] 📍 Step 7: Updating UI...');
+            this.updateUI();
+            console.log('[StateManager] ✅ UI updated');
+
+            console.log('[StateManager] ✅ Geometry deleted successfully:', geometryName);
+        } else {
+            console.warn('[StateManager] ⚠️ Invalid geometry index:', index);
         }
+
+        console.log('[StateManager] ========== deleteGeometry() END ==========');
+    }
+
+
+
+    /**
+
+     * Sélectionne une géométrie pour l'édition.
+
+     */
+
+    selectGeometry(index) {
+
+        this.selectedIndex = index;
+
+        console.log('[StateManager] Geometry selected for editing:', this.geometries[index]);
+
+        this.openContextMenu(index);
+
+    }
+
+    /**
+     * ✅ POINT D'ENTRÉE UNIQUE pour la mise à jour d'une géométrie.
+     * Gère la mise à jour des coordonnées et la reconstruction des flèches.
+     * @param {number} index - L'index de la géométrie.
+     * @param {L.LatLng[]} newCoords - Les nouvelles coordonnées.
+     */
+    updateGeometry(index, newCoords) {
+        if (index < 0 || index >= this.geometries.length) return;
 
         const geometry = this.geometries[index];
-        if (!geometry || !geometry.layer) {
-            console.error('[StateManager] Geometry or layer is undefined.');
-            return;
-        }
+        console.log(`[StateManager] 🔄 updateGeometry called for index ${index}`);
 
-        // Activer l'édition sur la forme sélectionnée
-        if (geometry.layer.pm) {
-            geometry.layer.pm.enable({
-                snappable: true,
-                snapDistance: 20,
-                allowSelfIntersection: true,
-                addVertexOn: 'midpoint', // Activation des vertex midpoints
-                preventMarkerRemoval: false,
-                removeLayerOnEmpty: true,
+        // 1. Mettre à jour les coordonnées dans l'état
+        geometry.coordinates = newCoords;
+        if (geometry.layer) {
+            geometry.layer.setLatLngs(newCoords);
+        }
+        console.log(`   -> Coordonnées mises à jour pour le layer ${geometry.layer?._leaflet_id}`);
+
+        // 2. Si c'est une flèche, la reconstruire proprement
+        if (geometry.arrowType && geometry.layer) {
+            console.log(`   -> C'est une flèche, reconstruction...`);
+
+            // A. Nettoyer complètement l'ancienne flèche (SVG et écouteurs)
+            SVGUtils.cleanupArrowheads(geometry.layer);
+            // B. Utiliser requestAnimationFrame pour une reconstruction fluide
+            requestAnimationFrame(() => {
+                // C. Recréer la flèche SVG avec les styles actuels
+                SVGUtils.addArrowheadsToPolylineSVG(geometry.layer, geometry.arrowType);
+
+                // D. S'assurer que la polyline native est masquée et la SVG visible
+                if (geometry.layer._path) {
+                    geometry.layer._path.style.display = 'none';
+                }
+                if (geometry.layer._svgPath) {
+                    geometry.layer._svgPath.style.display = '';
+                }
+                console.log(`   -> [rAF] Flèche reconstruite pour le layer ${geometry.layer._leaflet_id}`);
             });
         }
 
-        // Désactiver l'édition sur toutes les autres formes
-        this.mapManager.map.eachLayer((layer) => {
-            if (layer !== geometry.layer && layer.pm) {
-                layer.pm.disable();
-            }
-        });
-
-        // Mettre à jour l'interface utilisateur
-        this.updateUI();
-
-        console.log('[StateManager] Geometry selected for editing:', geometry);
+        // 3. Déclencher une mise à jour de l'UI si nécessaire (pour la légende, etc.)
+        // On peut utiliser un debounce plus court ici car c'est une mise à jour légère.
+        this.updateUI(100);
     }
 
-    /**
-     * Supprime une géométrie de la liste.
-     * @param {number} index - L'index de la géométrie à supprimer.
-     */
-    deleteGeometry(index) {
-        if (index < 0 || index >= this.geometries.length) {
-            console.error('[StateManager] Invalid index in deleteGeometry:', index);
-            return;
-        }
 
-        const geometry = this.geometries[index];
-        if (geometry && geometry.layer) {
-            this.mapManager.map.removeLayer(geometry.layer); // Supprimer la couche de la carte
-        }
 
-        this.geometries.splice(index, 1); // Supprimer la géométrie de la liste
 
-        if (this.selectedIndex === index) {
-            this.selectedIndex = null; // Réinitialiser l'index sélectionné
-        } else if (this.selectedIndex > index) {
-            this.selectedIndex--; // Ajuster l'index sélectionné si nécessaire
-        }
 
-        // Mettre à jour la légende après la suppression de la géométrie
-        if (this.legendManager) {
-            this.legendManager.updateLegend();
-        }
 
-        // Mettre à jour l'interface utilisateur
-        this.updateUI();
-    }
 
     /**
-     * Met à jour le nom d'une géométrie.
-     * @param {number} index - L'index de la géométrie à mettre à jour.
-     * @param {string} newName - Le nouveau nom de la géométrie.
-     */
-    updateGeometryName(index, newName) {
-        if (index < 0 || index >= this.geometries.length) {
-            console.error('[StateManager] Invalid index in updateGeometryName:', index);
-            return;
-        }
-
-        const geometry = this.geometries[index];
-        if (geometry) {
-            geometry.name = newName; // Mettre à jour le nom de la géométrie
-            this.updateUI(); // Mettre à jour l'interface utilisateur
-            if (this.legendManager) {
-                this.legendManager.updateLegend(); // Rafraîchir la légende
-            }
-        }
-    }
-
-    /**
-     * Applique les styles à la géométrie sélectionnée.
-     * @param {string} color - La couleur de remplissage.
-     * @param {string} lineColor - La couleur de la ligne.
-     * @param {number} opacity - L'opacité.
-     * @param {string} lineDash - Le style de ligne (solid, dashed, dotted).
-     * @param {number} lineWeight - L'épaisseur de la ligne.
-     * @param {number} markerSize - La taille du marqueur (si applicable).
-     * @param {string} shape - La forme du marqueur (si applicable).
+     * ✅ VERSION FINALE OPTIMISÉE - Gère flèches ET géométries standards
+     * - Reconstruction complète pour les flèches (arrows)
+     * - Application directe des styles pour polygones, cercles, etc.
+     * - Mise à jour des marqueurs SVG personnalisés
      */
     applyStyle(color, lineColor, opacity, lineDash, lineWeight, markerSize) {
-        if (this.selectedIndex === null || this.selectedIndex < 0 || this.selectedIndex >= this.geometries.length) {
-            console.error('[StateManager] No geometry selected or invalid index.');
+        console.log('[StateManager] ========== applyStyle() START ==========');
+        console.log('[StateManager] selectedIndex:', this.selectedIndex);
+
+        if (this.selectedIndex === null) {
+            console.warn('[StateManager] ⚠️ No geometry selected');
             return;
         }
 
         const geometry = this.geometries[this.selectedIndex];
-        if (!geometry || !geometry.layer) {
-            console.error('[StateManager] Geometry or layer is undefined.');
+
+        if (!geometry) {
+            console.error('[StateManager] ❌ ERROR: Geometry missing');
             return;
         }
 
-        // Appliquer les styles à la couche Leaflet
-        const style = {
-            color: lineColor,
-            fillColor: color,
-            fillOpacity: opacity,
-            weight: lineWeight,
-            dashArray: lineDash === 'dashed' ? '5,5' : lineDash === 'dotted' ? '2,2' : ''
-        };
+        console.log('[StateManager] 📝 Geometry:', geometry.name, 'type:', geometry.type, 'arrowType:', geometry.arrowType || 'none');
 
-        if (geometry.layer.setStyle) {
-            geometry.layer.setStyle(style);
-        } else if (geometry.type === 'CustomMarker') {
-            // Mise à jour du style pour les marqueurs SVG
-            SVGUtils.updateMarkerStyle(geometry.layer, {
-                color: color,
-                lineColor: lineColor,
-                lineWeight: lineWeight,
-                opacity: opacity,
-                markerSize: markerSize // Ajouter la taille du marqueur
-            });
-        } else {
-            console.error('[StateManager] Layer does not support setStyle method:', geometry.layer);
-        }
-
-        // Mettre à jour les propriétés de la géométrie
+        // ========================================
+        // ÉTAPE 1 : Sauvegarder les nouveaux styles
+        // ========================================
         geometry.color = color;
         geometry.lineColor = lineColor;
         geometry.opacity = opacity;
         geometry.lineDash = lineDash;
         geometry.lineWeight = lineWeight;
+        console.log('[StateManager] ✅ Styles saved:', {
+            color,
+            lineColor,
+            opacity,
+            lineDash,
+            lineWeight
+        });
 
-        // Si c'est un marqueur personnalisé, mettre à jour la taille
-        if (geometry.type === 'CustomMarker') {
-            geometry.markerSize = markerSize;
+        // ========================================
+        // ÉTAPE 2 : GESTION DES MARQUEURS SVG PERSONNALISÉS
+        // ========================================
+        if (geometry.type && geometry.type.startsWith('Marker_')) {
+            console.log('[StateManager] 📏 Marker detected - processing markerSize:', markerSize);
+            geometry.markerSize = markerSize || 24;
+
+            // Mettre à jour le marqueur SVG
+            if (geometry.layer) {
+                const markerType = geometry.type.replace('Marker_', '');
+
+                try {
+                    const updatedMarker = SVGUtils.createMarkerSVG(markerType, geometry.layer.getLatLng(), {
+                        color: color,
+                        lineColor: lineColor,
+                        opacity: opacity,
+                        lineWeight: lineWeight,
+                        lineDash: lineDash,
+                        markerSize: markerSize
+                    });
+
+                    geometry.layer.setIcon(updatedMarker.getIcon());
+                    console.log('[StateManager] ✅ Marker style updated');
+                } catch (error) {
+                    console.error('[StateManager] ❌ ERROR updating marker:', error.message);
+                }
+            }
         }
 
-        // Mettre à jour la légende et l'interface utilisateur
+        // ========================================
+        // ÉTAPE 2.5 : 🔥 RECONSTRUCTION COMPLÈTE DES FLÈCHES
+        // ========================================
+        console.log('[StateManager] 🔍 Checking arrow conditions:');
+        console.log('[StateManager]    - geometry.arrowType:', geometry.arrowType);
+        console.log('[StateManager]    - geometry.layer:', !!geometry.layer);
+        console.log('[StateManager]    - this.mapManager:', !!this.mapManager);
+        console.log('[StateManager]    - Should rebuild:', !!(geometry.arrowType && geometry.layer && this.mapManager));
+
+        if (geometry.arrowType && geometry.layer && this.mapManager) {
+            console.log('[StateManager] 🎯 ARROW DETECTED - Full reconstruction');
+            console.log('[StateManager] Arrow type:', geometry.arrowType);
+
+            try {
+                const map = this.mapManager.map;
+                const oldLayer = geometry.layer;
+                const arrowType = geometry.arrowType;
+                const coords = oldLayer.getLatLngs();
+                const wasEditable = oldLayer.pm?.enabled() || false;
+
+                console.log('[StateManager] 📍 Coordinates:', coords.length, 'points');
+                console.log('[StateManager] 📍 Was editable:', wasEditable);
+
+                // ✅ A : Désactiver l'édition si active
+                if (wasEditable) {
+                    oldLayer.pm.disable();
+                    console.log('[StateManager] ✅ Editing disabled on old layer');
+                }
+
+                // ✅ B : Nettoyer complètement l'ancienne flèche
+                SVGUtils.cleanupArrowheads(oldLayer);
+                console.log('[StateManager] ✅ SVG artifacts cleaned');
+
+                // ✅ C : Retirer du LayerGroupManager
+                if (this.mapManager.layerGroupManager) {
+                    this.mapManager.layerGroupManager.removeLayer(oldLayer);
+                    console.log('[StateManager] ✅ Removed from LayerGroupManager');
+                }
+
+                // ✅ D : Retirer de la carte
+                if (oldLayer._map) {
+                    map.removeLayer(oldLayer);
+                    console.log('[StateManager] ✅ Old layer removed from map');
+                }
+
+                // ✅ E : Créer la nouvelle polyline avec les nouveaux styles
+                const newOptions = {
+                    color: lineColor,
+                    weight: lineWeight,
+                    opacity: opacity,
+                    dashArray: this._convertDashToArray(lineDash),
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                    smoothFactor: 1.0
+                };
+
+                console.log('[StateManager] 🔨 Creating new polyline:', newOptions);
+
+                const newLayer = L.polyline(coords, newOptions);
+
+                // ✅ F : Copier les métadonnées critiques
+                newLayer._arrowType = arrowType;
+                newLayer._leaflet_id = oldLayer._leaflet_id; // ✅ Conserver l'ID stable
+                geometry.layer = newLayer; // ✅ Mettre à jour immédiatement
+
+                // ✅ G : Ajouter à la carte
+                newLayer.addTo(map);
+                console.log('[StateManager] ✅ New polyline added to map');
+
+                // ✅ H : Réenregistrer dans le LayerGroupManager
+                if (this.mapManager.layerGroupManager) {
+                    this.mapManager.layerGroupManager.addLayer(newLayer);
+                    console.log('[StateManager] ✅ Re-registered in LayerGroupManager');
+                }
+
+                // ✅ I : Réactiver l'édition si nécessaire
+                if (wasEditable) {
+                    newLayer.pm.enable({
+                        snappable: true,
+                        snapDistance: 20
+                    });
+                    console.log('[StateManager] ✅ Editing re-enabled on new layer');
+                }
+
+                // ✅ J : Régénérer les flèches SVG avec requestAnimationFrame
+                requestAnimationFrame(() => {
+                    console.log('[StateManager] 🔄 [rAF] Building arrow SVG...');
+
+                    const success = SVGUtils.addArrowheadsToPolylineSVG(newLayer, arrowType);
+
+                    if (success) {
+                        // Masquer la polyline native
+                        if (newLayer._path) {
+                            newLayer._path.style.display = 'none';
+                        }
+                        console.log('[StateManager] ✅ [rAF] Arrow SVG built and native path hidden');
+                    } else {
+                        console.error('[StateManager] ❌ [rAF] Failed to build arrow SVG');
+                    }
+                });
+
+                console.log('[StateManager] ✅ Arrow reconstruction complete');
+
+            } catch (error) {
+                console.error('[StateManager] ❌ ERROR in arrow rebuild:', error.message);
+                console.error('[StateManager] Stack:', error.stack);
+            }
+        }
+            // ========================================
+            // ÉTAPE 2.6 : 🎨 APPLICATION DES STYLES POUR LES NON-FLÈCHES
+        // ========================================
+        else if (geometry.layer && !geometry.arrowType) {
+            console.log('[StateManager] 🎨 NON-ARROW geometry detected - Applying styles directly');
+
+            try {
+                const layer = geometry.layer;
+
+                // Vérifier si c'est un marqueur (pas de setStyle)
+                const isMarker = geometry.type.startsWith('Marker_') || layer instanceof L.Marker;
+
+                if (isMarker) {
+                    console.log('[StateManager] 📍 Marker detected - styles already applied in ÉTAPE 2');
+                } else {
+                    // Construire les options de style pour Polygones, Cercles, etc.
+                    const styleOptions = {
+                        color: lineColor,
+                        fillColor: color,
+                        fillOpacity: opacity,
+                        weight: lineWeight,
+                        opacity: opacity,
+                        dashArray: this._convertDashToArray(lineDash)
+                    };
+
+                    console.log('[StateManager] 🎨 Applying styles:', styleOptions);
+
+                    // Appliquer le style
+                    if (layer.setStyle && typeof layer.setStyle === 'function') {
+                        layer.setStyle(styleOptions);
+                        console.log('[StateManager] ✅ Styles applied to layer');
+                    } else {
+                        console.warn('[StateManager] ⚠️ Layer does not support setStyle');
+                    }
+                }
+
+            } catch (error) {
+                console.error('[StateManager] ❌ ERROR applying styles:', error.message);
+            }
+        }
+
+        // ========================================
+        // ÉTAPE 3 : SYNCHRONISER SymbolPaletteManager
+        // ========================================
+        console.log('[StateManager] 📍 Step 3: Syncing with SymbolPaletteManager...');
+
+        if (this.symbolPaletteManager) {
+            try {
+                this.symbolPaletteManager.onGeometryUpdated(geometry);
+                console.log('[StateManager] ✅ SymbolPaletteManager updated');
+            } catch (error) {
+                console.error('[StateManager] ❌ ERROR:', error.message);
+            }
+        }
+
+        // ========================================
+        // ÉTAPE 4 : RAFRAÎCHIR LA LÉGENDE
+        // ========================================
+        console.log('[StateManager] 📍 Step 4: Refreshing legend...');
+
         if (this.legendManager) {
-            this.legendManager.updateLegend();
+            try {
+                this.legendManager.updateLegend();
+                console.log('[StateManager] ✅ Legend refreshed');
+            } catch (error) {
+                console.error('[StateManager] ❌ ERROR:', error.message);
+            }
         }
-        this.updateUI();
+
+        console.log('[StateManager] ✅ Style applied successfully');
+        console.log('[StateManager] ========== applyStyle() END ==========');
+    }
+    updateGeometryCoordinates(index, newCoords) {
+        this.updateGeometry(index, newCoords);
     }
 
+
     /**
-     * Termine l'édition d'une géométrie.
-     * @param {number} index - L'index de la géométrie à finaliser.
+     * ✅ Utilitaire : Convertir le type de tiret en format dashArray Leaflet
      */
-    finishEditingGeometry(index) {
-        if (index < 0 || index >= this.geometries.length) {
-            console.error('[StateManager] Invalid index in finishEditingGeometry:', index);
-            return;
+    _convertDashToArray(lineDash) {
+        switch (lineDash) {
+            case 'dashed':
+                return '10, 10';
+            case 'dotted':
+                return '2, 6';
+            case 'solid':
+            default:
+                return null;
         }
-
-        const geometry = this.geometries[index];
-        if (!geometry || !geometry.layer) {
-            console.error('[StateManager] Geometry or layer is undefined.');
-            return;
-        }
-
-        // Désactiver l'édition de la couche si nécessaire
-        if (geometry.layer.pm) {
-            geometry.layer.pm.disable();
-        }
-
-        // Mettre à jour l'interface utilisateur
-        this.updateUI();
-
-        console.log('[StateManager] Editing finished for geometry at index:', index);
     }
 
+
+
+
+
+
+
+
+
+
     /**
-     * Met à jour l'interface utilisateur.
+
+     * ✅ Debounce global pour updateUI - évite les appels multiples
+
+     */
+
+    static updateUITimeout = null;
+
+    static updateUIInProgress = false;
+
+    static UPDATE_UI_DEBOUNCE = 100;  // ms
+
+
+
+    /**
+     * ✅ Met à jour l'interface utilisateur avec debounce
+     * ÉTAPES : Géométries → Carte → Légende → SymbolPalette
      */
     updateUI() {
-        console.log('[StateManager] Updating UI');
+        console.log('[StateManager] ========== updateUI() START ==========');
+        console.log('[StateManager] 📍 updateUI called');
 
-        // Mettre à jour l'affichage du titre de la carte
-        const mapTitleDisplay = document.getElementById('mapTitleDisplay');
-        if (mapTitleDisplay) {
-            mapTitleDisplay.textContent = this.mapTitle;
-        }
-
-        // Mettre à jour la liste des géométries dans la sidebar
-        this.updateList();
-
-        // Mettre à jour la carte avec les géométries actuelles
-        if (this.mapManager && this.mapManager.updateMap) {
-            this.mapManager.updateMap();
-        } else {
-            console.error('[StateManager] mapManager.updateMap is not a function');
-        }
-
-        console.log('[StateManager] UI update complete');
-    }
-
-    /**
-     * Met à jour la liste des géométries dans l'interface utilisateur.
-     */
-    updateList() {
-        console.log('[StateManager] Updating geometry list');
-        const container = document.getElementById('geometryList');
-        if (!container) {
-            console.error('[StateManager] Geometry list container not found in the DOM.');
+        // ✅ DÉBOUNCE : ignorer si déjà en cours
+        if (StateManager.updateUIInProgress) {
+            console.log('[StateManager] ⏱️ updateUI debounced - already in progress');
             return;
         }
 
-        container.innerHTML = '';
+        // ✅ Annuler le timeout précédent
+        clearTimeout(StateManager.updateUITimeout);
 
-        // Supprimer les géométries obsolètes
-        this.geometries = this.geometries.filter(geometry => geometry && geometry.type && geometry.layer);
+        // ✅ Marquer comme en cours
+        console.log(`[StateManager] ⏳ Démarrage du debounce de ${StateManager.UPDATE_UI_DEBOUNCE}ms pour updateUI.`);
+        StateManager.updateUIInProgress = true;
 
-        // Renommer les géométries pour éviter les doublons
+        // ✅ Exécuter après le délai
+        StateManager.updateUITimeout = setTimeout(() => {
+            console.log('[StateManager] 🔄 Executing updateUI...');
+
+            try {
+                // ========================================
+                // ÉTAPE 1 : Mettre à jour la liste de géométries
+                // ========================================
+                console.log('[StateManager] 📍 Step 1: Updating geometry list...');
+                try {
+                    this.updateGeometryList();
+                    console.log('[StateManager] ✅ Geometry list updated');
+                } catch (error) {
+                    console.error('[StateManager] ❌ Error in updateGeometryList():', error.message);
+                }
+
+                // ========================================
+                // ÉTAPE 2 : Mettre à jour la carte (redessiner toutes les layers)
+                // ========================================
+                console.log('[StateManager] 📍 Step 2: Updating map...');
+                if (this.mapManager) {
+                    try {
+                        // ✅ IMPORTANT : Appeler updateMap() SANS paramètres
+                        // (les géométries sont déjà dans this.geometries)
+                        this.mapManager.updateMap();
+                        console.log('[StateManager] ✅ Map updated');
+                    } catch (error) {
+                        console.error('[StateManager] ❌ Error in MapManager.updateMap():', error.message);
+                    }
+                } else {
+                    console.warn('[StateManager] ⚠️ MapManager not available');
+                }
+
+                // ========================================
+                // ÉTAPE 3 : Mettre à jour la légende
+                // ========================================
+                console.log('[StateManager] 📍 Step 3: Updating legend...');
+                if (this.legendManager) {
+                    try {
+                        this.legendManager.updateLegend();
+                        console.log('[StateManager] ✅ Legend updated');
+                    } catch (error) {
+                        console.error('[StateManager] ❌ Error in LegendManager.updateLegend():', error.message);
+                    }
+                } else {
+                    console.warn('[StateManager] ⚠️ LegendManager not available');
+                }
+
+                // ========================================
+                // ÉTAPE 4 : Mettre à jour le conteneur de symboles (optionnel)
+                // ========================================
+                console.log('[StateManager] 📍 Step 4: Syncing symbol palette...');
+                if (this.symbolPaletteManager) {
+                    try {
+                        // ✅ Optionnel : refaire la sync si nécessaire
+                        console.log('[StateManager] ✅ Symbol palette in sync');
+                    } catch (error) {
+                        console.error('[StateManager] ❌ Error in SymbolPaletteManager:', error.message);
+                    }
+                }
+
+                console.log('[StateManager] ✅ UI update complete');
+            } catch (error) {
+                console.error('[StateManager] ❌ Error during updateUI:', error.message);
+                console.error('[StateManager] Stack:', error.stack);
+            } finally {
+                // ✅ Marquer comme terminé
+                console.log('[StateManager] 📍 Resetting updateUI lock');
+                StateManager.updateUIInProgress = false;
+                console.log('[StateManager] ========== updateUI() END ==========');
+            }
+
+        }, StateManager.UPDATE_UI_DEBOUNCE);
+    }
+
+
+
+
+
+    /**
+
+     * ✅ Met à jour la liste des géométries dans le panneau latéral.
+
+     */
+
+    updateGeometryList() {
+
+        console.log('[StateManager] Updating geometry list');
+
+        const geometryList = document.getElementById('geometryList');
+
+        if (!geometryList) {
+
+            console.error('[StateManager] geometryList element not found.');
+
+            return;
+
+        }
+
+
+
+        // Vider la liste
+
+        geometryList.innerHTML = '';
+
+
+
+        // Créer les éléments pour chaque géométrie
+
         this.geometries.forEach((geometry, index) => {
-            geometry.name = geometry.name || `Geometry ${index + 1}`; // Utiliser un nom par défaut si aucun nom n'est défini
-        });
 
-        // Afficher les géométries dans la sidebar
-        this.geometries.forEach((geometry, index) => {
-            const item = document.createElement('div');
-            item.className = `list-item ${this.selectedIndex === index ? 'selected' : ''}`;
-            const nameContainer = document.createElement('div');
-            nameContainer.className = 'd-flex align-items-center flex-grow-1';
+            // Créer le conteneur principal
 
-            // Ajouter un champ d'édition de texte pour le nom
+            const listItem = document.createElement('div');
+
+            listItem.className = 'list-item';
+
+
+
+            // Input pour le nom
+
             const nameInput = document.createElement('input');
+
             nameInput.type = 'text';
-            nameInput.className = 'form-control me-2';
+
+            nameInput.className = 'form-control';
+
             nameInput.value = geometry.name || `Geometry ${index + 1}`;
+
+            nameInput.dataset.index = index;
+
+
+
+            // Conteneur des boutons
+
+            const btnGroup = document.createElement('div');
+
+            btnGroup.className = 'btn-group';
+
+
+
+            // Bouton Éditer
+
+            const editButton = document.createElement('button');
+
+            editButton.className = 'btn btn-light btn-sm btn-edit';
+
+            editButton.dataset.index = index;
+
+            editButton.title = 'Éditer';
+
+            editButton.textContent = '✏️';
+
+
+
+            // Bouton Supprimer
+
+            const deleteButton = document.createElement('button');
+
+            deleteButton.className = 'btn btn-danger btn-sm btn-delete';
+
+            deleteButton.dataset.index = index;
+
+            deleteButton.title = 'Supprimer';
+
+            deleteButton.textContent = '🗑️';
+
+
+
+            // Assembler les éléments
+
+            btnGroup.appendChild(editButton);
+
+            btnGroup.appendChild(deleteButton);
+
+            listItem.appendChild(nameInput);
+
+            listItem.appendChild(btnGroup);
+
+            geometryList.appendChild(listItem);
+
+
+
+            // ✅ Événements
+
             nameInput.addEventListener('change', (e) => {
-                const newName = e.target.value;
-                this.updateGeometryName(index, newName); // Mettre à jour le nom dans le StateManager
+
+                e.stopPropagation();
+
+                this.geometries[index].name = e.target.value;
+
+                this.updateUI();
+
+                console.log('[StateManager] Geometry renamed:', e.target.value);
+
             });
 
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn btn-warning btn-sm me-2';
-            editBtn.textContent = 'Éditer';
-            editBtn.onclick = (e) => {
+
+
+            editButton.addEventListener('click', (e) => {
+
                 e.stopPropagation();
-                this.openContextMenu(index, e);
-            };
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn btn-danger btn-sm';
-            deleteBtn.textContent = 'Supprimer';
-            deleteBtn.onclick = () => {
-                this.deleteGeometry(index); // Appeler la méthode deleteGeometry du StateManager
-            };
+                e.preventDefault();
 
-            nameContainer.appendChild(nameInput);
-            item.appendChild(nameContainer);
-            item.appendChild(editBtn);
-            item.appendChild(deleteBtn);
-            container.appendChild(item);
+                this.selectGeometry(index);
+
+                console.log('[StateManager] Edit button clicked for geometry:', index);
+
+            });
+
+
+
+            deleteButton.addEventListener('click', (e) => {
+
+                e.stopPropagation();
+
+                e.preventDefault();
+
+
+
+                if (confirm(`Voulez-vous vraiment supprimer "${geometry.name || 'Geometry ' + (index + 1)}" ?`)) {
+
+                    this.deleteGeometry(index);
+
+                    console.log('[StateManager] Geometry deleted via list button:', index);
+
+                }
+
+            });
+
+
+
+            // Empêcher le drag & drop sur les éléments de contrôle
+
+            nameInput.addEventListener('mousedown', (e) => e.stopPropagation());
+
+            editButton.addEventListener('mousedown', (e) => e.stopPropagation());
+
+            deleteButton.addEventListener('mousedown', (e) => e.stopPropagation());
+
         });
+
+
+
+        console.log('[StateManager] Geometry list updated with', this.geometries.length, 'items');
+
+    }
+
+
+
+    /**
+     * Ouvre le menu contextuel pour éditer une géométrie.
+     */
+    openContextMenu(index) {
+        console.log('[StateManager] Opening context menu for geometry at index:', index);
+
+        const geometry = this.geometries[index];
+        const contextMenu = document.getElementById('contextMenu');
+
+        if (!contextMenu) {
+            console.error('[StateManager] contextMenu element not found.');
+            return;
+        }
+
+        // ========================================
+        // 1️⃣ AFFICHER LE MENU
+        // ========================================
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = '50%';
+        contextMenu.style.top = '50%';
+        contextMenu.style.transform = 'translate(-50%, -50%)';
+
+        // Notifier le drag manager que le menu est affiché
+        if (window.contextMenuDragger) {
+            window.contextMenuDragger.onMenuShow();
+        }
+
+        console.log('[StateManager] ✅ Context menu displayed');
+
+        // ========================================
+        // 2️⃣ APPELER LA MÉTHODE DE REMPLISSAGE
+        // ========================================
+        if (this.uiManager && typeof this.uiManager.populateContextMenuForGeometry === 'function') {
+            console.log('[StateManager] 📝 Calling UIManager.populateContextMenuForGeometry()');
+            this.uiManager.populateContextMenuForGeometry(geometry);
+            console.log('[StateManager] ✅ Context menu populated');
+        } else {
+            console.warn('[StateManager] ⚠️ UIManager not available or method not found');
+
+            // ✅ FALLBACK : Remplir manuellement si UIManager n'est pas disponible
+            console.log('[StateManager] 🔄 Fallback: Manual fill of context menu');
+
+            const elements = {
+                contextColorPicker: document.getElementById('contextColorPicker'),
+                contextLineColorPicker: document.getElementById('contextLineColorPicker'),
+                contextOpacitySlider: document.getElementById('contextOpacitySlider'),
+                contextOpacityValue: document.getElementById('contextOpacityValue'),
+                contextLineDash: document.getElementById('contextLineDash'),
+                contextLineWeight: document.getElementById('contextLineWeight'),
+                contextLineWeightValue: document.getElementById('contextLineWeightValue'),
+                contextMarkerSize: document.getElementById('contextMarkerSize'),
+                contextMarkerSizeValue: document.getElementById('contextMarkerSizeValue'),
+                contextMarkerSizeContainer: document.getElementById('contextMarkerSizeContainer')
+            };
+
+            // Vérifier les éléments manquants
+            const missingElements = Object.entries(elements)
+                .filter(([key, element]) => !element)
+                .map(([key]) => key);
+
+            if (missingElements.length > 0) {
+                missingElements.forEach(key => {
+                    console.warn('[StateManager] Missing element:', key);
+                });
+            }
+
+            // ========================================
+            // Remplir les couleurs
+            // ========================================
+            if (elements.contextColorPicker) {
+                elements.contextColorPicker.value = geometry.color || '#3388ff';
+            }
+            if (elements.contextLineColorPicker) {
+                elements.contextLineColorPicker.value = geometry.lineColor || '#000000';
+            }
+
+            // ========================================
+            // Remplir l'opacité
+            // ========================================
+            if (elements.contextOpacitySlider) {
+                elements.contextOpacitySlider.value = geometry.opacity || 1;
+                if (elements.contextOpacityValue) {
+                    elements.contextOpacityValue.textContent = (geometry.opacity || 1).toFixed(1);
+                }
+            }
+
+            // ========================================
+            // Remplir le style de ligne
+            // ========================================
+            if (elements.contextLineDash) {
+                elements.contextLineDash.value = geometry.lineDash || 'solid';
+            }
+
+            // ========================================
+            // Remplir l'épaisseur de ligne
+            // ========================================
+            if (elements.contextLineWeight) {
+                elements.contextLineWeight.value = geometry.lineWeight || 2;
+                if (elements.contextLineWeightValue) {
+                    elements.contextLineWeightValue.textContent = geometry.lineWeight || 2;
+                }
+            }
+
+            // ========================================
+            // ✅ GESTION SPÉCIALE : Marqueurs
+            // ========================================
+            if (geometry.type && geometry.type.startsWith('Marker_')) {
+                console.log('[StateManager] 📍 Marker geometry detected:', geometry.type);
+
+                const markerSize = geometry.markerSize || 24;
+
+                // Afficher le conteneur
+                if (elements.contextMarkerSizeContainer) {
+                    elements.contextMarkerSizeContainer.style.display = 'block';
+                    console.log('[StateManager] ✅ Marker size container shown');
+                }
+
+                // Remplir le slider
+                if (elements.contextMarkerSize) {
+                    elements.contextMarkerSize.value = markerSize;
+                    console.log('[StateManager] ✅ Marker size slider set to:', markerSize);
+                }
+
+                // Remplir l'affichage de la valeur
+                if (elements.contextMarkerSizeValue) {
+                    elements.contextMarkerSizeValue.textContent = markerSize;
+                    console.log('[StateManager] ✅ Marker size value display set to:', markerSize);
+                }
+            } else {
+                // Masquer le conteneur pour les autres géométries
+                console.log('[StateManager] 📍 Non-marker geometry:', geometry.type);
+
+                if (elements.contextMarkerSizeContainer) {
+                    elements.contextMarkerSizeContainer.style.display = 'none';
+                    console.log('[StateManager] ✅ Marker size container hidden');
+                }
+            }
+
+            console.log('[StateManager] ✅ Context menu populated manually');
+        }
+    }
+
+
+
+    /**
+
+     * Définit le titre de la carte.
+
+     */
+
+    setMapTitle(title) {
+
+        if (typeof title !== 'string') {
+
+            console.error('[StateManager] Invalid title type:', title);
+
+            return;
+
+        }
+
+
+
+        this.mapTitle = title;
+
+
+
+        const titleInput = document.getElementById('mapTitleInput');
+
+        if (titleInput) {
+
+            titleInput.value = title;
+
+            console.log('[StateManager] Title input updated to:', title);
+
+        }
+
+
+
+        const titleDisplay = document.getElementById('mapTitleDisplay');
+
+        if (titleDisplay) {
+
+            titleDisplay.textContent = title || 'Sans titre';
+
+            console.log('[StateManager] Title display updated');
+
+        }
+
+
+
+        this.updateUI();
+
+        console.log('[StateManager] Map title updated:', title);
+
+    }
+
+
+
+    /**
+
+     * Active l'édition d'une géométrie en préservant son marqueur SVG original.
+
+     */
+
+    startEditingGeometry(index) {
+
+        const geometry = this.geometries[index];
+
+        if (geometry && geometry.type === 'CustomMarker' && geometry.layer) {
+
+            const originalIcon = geometry.layer.getIcon();
+
+            this.temporarySVGs.set(index, originalIcon);
+
+
+
+            const defaultIcon = L.icon({
+
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+
+                iconSize: [25, 41],
+
+                iconAnchor: [12, 41]
+
+            });
+
+            geometry.layer.setIcon(defaultIcon);
+
+            console.log('[StateManager] SVG temporarily replaced for editing at index:', index);
+
+        }
+
+    }
+
+
+
+    /**
+
+     * Termine l'édition d'une géométrie et restaure son marqueur SVG original.
+
+     */
+
+    finishEditingGeometry(index) {
+
+        const geometry = this.geometries[index];
+
+        if (geometry && this.temporarySVGs.has(index)) {
+
+            const originalIcon = this.temporarySVGs.get(index);
+
+            if (geometry.layer && originalIcon) {
+
+                geometry.layer.setIcon(originalIcon);
+
+                console.log('[StateManager] Original SVG restored at index:', index);
+
+            }
+
+            this.temporarySVGs.delete(index);
+
+        }
+
+    }
+
+
+
+    // ==================== MÉTHODES POUR LES PARTIES DE LÉGENDE ====================
+
+
+
+    addLegendPart(title = 'Nouvelle partie') {
+
+        const partId = `part-${Date.now()}`;
+
+        // ✅ Chaque partie a maintenant un tableau pour les sous-parties
+        const part = { id: partId, title: title, geometries: [], subParts: [] };
+        this.legendParts.push(part);
+
+        this.updateUI();
+
+        console.log('[StateManager] Legend part added:', part);
+
+        return partId;
+
+    }
+
+
+
+    updatePartTitle(partId, newTitle) {
+
+        const part = this.legendParts.find(p => p.id === partId);
+
+        if (part) {
+
+            part.title = newTitle;
+
+            this.updateUI();
+
+            console.log('[StateManager] Part title updated:', partId, newTitle);
+
+        }
+
+    }
+
+
+
+    deleteLegendPart(partId) {
+
+        const partIndex = this.legendParts.findIndex(p => p.id === partId);
+
+        if (partIndex !== -1) {
+
+            this.legendParts[partIndex].geometries.forEach(geomIndex => {
+
+                this.geometryToPart.delete(geomIndex);
+
+            });
+
+            this.legendParts.splice(partIndex, 1);
+
+            this.updateUI();
+
+            console.log('[StateManager] Part deleted:', partId);
+
+        }
+
+    }
+
+
+
+    assignGeometryToPart(geometryIndex, partId) {
+        // ✅ Logique améliorée pour gérer les sous-parties
+        const oldPartId = this.geometryToPart.get(geometryIndex);
+        if (oldPartId) {
+            // Retirer de l'ancienne position (partie ou sous-partie)
+            for (const part of this.legendParts) {
+                if (part.id === oldPartId) {
+                    part.geometries = part.geometries.filter(i => i !== geometryIndex);
+                    break;
+                }
+                const subPart = part.subParts.find(sp => sp.id === oldPartId);
+                if (subPart) {
+                    subPart.geometries = subPart.geometries.filter(i => i !== geometryIndex);
+                    break;
+                }
+            }
+        }
+
+        if (partId) {
+            this.geometryToPart.set(geometryIndex, partId);
+            // Ajouter à la nouvelle position (partie ou sous-partie)
+            let assigned = false;
+            for (const part of this.legendParts) {
+                if (part.id === partId) {
+                    if (!part.geometries.includes(geometryIndex)) part.geometries.push(geometryIndex);
+                    assigned = true;
+                    break;
+                }
+                const subPart = part.subParts.find(sp => sp.id === partId);
+                if (subPart) {
+                    if (!subPart.geometries.includes(geometryIndex)) subPart.geometries.push(geometryIndex);
+                    assigned = true;
+                    break;
+                }
+            }
+        } else {
+            this.geometryToPart.delete(geometryIndex);
+        }
+
+        this.updateUI();
+        console.log(`[StateManager] Geometry ${geometryIndex} assigned to target ID:`, partId);
+    }
+
+    // ==================== NOUVELLES MÉTHODES POUR LES SOUS-PARTIES ====================
+
+    addLegendSubPart(partId, count = 1) {
+        const part = this.legendParts.find(p => p.id === partId);
+        if (!part) return;
+
+        for (let i = 0; i < count; i++) {
+            const subPartId = `subpart-${Date.now()}-${i}`;
+            const subPartTitle = String.fromCharCode(65 + part.subParts.length); // A, B, C...
+            part.subParts.push({ id: subPartId, title: subPartTitle, geometries: [] });
+        }
+
+        this.updateUI();
+        console.log(`[StateManager] ${count} sub-part(s) added to part:`, partId);
+    }
+
+    updateSubPartTitle(partId, subPartId, newTitle) {
+        const part = this.legendParts.find(p => p.id === partId);
+        if (part) {
+            const subPart = part.subParts.find(sp => sp.id === subPartId);
+            if (subPart) {
+                subPart.title = newTitle;
+                this.updateUI();
+                console.log(`[StateManager] Sub-part title updated: ${subPartId} -> ${newTitle}`);
+            }
+        }
     }
 
     /**
-     * Ouvre le menu contextuel pour une géométrie spécifique.
-     * @param {number} index - L'index de la géométrie.
-     * @param {Event} event - L'événement de clic.
+     * ✅ Supprime une sous-partie complètement
      */
-    openContextMenu(index, event) {
-        console.log('[StateManager] Opening context menu for geometry at index:', index);
+    deleteLegendSubPart(partId, subPartId) {
+        const part = this.legendParts.find(p => p.id === partId);
+        if (!part) return;
 
-        if (index < 0 || index >= this.geometries.length) {
-            console.error('[StateManager] Invalid index in openContextMenu:', index);
-            return;
-        }
+        const subPartIndex = part.subParts.findIndex(sp => sp.id === subPartId);
+        if (subPartIndex !== -1) {
+            // Récupérer tous les géométries de la sous-partie
+            const subPart = part.subParts[subPartIndex];
+            subPart.geometries.forEach(geomIndex => {
+                this.geometryToPart.delete(geomIndex);
+            });
 
-        const geometry = this.geometries[index];
-        if (!geometry) {
-            console.error('[StateManager] Geometry not found at index:', index);
-            return;
-        }
-
-        this.selectedIndex = index;
-
-        // Vérifiez si tous les éléments du menu contextuel existent
-        const requiredElements = [
-            'contextColorPicker', 'contextLineColorPicker', 'contextOpacitySlider',
-            'contextLineDash', 'contextLineWeight', 'contextMarkerSize'
-        ];
-
-        const contextElements = requiredElements.reduce((elements, id) => {
-            const el = document.getElementById(id);
-            if (!el) console.warn(`[StateManager] Missing element: ${id}`);
-            elements[id] = el;
-            return elements;
-        }, {});
-
-        // Si des éléments requis sont manquants, arrêtez l'exécution
-        if (Object.values(contextElements).some(el => !el)) {
-            console.error('[StateManager] Some context menu elements are missing.');
-            return;
-        }
-
-        // Remplissez les champs du menu contextuel avec les valeurs actuelles
-        contextElements.contextColorPicker.value = geometry.color || "#000000";
-        contextElements.contextLineColorPicker.value = geometry.lineColor || "#000000";
-        contextElements.contextOpacitySlider.value = geometry.opacity || 1;
-        contextElements.contextLineDash.value = geometry.lineDash || "solid";
-        contextElements.contextLineWeight.value = geometry.lineWeight || 2;
-        contextElements.contextMarkerSize.value = geometry.markerSize || 24;
-
-
-        // Désactivez les champs si nécessaire
-        if (geometry.type !== 'CustomMarker') {
-            contextElements.contextMarkerSize.disabled = true;
-            contextElements.contextMarkerSize.title = "La taille ne peut pas être modifiée pour ce type de géométrie.";
-        } else {
-            contextElements.contextMarkerSize.disabled = false;
-            contextElements.contextMarkerSize.title = "";
-        }
-
-        // Affichez le menu contextuel
-        const contextMenu = document.getElementById('contextMenu');
-        if (contextMenu) {
-            contextMenu.style.display = 'block';
-            contextMenu.style.left = `${event.clientX}px`;
-            contextMenu.style.top = `${event.clientY}px`;
-        } else {
-            console.error('[StateManager] Context menu not found in the DOM.');
+            // Supprimer la sous-partie
+            part.subParts.splice(subPartIndex, 1);
+            this.updateUI();
+            console.log('[StateManager] Sub-part deleted:', subPartId);
         }
     }
+
+
+
+    getGeometryPart(geometryIndex) {
+
+        for (const part of this.legendParts) {
+
+            if (part.geometries && part.geometries.includes(geometryIndex)) {
+
+                return part.id;
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+
+
+    getUnclassifiedGeometries() {
+
+        return this.geometries
+
+            .map((_, index) => index)
+
+            .filter(index => !this.geometryToPart.has(index));
+
+    }
+
+
+
+    movePartOrder(partId, direction) {
+
+        const currentIndex = this.legendParts.findIndex(p => p.id === partId);
+
+        if (currentIndex === -1) return;
+
+
+
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+
+
+        if (newIndex >= 0 && newIndex < this.legendParts.length) {
+
+            const part = this.legendParts.splice(currentIndex, 1)[0];
+
+            this.legendParts.splice(newIndex, 0, part);
+
+            this.updateUI();
+
+            console.log('[StateManager] Part moved:', partId, direction);
+
+        }
+
+    }
+
+
+
+    setExportImportManager(exportImportManager) {
+
+        this.exportImportManager = exportImportManager;
+
+        console.log('[StateManager] ExportImportManager set');
+
+    }
+
+    /**
+     * ✅ Passer le SymbolPaletteManager au StateManager
+     */
+    setSymbolPaletteManager(symbolPaletteManager) {
+        if (!symbolPaletteManager) {
+            console.warn('[StateManager] Attempted to set null SymbolPaletteManager');
+            return;
+        }
+
+        this.symbolPaletteManager = symbolPaletteManager;
+        console.log('[StateManager] SymbolPaletteManager set');
+    }
+
+
 }
