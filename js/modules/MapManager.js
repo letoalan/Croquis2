@@ -96,6 +96,11 @@ export class MapManager {
                     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     attribution: '© OpenStreetMap contributors'
                 },
+            
+                voyager: {
+                    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+                    attribution: '© CARTO'
+                },
 
                 cartodb: {
                     url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
