@@ -131,32 +131,7 @@ export class MapManager {
                 openTopo: {
                     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                     attribution: '© OpenTopoMap contributors'
-                },
-
-                terrain: {
-                    url: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}.png',
-                    attribution: '© Stadia Maps © Stamen Design © OpenStreetMap'
-                },
-
-                watercolor: {
-                    url: 'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg',
-                    attribution: '© Stadia Maps © Stamen Design © OpenStreetMap'
-                },
-
-                voyager: {
-                    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-                    attribution: '© CARTO'
-                },
-
-                toner: {
-                    url: 'https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}.png',
-                    attribution: '© Stadia Maps © Stamen Design © OpenStreetMap'
-                },
-
-                tonerLite: {
-                    url: 'https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}.png',
-                    attribution: '© Stadia Maps © Stamen Design © OpenStreetMap'
-                },
+                },                
 
                 positron: {
                     url: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
