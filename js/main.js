@@ -25,7 +25,7 @@ function calculateBaseWidth() {
     const nativeWidth = Math.round(physicalWidth / dpr);
 
     // Calculer la référence à 67%
-    const baseWidth = Math.round(nativeWidth * (100 / 67));
+    const baseWidth = Math.round(nativeWidth * (100 / 75));
 
     console.log(`📐 Largeur native estimée: ${nativeWidth}px`);
     console.log(`📐 Référence calculée (67%): ${baseWidth}px`);
