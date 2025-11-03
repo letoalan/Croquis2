@@ -43,7 +43,7 @@ function getEffectiveZoomLevel() {
     const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
 
     // Calcule un "zoom effectif" exprimé comme un pourcentage de la largeur de référence
-    const zoomLevel = Math.round((BASE_VIEWPORT_WIDTH / viewportWidth) * 67);
+    const zoomLevel = Math.round((BASE_VIEWPORT_WIDTH / viewportWidth) * 80);
     if (isNaN(zoomLevel) || zoomLevel < 10 || zoomLevel > 500) {
         console.warn('[Zoom] Mesure invalide, fallback à 100%');
         return 100;
