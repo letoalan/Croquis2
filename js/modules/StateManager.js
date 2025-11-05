@@ -139,121 +139,109 @@ export class StateManager {
     }
 
 
-    /**
-     * ✅ Supprime une géométrie complètement
-     */
     deleteGeometry(index) {
-        console.log('[StateManager] ========== deleteGeometry() START ==========');
-        console.log('[StateManager] Deleting geometry at index:', index);
+        console.log('[StateManager] deleteGeometry START');
+        console.log('[StateManager] Deleting geometry at index', index);
 
-        if (index >= 0 && index < this.geometries.length) {
-            const geometry = this.geometries[index];
-            const geometryName = geometry.name || 'Sans nom';
-            const geometryType = geometry.type;
-
-            console.log('[StateManager] Geometry to delete:', geometryName, 'type:', geometryType);
-
-            // ========================================
-            // ÉTAPE 1 : NOTIFIER LE SYMBOL PALETTE MANAGER
-            // ========================================
-            console.log('[StateManager] 📍 Step 1: Notifying SymbolPaletteManager...');
-            if (this.symbolPaletteManager && geometry) {
-                console.log('[StateManager] 🔄 Calling onGeometryRemoved()');
-                this.symbolPaletteManager.onGeometryRemoved(geometry);
-                console.log('[StateManager] ✅ SymbolPaletteManager notified');
-            }
-
-            // ========================================
-            // ÉTAPE 2 : RETIRER LA LAYER DE LA CARTE
-            // ========================================
-            console.log('[StateManager] 📍 Step 2: Removing layer from map...');
-            if (geometry.layer) {
-                // Retirer du LayerGroupManager
-                if (this.mapManager && this.mapManager.layerGroupManager) {
-                    this.mapManager.layerGroupManager.removeLayer(geometry.layer);
-                    console.log('[StateManager] ✅ Layer removed from LayerGroupManager');
-                }
-
-                // Retirer de la carte Leaflet
-                if (this.mapManager && this.mapManager.map) {
-                    if (this.mapManager.map.hasLayer(geometry.layer)) {
-                        this.mapManager.map.removeLayer(geometry.layer);
-                        console.log('[StateManager] ✅ Layer removed from Leaflet map');
-                    }
-                }
-            }
-
-            // ========================================
-            // ÉTAPE 3 : RETIRER DE LA LÉGENDE
-            // ========================================
-            console.log('[StateManager] 📍 Step 3: Removing from legend parts...');
-            if (this.geometryToPart.has(index)) {
-                const partId = this.geometryToPart.get(index);
-                const part = this.legendParts.find(p => p.id === partId);
-
-                if (part) {
-                    const oldLength = part.geometries.length;
-                    part.geometries = part.geometries.filter(i => i !== index);
-                    console.log('[StateManager] ✅ Removed from part:', part.title, `(${oldLength} → ${part.geometries.length})`);
-                }
-
-                this.geometryToPart.delete(index);
-                console.log('[StateManager] ✅ Removed from geometryToPart mapping');
-            }
-
-            // ========================================
-            // ÉTAPE 4 : SUPPRIMER DU TABLEAU PRINCIPAL
-            // ========================================
-            console.log('[StateManager] 📍 Step 4: Removing from geometries array...');
-            this.geometries.splice(index, 1);
-            console.log('[StateManager] ✅ Geometry removed from array');
-
-            // ========================================
-            // ÉTAPE 5 : RÉINDEXER geometryToPart
-            // ========================================
-            console.log('[StateManager] 📍 Step 5: Reindexing geometryToPart...');
-            const updatedMap = new Map();
-
-            this.geometryToPart.forEach((partId, geomIndex) => {
-                if (geomIndex > index) {
-                    updatedMap.set(geomIndex - 1, partId);
-                    console.log('[StateManager]   - Index', geomIndex, '→', geomIndex - 1);
-                } else if (geomIndex < index) {
-                    updatedMap.set(geomIndex, partId);
-                }
-            });
-
-            this.geometryToPart = updatedMap;
-            console.log('[StateManager] ✅ geometryToPart reindexed');
-
-            // ========================================
-            // ÉTAPE 6 : RÉINDEXER LES PARTIES
-            // ========================================
-            console.log('[StateManager] 📍 Step 6: Reindexing legend parts...');
-            this.legendParts.forEach(part => {
-                const oldGeometries = [...part.geometries];
-                part.geometries = part.geometries
-                    .filter(i => i !== index)
-                    .map(i => i > index ? i - 1 : i);
-
-                console.log('[StateManager]   - Part:', part.title, `(${oldGeometries} → ${part.geometries})`);
-            });
-            console.log('[StateManager] ✅ Legend parts reindexed');
-
-            // ========================================
-            // ÉTAPE 7 : METTRE À JOUR L'INTERFACE
-            // ========================================
-            console.log('[StateManager] 📍 Step 7: Updating UI...');
-            this.updateUI();
-            console.log('[StateManager] ✅ UI updated');
-
-            console.log('[StateManager] ✅ Geometry deleted successfully:', geometryName);
-        } else {
-            console.warn('[StateManager] ⚠️ Invalid geometry index:', index);
+        if (index < 0 || index >= this.geometries.length) {
+            console.warn('[StateManager] Invalid geometry index', index);
+            console.log('[StateManager] deleteGeometry END');
+            return;
         }
 
-        console.log('[StateManager] ========== deleteGeometry() END ==========');
+        const geometry = this.geometries[index];
+        const geometryName = geometry.name || 'Sans nom';
+        const geometryType = geometry.type;
+
+        console.log('[StateManager] Geometry to delete:', geometryName, 'type:', geometryType);
+
+        // ✅ ÉTAPE 0 (NOUVEAU): NETTOYER LES FLÈCHES SVG AVANT TOUT
+        console.log('[StateManager] Step 0: Cleaning up arrow SVG elements...');
+        if (geometry.layer && (geometry.arrowType || geometry.layer.arrowType)) {
+            console.log('[StateManager] Arrow detected - calling SVGUtils.cleanupArrowheads');
+            try {
+                SVGUtils.cleanupArrowheads(geometry.layer);
+                console.log('[StateManager] ✅ Arrow SVG elements cleaned');
+            } catch (error) {
+                console.error('[StateManager] ❌ Error cleaning arrow SVG:', error.message);
+            }
+        }
+
+        // ÉTAPE 1: NOTIFIER LE SYMBOL PALETTE MANAGER
+        console.log('[StateManager] Step 1: Notifying SymbolPaletteManager...');
+        if (this.symbolPaletteManager && geometry) {
+            console.log('[StateManager] Calling onGeometryRemoved');
+            this.symbolPaletteManager.onGeometryRemoved(geometry);
+            console.log('[StateManager] SymbolPaletteManager notified');
+        }
+
+        // ÉTAPE 2: RETIRER LA LAYER DE LA CARTE
+        console.log('[StateManager] Step 2: Removing layer from map...');
+        if (geometry.layer) {
+            // Retirer du LayerGroupManager
+            if (this.mapManager && this.mapManager.layerGroupManager) {
+                this.mapManager.layerGroupManager.removeLayer(geometry.layer);
+                console.log('[StateManager] Layer removed from LayerGroupManager');
+            }
+
+            // Retirer de la carte Leaflet
+            if (this.mapManager && this.mapManager.map) {
+                if (this.mapManager.map.hasLayer(geometry.layer)) {
+                    this.mapManager.map.removeLayer(geometry.layer);
+                    console.log('[StateManager] Layer removed from Leaflet map');
+                }
+            }
+        }
+
+        // ÉTAPE 3: RETIRER DE LA LÉGENDE
+        console.log('[StateManager] Step 3: Removing from legend parts...');
+        if (this.geometryToPart.has(index)) {
+            const partId = this.geometryToPart.get(index);
+            const part = this.legendParts.find(p => p.id === partId);
+
+            if (part) {
+                const oldLength = part.geometries.length;
+                part.geometries = part.geometries.filter(i => i !== index);
+                console.log('[StateManager] Removed from part', part.title, oldLength, '->', part.geometries.length);
+            }
+
+            this.geometryToPart.delete(index);
+            console.log('[StateManager] Removed from geometryToPart mapping');
+        }
+
+        // ÉTAPE 4: SUPPRIMER DU TABLEAU PRINCIPAL
+        console.log('[StateManager] Step 4: Removing from geometries array...');
+        this.geometries.splice(index, 1);
+        console.log('[StateManager] Geometry removed from array');
+
+        // ÉTAPE 5: RÉINDEXER geometryToPart
+        console.log('[StateManager] Step 5: Reindexing geometryToPart...');
+        const updatedMap = new Map();
+        this.geometryToPart.forEach((partId, geomIndex) => {
+            if (geomIndex > index) {
+                updatedMap.set(geomIndex - 1, partId);
+            } else if (geomIndex < index) {
+                updatedMap.set(geomIndex, partId);
+            }
+        });
+        this.geometryToPart = updatedMap;
+
+        // ÉTAPE 6: RÉINDEXER LES PARTIES
+        console.log('[StateManager] Step 6: Reindexing legend parts...');
+        this.legendParts.forEach(part => {
+            part.geometries = part.geometries
+                .filter(i => i !== index)
+                .map(i => i > index ? i - 1 : i);
+        });
+
+        // ÉTAPE 7: METTRE À JOUR L'INTERFACE
+        console.log('[StateManager] Step 7: Updating UI...');
+        this.updateUI();
+
+        console.log('[StateManager] Geometry deleted successfully:', geometryName);
+        console.log('[StateManager] deleteGeometry END');
     }
+
 
 
 
