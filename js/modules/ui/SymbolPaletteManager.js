@@ -21,21 +21,43 @@ export class SymbolPaletteManager {
         this.initialize();
     }
 
-    /**
-     * ✅ Initialise le gestionnaire
-     */
     initialize() {
         console.log('[SymbolPaletteManager] Initializing palette manager...');
 
         this.initializeDropZones();
-        this.initializeSynchronizedScrolls();
         this.setupDragAndDrop();
+        this.setupStorageSymbolDoubleClick();
 
-        // ✅ SYNCHRONISER IMMÉDIATEMENT AVEC LA LÉGENDE
+        // ✅ Attendre que le DOM soit complètement prêt
+        setTimeout(() => {
+            this.initializeSynchronizedScrolls();
+            this.initializeTextEditorPlaceholder(); // ✅ NOUVEAU - Gestion du placeholder
+
+            // ✅ Surveiller les changements de contenu
+            const textEditor = document.querySelector('.text-editor-multiline');
+            if (textEditor) {
+                const observer = new MutationObserver(() => {
+                    setTimeout(() => this.syncDropZoneLines(), 50);
+                });
+
+                observer.observe(textEditor, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true
+                });
+
+                textEditor.addEventListener('input', () => {
+                    setTimeout(() => this.syncDropZoneLines(), 50);
+                });
+            }
+        }, 100);
+
+        // ✅ SYNCHRONISER AVEC LA LÉGENDE
         this.syncWithLegend();
 
         console.log('[SymbolPaletteManager] ✅ Initialization complete');
     }
+
 
     /**
      * ✅ SYNCHRONISE AVEC LA LÉGENDE EXISTANTE
@@ -51,12 +73,8 @@ export class SymbolPaletteManager {
         console.log('[SymbolPaletteManager] ✅ Legend sync complete');
     }
 
-    /**
-     * ✅ Crée les zones de drop
-     */
     initializeDropZones() {
         console.log('[SymbolPaletteManager] Initializing drop zones...');
-
         const dropZonesContainer = document.getElementById('dropZonesContainer');
         if (!dropZonesContainer) {
             console.error('[SymbolPaletteManager] ❌ Drop zones container not found!');
@@ -68,12 +86,16 @@ export class SymbolPaletteManager {
             dropZone.className = 'symbol-drop-zone';
             dropZone.setAttribute('data-zone-id', i);
             dropZone.setAttribute('data-symbol-id', '');
-            dropZone.droppable = true;
 
+            // ✅ AJOUTER UNE HAUTEUR FIXE CORRESPONDANT À LA LIGNE DE TEXTE
+            dropZone.style.height = '40px'; // Ajuster selon votre line-height
+            dropZone.style.minHeight = '40px';
+            dropZone.style.marginBottom = '0'; // Pas d'espace entre les zones
+
+            dropZone.droppable = true;
             dropZone.addEventListener('dragover', (e) => this.onDragOver(e));
             dropZone.addEventListener('drop', (e) => this.onDrop(e));
             dropZone.addEventListener('dragleave', (e) => this.onDragLeave(e));
-
             dropZonesContainer.appendChild(dropZone);
             this.dropZoneElements.push(dropZone);
         }
@@ -82,30 +104,174 @@ export class SymbolPaletteManager {
         console.log('[SymbolPaletteManager] ✅ Drop zones initialized');
     }
 
-    /**
-     * ✅ Synchronise les scrolls
-     */
-    initializeSynchronizedScrolls() {
-        console.log('[SymbolPaletteManager] Setting up synchronized scrolls...');
-
+    syncDropZoneLines() {
+        const textEditor = document.querySelector('.text-editor-multiline');
         const dropZonesContainer = document.querySelector('.drop-zones-container');
-        const textEditorMultiline = document.querySelector('.text-editor-multiline');
+        const synchronizedContainer = document.querySelector('.synchronized-scroll-container');
 
-        if (!dropZonesContainer || !textEditorMultiline) {
-            console.warn('[SymbolPaletteManager] ⚠️ Scroll containers not found');
+        if (!textEditor || !dropZonesContainer || !synchronizedContainer) {
+            console.warn('[SymbolPaletteManager] ⚠️ Required containers not found');
             return;
         }
 
-        dropZonesContainer.addEventListener('scroll', () => {
-            textEditorMultiline.scrollTop = dropZonesContainer.scrollTop;
+        const lineHeight = 28;
+
+        // ✅ Calculer la hauteur basée sur le contenu réel du texte
+        const textHeight = textEditor.scrollHeight;
+        const neededLines = Math.max(10, Math.ceil(textHeight / lineHeight));
+
+        const existingZones = dropZonesContainer.querySelectorAll('.symbol-drop-zone');
+        const currentCount = existingZones.length;
+
+        console.log(`[SymbolPaletteManager] 📏 Text height: ${textHeight}px, Needed lines: ${neededLines}, Current: ${currentCount}`);
+
+        // ✅ Ajuster le nombre de zones
+        if (neededLines > currentCount) {
+            for (let i = currentCount; i < neededLines; i++) {
+                const zone = document.createElement('div');
+                zone.className = 'symbol-drop-zone';
+                zone.setAttribute('data-zone-id', i);
+                zone.setAttribute('data-symbol-id', '');
+                zone.style.height = `${lineHeight}px`;
+                zone.style.minHeight = `${lineHeight}px`;
+                zone.style.flexShrink = '0';
+
+                zone.addEventListener('dragover', (e) => this.onDragOver(e));
+                zone.addEventListener('drop', (e) => this.onDrop(e));
+                zone.addEventListener('dragleave', (e) => this.onDragLeave(e));
+
+                dropZonesContainer.appendChild(zone);
+            }
+            console.log(`[SymbolPaletteManager] ➕ Added ${neededLines - currentCount} drop zones`);
+        } else if (neededLines < currentCount) {
+            const zonesToKeep = Math.max(10, neededLines);
+            const zonesToRemove = Array.from(existingZones).slice(zonesToKeep);
+
+            zonesToRemove.forEach(z => z.remove());
+            console.log(`[SymbolPaletteManager] ➖ Removed ${zonesToRemove.length} drop zones`);
+        }
+
+        // ✅ Définir les hauteurs minimales pour permettre le scroll
+        const totalHeight = Math.max(textHeight, neededLines * lineHeight);
+
+        dropZonesContainer.style.minHeight = `${totalHeight}px`;
+        textEditor.style.minHeight = `${totalHeight}px`;
+
+        // ✅ Forcer la hauteur du conteneur de contenu
+        const contentColumn = document.querySelector('.text-content-column');
+        const symbolColumn = document.querySelector('.symbol-drop-column');
+
+        if (contentColumn) contentColumn.style.minHeight = `${totalHeight}px`;
+        if (symbolColumn) symbolColumn.style.minHeight = `${totalHeight}px`;
+
+        console.log(`[SymbolPaletteManager] ✅ Heights synchronized to ${totalHeight}px`);
+    }
+
+    initializeSynchronizedScrolls() {
+        console.log('[SymbolPaletteManager] 🔄 Initializing synchronized scrolls...');
+
+        const synchronizedContainer = document.querySelector('.synchronized-scroll-container');
+        const textEditor = document.querySelector('.text-editor-multiline');
+        const dropZonesContainer = document.querySelector('.drop-zones-container');
+
+        if (!synchronizedContainer || !textEditor || !dropZonesContainer) {
+            console.error('[SymbolPaletteManager] ❌ Synchronized scroll containers not found!');
+            return;
+        }
+
+        console.log('[SymbolPaletteManager] ✅ Found synchronized scroll container');
+
+        // ✅ FORCER la suppression du scroll individuel mais permettre le contenu étendu
+        textEditor.style.overflowY = 'hidden';
+        textEditor.style.overflowX = 'hidden';
+
+        dropZonesContainer.style.overflowY = 'hidden';
+        dropZonesContainer.style.overflowX = 'hidden';
+
+        let isScrolling = false;
+
+        // ✅ FONCTION pour synchroniser la position
+        const syncScrollPosition = (scrollTop) => {
+            // ✅ Appliquer la transformation pour le défilement visuel
+            textEditor.style.transform = `translateY(${-scrollTop}px)`;
+            dropZonesContainer.style.transform = `translateY(${-scrollTop}px)`;
+
+            // ✅ Mettre à jour la position de scroll (pour la synchronisation bidirectionnelle)
+            textEditor.scrollTop = scrollTop;
+            dropZonesContainer.scrollTop = scrollTop;
+        };
+
+        // ✅ SYNCHRONISATION: Conteneur principal → Colonnes
+        synchronizedContainer.addEventListener('scroll', () => {
+            if (isScrolling) return;
+
+            isScrolling = true;
+            const scrollTop = synchronizedContainer.scrollTop;
+
+            syncScrollPosition(scrollTop);
+
+            setTimeout(() => {
+                isScrolling = false;
+            }, 10);
         });
 
-        textEditorMultiline.addEventListener('scroll', () => {
-            dropZonesContainer.scrollTop = textEditorMultiline.scrollTop;
-        });
+        // ✅ SYNCHRONISATION: Colonnes → Conteneur principal (sécurité)
+        const setupColumnSync = (element) => {
+            element.addEventListener('scroll', (e) => {
+                if (isScrolling) return;
+
+                isScrolling = true;
+                const scrollTop = element.scrollTop;
+
+                // ✅ Synchroniser le conteneur principal
+                synchronizedContainer.scrollTop = scrollTop;
+
+                // ✅ Synchroniser l'autre colonne
+                syncScrollPosition(scrollTop);
+
+                setTimeout(() => {
+                    isScrolling = false;
+                }, 10);
+            });
+        };
+
+        setupColumnSync(textEditor);
+        setupColumnSync(dropZonesContainer);
+
+        // ✅ Initialiser la synchronisation des zones
+        this.syncDropZoneLines();
 
         console.log('[SymbolPaletteManager] ✅ Synchronized scrolls initialized');
     }
+
+    // ✅ MÉTHODE DE DÉBOGAGE - À APPELER DANS LA CONSOLE
+    debugScrollSync() {
+        const synchronizedContainer = document.querySelector('.synchronized-scroll-container');
+        const textEditor = document.querySelector('.text-editor-multiline');
+        const dropZonesContainer = document.querySelector('.drop-zones-container');
+
+        console.log('=== DEBUG SCROLL SYNC ===');
+        console.log('Synchronized container:', {
+            scrollHeight: synchronizedContainer.scrollHeight,
+            clientHeight: synchronizedContainer.clientHeight,
+            scrollTop: synchronizedContainer.scrollTop,
+            hasScroll: synchronizedContainer.scrollHeight > synchronizedContainer.clientHeight
+        });
+        console.log('Text editor:', {
+            scrollHeight: textEditor.scrollHeight,
+            clientHeight: textEditor.clientHeight,
+            scrollTop: textEditor.scrollTop,
+            transform: textEditor.style.transform
+        });
+        console.log('Drop zones:', {
+            scrollHeight: dropZonesContainer.scrollHeight,
+            clientHeight: dropZonesContainer.clientHeight,
+            scrollTop: dropZonesContainer.scrollTop,
+            transform: dropZonesContainer.style.transform
+        });
+        console.log('====================');
+    }
+
 
     /**
      * ✅ QUAND UNE GÉOMÉTRIE EST AJOUTÉE (une seule fois)
@@ -254,6 +420,213 @@ export class SymbolPaletteManager {
     }
 
     /**
+     * ✅ DÉPLACER UN SYMBOLE DE LA COLONNE VERS LE STOCKAGE
+     */
+    moveSymbolToStorage(symbolId) {
+        console.log('[SymbolPaletteManager] 🏠 Moving symbol to storage:', symbolId);
+
+        // ✅ Trouver la drop zone contenant ce symbole
+        const dropZone = document.querySelector(`[data-symbol-id="${symbolId}"]`);
+        if (!dropZone || !dropZone.classList.contains('filled')) {
+            console.warn('[SymbolPaletteManager] ⚠️ Symbol not found in drop zone:', symbolId);
+            return false;
+        }
+
+        // ✅ Vider la drop zone
+        dropZone.innerHTML = '';
+        dropZone.setAttribute('data-symbol-id', '');
+        dropZone.classList.remove('filled');
+        dropZone.classList.remove('drag-over');
+
+        // ✅ Réafficher le symbole dans le stockage
+        this.showSymbolInStorageContainer(symbolId);
+
+        // ✅ Mettre à jour l'état du symbole
+        const symbol = this.usedSymbols.get(symbolId);
+        if (symbol) {
+            symbol.dropped = false;
+            symbol.dropZoneId = undefined;
+            console.log('[SymbolPaletteManager] ✅ Symbol moved back to storage:', symbol.name);
+        }
+
+        return true;
+    }
+
+    /**
+     * ✅ DÉPLACER UN SYMBOLE DU STOCKAGE VERS UNE ZONE SPÉCIFIQUE
+     */
+    moveSymbolToDropZone(symbolId, zoneId) {
+        console.log('[SymbolPaletteManager] 📍 Moving symbol to drop zone:', symbolId, 'zone:', zoneId);
+
+        const symbol = this.usedSymbols.get(symbolId);
+        if (!symbol) {
+            console.error('[SymbolPaletteManager] ❌ Symbol not found:', symbolId);
+            return false;
+        }
+
+        // ✅ Trouver la drop zone cible
+        const dropZone = document.querySelector(`[data-zone-id="${zoneId}"]`);
+        if (!dropZone) {
+            console.error('[SymbolPaletteManager] ❌ Drop zone not found:', zoneId);
+            return false;
+        }
+
+        // ✅ Si la zone est déjà occupée, libérer l'ancien symbole
+        const existingSymbolId = dropZone.getAttribute('data-symbol-id');
+        if (existingSymbolId && existingSymbolId !== '') {
+            this.moveSymbolToStorage(existingSymbolId);
+        }
+
+        // ✅ Masquer le symbole du stockage
+        this.hideSymbolInStorageContainer(symbolId);
+
+        // ✅ Créer l'aperçu dans la drop zone
+        dropZone.innerHTML = '';
+        const previewWrapper = document.createElement('div');
+        previewWrapper.className = 'dropped-symbol-wrapper';
+        previewWrapper.style.width = '100%';
+        previewWrapper.style.height = '100%';
+        previewWrapper.style.display = 'flex';
+        previewWrapper.style.alignItems = 'center';
+        previewWrapper.style.justifyContent = 'center';
+
+        const geometry = symbol.geometry;
+        if (geometry.type && geometry.type.startsWith('Marker_')) {
+            this._createMarkerPreview(previewWrapper, geometry);
+        } else if (geometry.arrowType && geometry.arrowType !== 'none') {
+            this._createArrowPreview(previewWrapper, geometry);
+        } else {
+            const preview = document.createElement('div');
+            preview.className = 'dropped-symbol';
+            preview.style.backgroundColor = geometry.color || symbol.color || '#3388ff';
+            preview.style.borderColor = geometry.lineColor || symbol.lineColor || '#000000';
+            preview.style.borderWidth = (geometry.lineWeight || symbol.lineWeight || 2) + 'px';
+            preview.style.opacity = geometry.opacity !== undefined ? geometry.opacity : (symbol.opacity || 1);
+            preview.title = symbol.name;
+
+            if (geometry.lineDash === 'dashed') {
+                preview.style.borderStyle = 'dashed';
+            } else if (geometry.lineDash === 'dotted') {
+                preview.style.borderStyle = 'dotted';
+            } else {
+                preview.style.borderStyle = 'solid';
+            }
+            previewWrapper.appendChild(preview);
+        }
+
+        dropZone.appendChild(previewWrapper);
+        dropZone.setAttribute('data-symbol-id', symbolId);
+        dropZone.classList.add('filled');
+
+        // ✅ Ajouter un bouton de suppression
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'drop-zone-remove-btn';
+        removeBtn.innerHTML = '×';
+        removeBtn.title = 'Retirer le symbole';
+        removeBtn.style.position = 'absolute';
+        removeBtn.style.top = '2px';
+        removeBtn.style.right = '2px';
+        removeBtn.style.background = 'rgba(255,0,0,0.7)';
+        removeBtn.style.color = 'white';
+        removeBtn.style.border = 'none';
+        removeBtn.style.borderRadius = '50%';
+        removeBtn.style.width = '16px';
+        removeBtn.style.height = '16px';
+        removeBtn.style.fontSize = '12px';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.style.display = 'none';
+        removeBtn.style.alignItems = 'center';
+        removeBtn.style.justifyContent = 'center';
+        removeBtn.style.padding = '0';
+
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.moveSymbolToStorage(symbolId);
+        });
+
+        dropZone.appendChild(removeBtn);
+
+        // ✅ Afficher le bouton au survol
+        dropZone.addEventListener('mouseenter', () => {
+            removeBtn.style.display = 'flex';
+        });
+
+        dropZone.addEventListener('mouseleave', () => {
+            removeBtn.style.display = 'none';
+        });
+
+        // ✅ Mettre à jour l'état du symbole
+        symbol.dropped = true;
+        symbol.dropZoneId = zoneId;
+
+        console.log('[SymbolPaletteManager] ✅ Symbol moved to drop zone:', symbol.name);
+        return true;
+    }
+
+    /**
+     * ✅ RETIRER TOUS LES SYMBOLES DES ZONES DE DROP
+     */
+    clearAllDropZones() {
+        console.log('[SymbolPaletteManager] 🧹 Clearing all drop zones');
+
+        const dropZones = document.querySelectorAll('.symbol-drop-zone.filled');
+        let count = 0;
+
+        dropZones.forEach(dropZone => {
+            const symbolId = dropZone.getAttribute('data-symbol-id');
+            if (symbolId && symbolId !== '') {
+                this.moveSymbolToStorage(symbolId);
+                count++;
+            }
+        });
+
+        console.log(`[SymbolPaletteManager] ✅ Cleared ${count} symbols from drop zones`);
+        return count;
+    }
+
+    /**
+     * ✅ TROUVER UNE ZONE DE DROP LIBRE
+     */
+    findFreeDropZone() {
+        const dropZones = document.querySelectorAll('.symbol-drop-zone');
+        for (let zone of dropZones) {
+            const symbolId = zone.getAttribute('data-symbol-id');
+            if (!symbolId || symbolId === '') {
+                return zone.getAttribute('data-zone-id');
+            }
+        }
+        return null;
+    }
+
+    /**
+     * ✅ DOUBLE-CLICK SUR UN SYMBOLE DU STOCKAGE POUR LE PLACER AUTOMATIQUEMENT
+     */
+    setupStorageSymbolDoubleClick() {
+        const storageContainer = document.getElementById('usedSymbolsStorage');
+        if (!storageContainer) return;
+
+        storageContainer.addEventListener('dblclick', (e) => {
+            const symbolItem = e.target.closest('.storage-symbol-item');
+            if (!symbolItem) return;
+
+            const symbolId = symbolItem.getAttribute('data-symbol-id');
+            if (!symbolId) return;
+
+            console.log('[SymbolPaletteManager] 🖱️ Double-click on storage symbol:', symbolId);
+
+            // ✅ Trouver une zone libre
+            const freeZoneId = this.findFreeDropZone();
+            if (freeZoneId) {
+                this.moveSymbolToDropZone(symbolId, freeZoneId);
+            } else {
+                console.warn('[SymbolPaletteManager] ⚠️ No free drop zones available');
+                // Optionnel: Afficher un message à l'utilisateur
+                alert('Aucune zone de dépôt libre disponible. Veuillez libérer une zone d\'abord.');
+            }
+        });
+    }
+
+    /**
      * ✅ AJOUTE UN SYMBOLE AU CONTENEUR DE STOCKAGE
      */
     addSymbolToStorageContainer(geometry, symbolId) {
@@ -359,7 +732,7 @@ export class SymbolPaletteManager {
         return symbolElement;
     }
 
-    /**
+        /**
      * ✅ APERÇU POUR LES SHAPES (carrés colorés)
      */
     _createShapePreview(container, geometry) {
@@ -863,59 +1236,18 @@ export class SymbolPaletteManager {
         // ✅ Récupérer et convertir l'ID
         let symbolId = e.dataTransfer.getData('text/plain');
         const numSymbolId = parseInt(symbolId, 10);
+        symbolId = numSymbolId || symbolId;
 
-        let symbol = this.usedSymbols.get(numSymbolId) || this.usedSymbols.get(symbolId);
+        const symbol = this.usedSymbols.get(symbolId);
 
         if (!symbol) {
             console.error('[SymbolPaletteManager] ❌ Symbol not found');
             return;
         }
 
-        // ✅ MARQUER LE SYMBOLE COMME "DÉPOSÉ"
-        symbol.dropped = true;
-        symbol.dropZoneId = dropZone.getAttribute('data-zone-id');
-        console.log('[SymbolPaletteManager] 📍 ✅ Symbol marked as dropped:', symbol.name);
-
-        // ✅ MASQUER LE SYMBOLE DU CONTENEUR DE STOCKAGE
-        this.hideSymbolInStorageContainer(numSymbolId || symbolId);
-
-        // ✅ CRÉER L'APERÇU DANS LA DROP ZONE
-        dropZone.innerHTML = '';
-        const previewWrapper = document.createElement('div');
-        previewWrapper.className = 'dropped-symbol-wrapper';
-        previewWrapper.style.width = '100%';
-        previewWrapper.style.height = '100%';
-        previewWrapper.style.display = 'flex';
-        previewWrapper.style.alignItems = 'center';
-        previewWrapper.style.justifyContent = 'center';
-
-        const geometry = symbol.geometry;
-        if (geometry.type && geometry.type.startsWith('Marker_')) {
-            this._createMarkerPreview(previewWrapper, geometry);
-        } else if (geometry.arrowType && geometry.arrowType !== 'none') {
-            this._createArrowPreview(previewWrapper, geometry);
-        } else {
-            const preview = document.createElement('div');
-            preview.className = 'dropped-symbol';
-            preview.style.backgroundColor = geometry.color || symbol.color || '#3388ff';
-            preview.style.borderColor = geometry.lineColor || symbol.lineColor || '#000000';
-            preview.style.borderWidth = (geometry.lineWeight || symbol.lineWeight || 2) + 'px';
-            preview.style.opacity = geometry.opacity !== undefined ? geometry.opacity : (symbol.opacity || 1);
-            preview.title = symbol.name;
-
-            if (geometry.lineDash === 'dashed') {
-                preview.style.borderStyle = 'dashed';
-            } else if (geometry.lineDash === 'dotted') {
-                preview.style.borderStyle = 'dotted';
-            } else {
-                preview.style.borderStyle = 'solid';
-            }
-            previewWrapper.appendChild(preview);
-        }
-
-        dropZone.appendChild(previewWrapper);
-        dropZone.setAttribute('data-symbol-id', numSymbolId || symbolId);
-        dropZone.classList.add('filled');
+        // ✅ Utiliser la nouvelle méthode pour déplacer le symbole
+        const zoneId = dropZone.getAttribute('data-zone-id');
+        this.moveSymbolToDropZone(symbolId, zoneId);
 
         console.log('[SymbolPaletteManager] 📍 ✅ DROP COMPLETE - Symbol installed:', symbol.name);
     }
@@ -935,6 +1267,84 @@ export class SymbolPaletteManager {
             symbolElement.classList.add('hidden');
             console.log('[SymbolPaletteManager] 👁️ ✅ Symbol hidden:', symbolId);
         }
+    }
+
+    /**
+     * ✅ GESTION AVANCÉE DU PLACEHOLDER POUR L'ÉDITEUR DE TEXTE
+     */
+    initializeTextEditorPlaceholder() {
+        console.log('[TextEditor] 🖊️ Initializing advanced placeholder management');
+
+        const textEditor = document.querySelector('.text-editor-multiline');
+        if (!textEditor) {
+            console.warn('[TextEditor] ⚠️ Text editor not found');
+            return;
+        }
+
+        // ✅ FORCER le placeholder à disparaître au focus
+        textEditor.addEventListener('focus', () => {
+            console.log('[TextEditor] 🔍 Text editor focused');
+
+            // Si l'éditeur est vide au focus, le vider complètement
+            if (textEditor.textContent === 'Collez ou tapez votre texte ici...' || textEditor.innerHTML === 'Collez ou tapez votre texte ici...') {
+                textEditor.textContent = '';
+                console.log('[TextEditor] ✅ Placeholder cleared on focus');
+            }
+        });
+
+        // ✅ Gérer le collage (paste) pour effacer le placeholder
+        textEditor.addEventListener('paste', (e) => {
+            console.log('[TextEditor] 📋 Paste event detected');
+
+            // Annuler le collage par défaut
+            e.preventDefault();
+
+            // Obtenir le texte collé
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+
+            // Si l'éditeur contient seulement le placeholder, le vider d'abord
+            if (textEditor.textContent === 'Collez ou tapez votre texte ici...' || textEditor.innerHTML === 'Collez ou tapez votre texte ici...') {
+                textEditor.textContent = '';
+            }
+
+            // Insérer le texte collé
+            document.execCommand('insertText', false, pastedText);
+
+            console.log('[TextEditor] ✅ Text pasted successfully');
+        });
+
+        // ✅ Gérer la saisie pour maintenir le placeholder caché
+        textEditor.addEventListener('input', () => {
+            // S'assurer que le placeholder ne réapparaît pas pendant la saisie
+            if (textEditor.textContent === '' && document.activeElement !== textEditor) {
+                // Seulement remettre le placeholder si l'éditeur n'a pas le focus
+                setTimeout(() => {
+                    if (textEditor.textContent === '' && document.activeElement !== textEditor) {
+                        textEditor.textContent = 'Collez ou tapez votre texte ici...';
+                    }
+                }, 100);
+            }
+        });
+
+        // ✅ Gérer la perte de focus
+        textEditor.addEventListener('blur', () => {
+            if (textEditor.textContent === '' || textEditor.textContent.trim() === '') {
+                // Remettre le placeholder seulement si vide
+                setTimeout(() => {
+                    if (textEditor.textContent === '' || textEditor.textContent.trim() === '') {
+                        textEditor.textContent = 'Collez ou tapez votre texte ici...';
+                        console.log('[TextEditor] 🔄 Placeholder restored on blur');
+                    }
+                }, 150);
+            }
+        });
+
+        // ✅ Initialiser l'état du placeholder
+        if (textEditor.textContent === '' || textEditor.textContent.trim() === '') {
+            textEditor.textContent = 'Collez ou tapez votre texte ici...';
+        }
+
+        console.log('[TextEditor] ✅ Advanced placeholder management initialized');
     }
 
     /**

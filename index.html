@@ -255,23 +255,40 @@
                 <div class="editor-layout-container">
                     <!-- Section supérieure : 3 colonnes (Symboles | Texte | Palette) -->
                     <!-- ÉDITEUR 2 COLONNES SYNCHRONISÉES -->
-                    <div class="two-column-editor">
-                        <!-- Colonne 1 : Drop zones pour aligner les symboles -->
-                        <div class="symbol-drop-column" id="symbolDropColumn">
-                            <label class="form-label fw-bold">📍 Symboles</label>
-                            <div class="drop-zones-container synchronized-scroll" id="dropZonesContainer">
-                                <!-- Les zones de drop seront générées dynamiquement -->
+                    <!-- ÉDITEUR 2 COLONNES AVEC SCROLL UNIQUE -->
+                    <div class="two-column-editor-wrapper">
+
+                        <!-- En-têtes fixes (ne scrollent pas) -->
+                        <div class="editor-headers">
+                            <div class="symbol-header">
+                                <label class="form-label fw-bold">Symboles</label>
+                            </div>
+                            <div class="text-header">
+                                <label class="form-label fw-bold">Votre texte</label>
                             </div>
                         </div>
 
-                        <!-- Colonne 2 : Texte éditable -->
-                        <div class="text-content-column" id="textContentColumn">
-                            <label class="form-label fw-bold">📄 Votre texte</label>
-                            <div id="textEditor" class="text-editor-multiline synchronized-scroll" contenteditable="true">
-                                Collez ou tapez votre texte ici...
+                        <!-- Conteneur unique scrollable contenant les deux colonnes -->
+                        <div class="synchronized-scroll-container">
+
+                            <!-- Colonne 1: Drop zones pour symboles -->
+                            <div class="symbol-drop-column" id="symbolDropColumn">
+                                <div class="drop-zones-container" id="dropZonesContainer">
+                                    <!-- Les zones de drop seront générées dynamiquement -->
+                                </div>
                             </div>
+
+                            <!-- Colonne 2: Texte éditable -->
+                            <div class="text-content-column" id="textContentColumn">
+                                <div id="textEditor" class="text-editor-multiline" contenteditable="true">
+                                    <!-- ✅ SUPPRIMER le texte ici - il sera géré par CSS -->
+                                </div>
+                            </div>
+
                         </div>
+
                     </div>
+
 
                     <!-- Section inférieure : Conteneur de stockage -->
                     <div class="symbols-storage-legend">

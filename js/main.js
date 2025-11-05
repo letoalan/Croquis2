@@ -20,12 +20,13 @@ import { SVGUtils } from './modules/utils/SVGUtils.js';
 function calculateBaseWidth() {
     const physicalWidth = window.screen.width;
     const dpr = window.devicePixelRatio;
-
+    console.log("La résolution est de :", physicalWidth, "px")
+    console.log("Le ration écran est de :", dpr, "px")
     // Estimer la largeur "native" du viewport à 100%
     const nativeWidth = Math.round(physicalWidth / dpr);
 
     // Calculer la référence à 67%
-    const baseWidth = Math.round(nativeWidth);
+    const baseWidth = Math.round(nativeWidth * (100 / 67));
 
     console.log(`📐 Largeur native estimée: ${nativeWidth}px`);
     console.log(`📐 Référence calculée (67%): ${baseWidth}px`);
@@ -43,7 +44,7 @@ function getEffectiveZoomLevel() {
     const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
 
     // Calcule un "zoom effectif" exprimé comme un pourcentage de la largeur de référence
-    const zoomLevel = Math.round((BASE_VIEWPORT_WIDTH / viewportWidth) * 72);
+    const zoomLevel = Math.round((BASE_VIEWPORT_WIDTH / viewportWidth) * 90);
     if (isNaN(zoomLevel) || zoomLevel < 10 || zoomLevel > 500) {
         console.warn('[Zoom] Mesure invalide, fallback à 100%');
         return 100;

@@ -913,12 +913,14 @@ body {
 
 /* ==================== LÉGENDE INTERACTIVE ==================== */
 
+/* ==================== LÉGENDE INTERACTIVE ==================== */
+
 .legend-control {
-    background: linear-gradient(135deg, var(--white) 0%, #f5f7fa 100%);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
     padding: 20px;
     border-radius: var(--border-radius-xl);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     max-height: 70vh;
     min-height: 300px;
     width: 800px;
@@ -926,13 +928,19 @@ body {
     z-index: 1000;
     transition: var(--transition-base);
     cursor: default;
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.legend-control:hover {
-    background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
-    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
+.legend-control .legend-header,
+.legend-control .legend-part,
+.legend-control .legend-part-column,
+.legend-control .legend-subpart-header {
+    background: transparent !important;
+}
+
+.legend-control .legend-item {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(2px);
 }
 
 .legend-header {
@@ -983,7 +991,7 @@ body {
 }
 
 .legend-part {
-    background: linear-gradient(135deg, var(--light-gray) 0%, var(--gray) 100%);
+    background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(233, 236, 239, 0.9) 100%);
     border-radius: var(--border-radius-lg);
     padding: 15px;
     border-top: 4px solid var(--primary-gradient-start);
@@ -1004,7 +1012,7 @@ body {
     margin-bottom: 12px;
     border-radius: var(--border-radius-md);
     cursor: text;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     border: 2px solid transparent;
     transition: var(--transition-base);
     font-family: inherit;
@@ -1019,7 +1027,7 @@ body {
 .legend-part-title.editing {
     outline: none;
     border-color: var(--primary-gradient-start);
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -1069,7 +1077,7 @@ body {
     align-items: center;
     padding: 8px 12px;
     margin-bottom: 8px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.8);
     border-radius: var(--border-radius-md);
     cursor: move;
     transition: var(--transition-base);
@@ -1077,7 +1085,7 @@ body {
 }
 
 .legend-item:hover {
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
     border-color: var(--primary-gradient-start);
@@ -1690,7 +1698,7 @@ body {
 }
 
 .legend-subpart {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.6);
     border-radius: var(--border-radius-md);
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -1860,17 +1868,68 @@ body {
    ÉDITEUR 2 COLONNES SYNCHRONISÉES
    ======================================== */
 
+/* ✅ CONTENEUR PARENT - FLEXBOX */
 .two-column-editor {
     display: grid;
-    grid-template-columns: 80px 1fr;  /* ✅ 2 colonnes : Drop | Texte */
+    grid-template-columns: 80px 1fr;
     gap: 10px;
-    height: 400px;
+    height: 100%;
+    min-height: 400px;
     overflow: hidden;
-    border-radius: var(--border-radius-lg);
-    background: var(--light-gray);
-    padding: 8px;
-    box-shadow: var(--shadow-md);
 }
+
+/* ✅ COLONNES SYNCHRONISÉES */
+.drop-zones-container,
+.text-editor-multiline {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* ✅ CLEF pour flexbox */
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    margin: 0;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--white);
+}
+
+/* ✅ TEXTE - ALIGNEMENT PARFAIT */
+.text-editor-multiline {
+    font-size: 14px;
+    line-height: 28px; /* ✅ ÉLÉMENT CLEF */
+    font-family: 'Segoe UI', sans-serif;
+    resize: none;
+    outline: none;
+}
+
+/* ✅ CHAQUE LIGNE = 28px EXACTEMENT */
+.symbol-drop-zone {
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--border-color);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 150ms ease;
+}
+
+.symbol-drop-zone:hover {
+    background: rgba(240, 240, 240, 0.8);
+    border-color: var(--primary-gradient-start);
+}
+
+.symbol-drop-zone.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-gradient-start);
+    border-style: solid;
+}
+
 
 /* ========================================
    COLONNE 1 : ZONES DE DROP POUR SYMBOLES
@@ -1894,31 +1953,290 @@ body {
     background: rgba(40, 167, 69, 0.05);
     border-bottom: 1px solid var(--border-color);
     margin: 0;
+
 }
 
-.drop-zones-container {
-    flex: 1;
-    overflow-y: scroll;
-    background: var(--white);
-    padding: 5px;
+
+/* ==================== ÉDITEUR 2 COLONNES AVEC SCROLL SYNCHRONISÉ ==================== */
+
+/* ✅ WRAPPER PRINCIPAL - FLEXBOX VERTICAL */
+.two-column-editor-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    background: var(--light-gray);
+    border-radius: var(--border-radius-lg);
+    padding: 8px;
+    box-shadow: var(--shadow-md);
+    gap: 8px;
 }
+
+/* ✅ EN-TÊTES FIXES (ne scrollent pas) */
+.editor-headers {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 10px;
+    min-height: 40px;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.symbol-header,
+.text-header {
+    padding: 8px;
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.symbol-header label,
+.text-header label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+/* ✅ CONTENEUR SCROLLABLE UNIQUE - C'EST LE SEUL QUI SCROLLE */
+.synchronized-scroll-container {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 10px;
+    flex: 1;
+    overflow-y: auto; /* ✅ SEUL CONTENEUR AVEC SCROLL */
+    overflow-x: hidden;
+    min-height: 0;
+    background: var(--light-gray);
+    padding: 0;
+    height: 100%;
+}
+
+/* ✅ COLONNES INTERNES - CONTENEUR DE CONTENU (sans scroll) */
+.symbol-drop-column,
+.text-content-column {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: auto;
+    overflow: visible; /* ✅ Pas de scroll ici */
+}
+
+/* ✅ CONTENEURS DE CONTENU - DOIVENT ÊTRE HAUTS POUR PERMETTRE LE SCROLL */
+.drop-zones-container,
+.text-editor-multiline {
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 0;
+    margin: 0;
+    overflow: visible; /* ✅ IMPORTANT: visible pour le contenu */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%; /* ✅ Prend toute la hauteur */
+}
+
+/* ✅ CONTENEUR TEXTE - CONTENU EXPANSIBLE */
+.text-editor-multiline {
+    font-size: 14px;
+    line-height: 28px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    outline: none;
+    resize: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 4px 8px !important;
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: hidden !important; /* ✅ Pas de scroll individuel */
+    overflow-x: hidden !important;
+}
+
+/* ✅ CONTENEUR ZONES DE DROP - CONTENU EXPANSIBLE */
+.drop-zones-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100%;
+    overflow: hidden; /* ✅ Pas de scroll individuel */
+}
+
+/* ✅ ZONES DE DROP - HAUTEUR FIXE */
+.symbol-drop-zone {
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px dashed var(--border-color);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 150ms ease;
+    flex-shrink: 0 !important;
+}
+
+.symbol-drop-zone:hover {
+    background: rgba(240, 240, 240, 0.8);
+    border-color: var(--primary-gradient-start);
+}
+
+.symbol-drop-zone.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-gradient-start);
+    border-style: solid;
+    box-shadow: inset 0 0 4px rgba(102, 126, 234, 0.3);
+}
+
+.symbol-drop-zone.filled {
+    background: var(--white);
+    border-style: solid;
+    border-color: var(--success-gradient-start);
+}
+
+/* ✅ SCROLLBAR UNIQUE (sur le conteneur principal seulement) */
+.synchronized-scroll-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.synchronized-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.synchronized-scroll-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
+    border-radius: 3px;
+    transition: background 150ms ease;
+}
+
+.synchronized-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+}
+
+/* ✅ SUPPRESSION DES SCROLLBARS INTERNES */
+.drop-zones-container::-webkit-scrollbar,
+.text-editor-multiline::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* ==================== FIN ÉDITEUR 2 COLONNES ==================== */
+/* ==================== BOUTONS DE SUPPRESSION DROP ZONE ==================== */
+
+.drop-zone-remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.drop-zone-remove-btn:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: scale(1.1);
+}
+
+.symbol-drop-zone {
+    position: relative; /* ✅ Pour positionner le bouton */
+}
+
+.symbol-drop-zone:hover .drop-zone-remove-btn {
+    display: flex;
+}
+
+/* ==================== EFFET DE SURVOL POUR LES SYMBOLES STOCKAGE ==================== */
+
+.storage-symbol-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.storage-symbol-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.storage-symbol-item:active {
+    transform: translateY(0);
+}
+
+/* ✅ Indication visuelle pour le double-click */
+.storage-symbol-item::after {
+    content: 'Double-clic pour placer';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    background: var(--primary-gradient-start);
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.storage-symbol-item:hover::after {
+    opacity: 1;
+}
+
+
+.symbol-drop-column,
+.text-content-column {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    min-height: 0; /* ✅ Important pour flexbox */
+}
+
 
 .drop-zones-container.synchronized-scroll {
     /* Sera synchronisé via JavaScript */
 }
 
 .symbol-drop-zone {
+    height: 28px; /* ✅ Fixe et exact */
     min-height: 28px;
-    height: 28px;
     border: 2px dashed transparent;
     border-radius: var(--border-radius-sm);
-    margin-bottom: 2px;
+    margin: 0; /* ✅ Pas de margin-bottom */
+    padding: 0; /* ✅ Pas de padding */
     display: flex;
     align-items: center;
     justify-content: center;
     transition: var(--transition-fast);
     background: rgba(255, 255, 255, 0.5);
 }
+
 
 .symbol-drop-zone.drag-over {
     border-color: var(--secondary-gradient-start);
@@ -1971,24 +2289,67 @@ body {
     flex: 1;
     background: var(--white);
     overflow-y: scroll;
+    overflow-x: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
-    line-height: 28px;
-    padding: 8px;
+    line-height: 28px; /* ✅ Exact correspondance */
+    padding: 0; /* ✅ Padding zéro pour alignement parfait */
+    margin: 0;
     border: none;
     transition: var(--transition-base);
     resize: none;
+    outline: none;
 }
+
 
 .text-editor-multiline:focus {
     outline: none;
     background: rgba(40, 167, 69, 0.02);
 }
 
+/* ==================== PLACEHOLDER AMÉLIORÉ ==================== */
+
+/* ==================== PLACEHOLDER POUR L'ÉDITEUR 2 COLONNES ==================== */
+
 .text-editor-multiline[contenteditable="true"]:empty:before {
     content: 'Collez ou tapez votre texte ici...';
     color: var(--text-muted);
     font-style: italic;
+    pointer-events: none;
+    opacity: 0.7;
+    display: block;
+    /* ✅ SUPPRIMER les propriétés de positionnement qui entrent en conflit */
+    /* top: 0px;  ← RETIRÉ */
+    /* left: 0px; ← RETIRÉ */
+    /* position: absolute; ← NE PAS AJOUTER */
+}
+
+.text-editor-multiline[contenteditable="true"]:empty:focus:before {
+    opacity: 0.4;
+}
+
+.text-editor-multiline[contenteditable="true"]:not(:empty):before {
+    display: none;
+}
+
+/* ✅ Style de base pour l'éditeur - PADDING COHÉRENT */
+.text-editor-multiline {
+    position: relative !important;
+    padding: 4px 8px !important; /* ✅ PADDING COHÉRENT avec le placeholder */
+    font-size: 14px;
+    line-height: 28px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    outline: none;
+    resize: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
 }
 
 /* Support formatage WYSIWYG dans le multiline */
@@ -2086,6 +2447,7 @@ body {
     color: inherit;
     padding: 0;
 }
+
 
 /* ========================================
    SCROLL SYNCHRONISÉ

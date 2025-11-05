@@ -90,9 +90,13 @@ export class TileSelectorControl {
                     { value: 'hybrid', label: '🗺️ Satellite + Labels' },
                     { value: 'streets', label: '🏙️ Esri Streets' },
                     { value: 'topo', label: '⛰️ Esri Topo' },
-                    { value: 'openTopo', label: '🏔️ OpenTopoMap' },                   
+                    { value: 'openTopo', label: '🏔️ OpenTopoMap' },
+                    { value: 'terrain', label: '🌄 Stamen Terrain' },
+                    { value: 'watercolor', label: '🎨 Stamen Watercolor' },
 
-                    // 🗞️ Historiques / Vintage                    
+                    // 🗞️ Historiques / Vintage
+                    { value: 'toner', label: '📰 Stamen Toner' },
+                    { value: 'tonerLite', label: '📄 Toner Lite' },
                     { value: 'natGeo', label: '🌍 National Geographic' },
                     { value: 'grayCanvas', label: '📜 Gray Canvas' },
                     { value: 'positron', label: '⚪ Positron' },
@@ -105,10 +109,10 @@ export class TileSelectorControl {
                     { value: 'ignOrtho', label: '🛰️ Ortho IGN' },
 
                     // 🌿 Alternatives Libres
-                    //{ value: 'wikipediaMap', label: '🌐 Wikipedia Map' },
-                    //{ value: 'openHikingMap', label: '🥾 OpenHikingMap' },
-                    //{ value: 'openMapsFrTopo', label: '🇫🇷 OpenMaps FR Topo' }
-                
+                    { value: 'wikipediaMap', label: '🌐 Wikipedia Map' },
+                    { value: 'openHikingMap', label: '🥾 OpenHikingMap' },
+                    { value: 'openMapsFrTopo', label: '🇫🇷 OpenMaps FR Topo' }
+
 
 
 
