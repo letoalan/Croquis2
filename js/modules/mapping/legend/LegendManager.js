@@ -27,32 +27,19 @@ export class LegendManager {
      */
     initLegend() {
         const LegendControl = L.Control.extend({
-            options: {
-                position: 'bottomright'
-            },
+            options: { position: 'bottomright' },
             onAdd: (map) => {
                 const container = L.DomUtil.create('div', 'legend-control');
 
-                // ✅ Une seule ligne pour tout bloquer !
                 L.DomEvent
                     .disableClickPropagation(container)
                     .disableScrollPropagation(container);
 
-                // ✅ Blocage spécifique du drag (pan)
                 container.addEventListener('mousedown', (e) => {
                     e.stopPropagation();
-                }, true); // true = capture phase (avant Leaflet)
-
-                // ✅ Blocage du double-clic zoom
-                container.addEventListener('dblclick', (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
                 }, true);
 
-                // ✅ Empêcher le curseur "grab"
                 container.style.cursor = 'default';
-
-                console.log('[LegendManager] Legend isolated from map interactions');
 
                 return container;
             }
@@ -60,12 +47,25 @@ export class LegendManager {
 
         this.legendControl = new LegendControl();
         this.map.addControl(this.legendControl);
-        console.log('[LegendManager] Legend control initialized');
+
+        // ✅ NOUVEAU : Créer la première partie par défaut à l'initialisation
+        if (this.stateManager.legendParts.length === 0) {
+            this.stateManager.addLegendPart('I');
+            console.log('[LegendManager] Default first part created');
+        }
+
+        // Afficher la légende dès l'initialisation
+        this.updateLegend();
+
+        console.log('[LegendManager] Legend control initialized and displayed');
     }
+
 
     /**
      * ✅ Met à jour la légende avec système de parties en colonnes
      * + Affiche les représentations visuelles des symboles
+     * + Affiche le panneau dès l'initialisation (même sans figuré)
+     * + Une première partie (I) est toujours présente
      */
     updateLegend() {
         console.log('[LegendManager] ========== updateLegend() START ==========');
@@ -79,7 +79,7 @@ export class LegendManager {
             return;
         }
 
-        // ✅ Header avec bouton + Partie
+        // ✅ Header avec bouton + Partie (TOUJOURS AFFICHÉ)
         container.innerHTML = `
         <div class="legend-header">
             <span class="legend-title">✏️ Légende</span>
@@ -111,20 +111,19 @@ export class LegendManager {
                 partColumn.className = 'legend-part-column';
                 partColumn.setAttribute('data-part-id', part.id);
 
-                // En-tête de la partie
                 // ========================================
-// EN-TÊTE DE LA PARTIE AVEC CONTRÔLES
-// ========================================
+                // EN-TÊTE DE LA PARTIE AVEC CONTRÔLES
+                // ========================================
                 const partHeader = document.createElement('div');
                 partHeader.className = 'legend-part-header';
 
-// Titre
+                // Titre
                 const titleDiv = document.createElement('div');
                 titleDiv.className = 'legend-part-title';
                 titleDiv.textContent = part.title || `Partie ${partIndex + 1}`;
                 partHeader.appendChild(titleDiv);
 
-// ===== BOUTONS DE CONTRÔLE =====
+                // ===== BOUTONS DE CONTRÔLE =====
                 const controlsDiv = document.createElement('div');
                 controlsDiv.className = 'part-management-controls';
 
@@ -167,7 +166,6 @@ export class LegendManager {
 
                 partHeader.appendChild(controlsDiv);
                 partColumn.appendChild(partHeader);
-
 
                 // Conteneur des items de la partie
                 const itemsContainer = document.createElement('div');
@@ -342,7 +340,7 @@ export class LegendManager {
             container.appendChild(columnsContainer);
             console.log('[LegendManager] ✅ All columns added to container');
         }
-
+        // ✅ BLOC ELSE SUPPRIMÉ : Une première partie sera toujours créée à l'initialisation
 
         // ========================================
         // ÉTAPE 3 : SECTION NON CLASSÉS
@@ -369,28 +367,43 @@ export class LegendManager {
 
         console.log('[LegendManager] Found', unclassifiedGeometries.length, 'unclassified geometries');
 
-        unclassifiedGeometries.forEach((geometry, idx) => {
-            const geomIndex = this.stateManager.geometries.indexOf(geometry);
-            console.log(`[LegendManager]   ✅ Adding unclassified geometry ${idx}:`, geometry.name, 'index:', geomIndex);
+        if (unclassifiedGeometries.length > 0) {
+            unclassifiedGeometries.forEach((geometry, idx) => {
+                const geomIndex = this.stateManager.geometries.indexOf(geometry);
+                console.log(`[LegendManager]   ✅ Adding unclassified geometry ${idx}:`, geometry.name, 'index:', geomIndex);
 
-            const legendItem = document.createElement('div');
-            legendItem.className = 'legend-item';
-            legendItem.setAttribute('data-geometry-index', geomIndex);
-            legendItem.draggable = true;
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.setAttribute('data-geometry-index', geomIndex);
+                legendItem.draggable = true;
 
-            // ✅ Créer le symbole SVG/HTML selon le type
-            const symbolElement = this.createLegendSymbol(geometry);
-            legendItem.appendChild(symbolElement);
+                // ✅ Créer le symbole SVG/HTML selon le type
+                const symbolElement = this.createLegendSymbol(geometry);
+                legendItem.appendChild(symbolElement);
 
-            // Ajouter le nom
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'legend-item-name';
-            nameSpan.textContent = geometry.name || 'Sans nom';
-            legendItem.appendChild(nameSpan);
+                // Ajouter le nom
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'legend-item-name';
+                nameSpan.textContent = geometry.name || 'Sans nom';
+                legendItem.appendChild(nameSpan);
 
-            unclassifiedContainer.appendChild(legendItem);
-            console.log(`[LegendManager]   ✅ Unclassified legend item added for:`, geometry.name);
-        });
+                unclassifiedContainer.appendChild(legendItem);
+                console.log(`[LegendManager]   ✅ Unclassified legend item added for:`, geometry.name);
+            });
+        } else {
+            // ✅ Message si aucun figuré non classé
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'legend-empty-message';
+            emptyMsg.textContent = '📍 Aucun figuré non classé';
+            emptyMsg.style.cssText = `
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(102, 126, 234, 0.4);
+            font-style: italic;
+        `;
+            unclassifiedContainer.appendChild(emptyMsg);
+        }
 
         unclassifiedSection.appendChild(unclassifiedContainer);
         container.appendChild(unclassifiedSection);
@@ -428,6 +441,8 @@ export class LegendManager {
         console.log('[LegendManager] ✅ Legend updated with', this.stateManager.legendParts.length, 'parts and', this.stateManager.geometries.length, 'total geometries');
         console.log('[LegendManager] ========== updateLegend() END ==========');
     }
+
+
 
     /**
      * ✅ CRÉE LA REPRÉSENTATION SVG D'UN SYMBOLE POUR LA LÉGENDE
@@ -786,16 +801,21 @@ export class LegendManager {
     }
 
     /**
-     * ✅ Ajoute une nouvelle partie avec numérotation romaine
+     * ✅ Ajoute une nouvelle partie avec numération romaine
+     * La première partie (I) est créée à l'initialisation
+     * Les clics successifs créent II, III, IV, etc.
      */
     _addNewPart() {
         const partNumber = this.stateManager.legendParts.length + 1;
         const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+        // Utiliser la numérotation romaine, ou fallback si > 10
         const title = romanNumerals[partNumber - 1] || `Partie ${partNumber}`;
 
         this.stateManager.addLegendPart(title);
         console.log('[LegendManager] New part added:', title);
     }
+
 
     /**
      * ✅ Crée la section Non classés
