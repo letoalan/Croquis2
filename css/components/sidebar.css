@@ -1,0 +1,171 @@
+/* ==================== SIDEBAR GAUCHE ==================== */
+
+.sidebar-container {
+    position: relative;
+    display: flex;
+    height: 100%;
+    z-index: 1000;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--white);
+    border-right: 1px solid var(--medium-gray);
+    transition: var(--transition-base);
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    transform: translateX(-100%);
+}
+
+.sidebar h5 {
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+    color: var(--white);
+    padding: 12px 15px;
+    margin: -15px -15px 15px -15px;
+    border-radius: 0;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Bouton Toggle Gauche */
+
+.sidebar-toggle-left {
+    position: absolute;
+    top: 75%;
+    left: 100%;
+    transform: translateY(-50%);
+    width: var(--toggle-button-width);
+    height: var(--toggle-button-height);
+    background: var(--primary-gradient-end);
+    border: none;
+    border-radius: 0 10px 10px 0;
+    color: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    font-size: 20px;
+    padding: 0;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-base);
+}
+
+.sidebar-toggle-left:hover {
+    background: var(--primary-gradient-start);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.sidebar-toggle-left .toggle-icon {
+    display: inline-block;
+    transition: var(--transition-base);
+    transform: rotate(0deg);
+}
+
+.sidebar-left.collapsed + .sidebar-toggle-left {
+    left: 0;
+}
+
+/* ==================== SIDEBAR DROITE ==================== */
+
+.sidebar-container-right {
+    position: relative;
+    display: flex;
+    height: 100%;
+    z-index: 1000;
+}
+
+.sidebar-right {
+    width: var(--sidebar-right-width);
+    min-width: var(--sidebar-right-width);
+    background: var(--white);
+    border-left: 1px solid var(--medium-gray);
+    transition: var(--transition-base);
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-right.collapsed {
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.sidebar-right h5 {
+    background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
+    color: var(--white);
+    padding: 12px 15px;
+    margin: -15px -15px 15px -15px;
+    border-radius: 0;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Bouton Toggle Droite */
+
+.sidebar-toggle-right {
+    position: absolute;
+    top: 30%;
+    right: 100%;
+    transform: translateY(-50%);
+    width: var(--toggle-button-width);
+    height: var(--toggle-button-height);
+    background: var(--primary-gradient-end);
+    border: none;
+    border-radius: 10px 0 0 10px;
+    color: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    font-size: 20px;
+    padding: 0;
+    box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-base);
+}
+
+.sidebar-toggle-right:hover {
+    background: var(--primary-gradient-start);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.sidebar-toggle-right .toggle-icon {
+    display: inline-block;
+    transition: var(--transition-base);
+    transform: rotate(180deg);
+}
+
+.sidebar-right.collapsed + .sidebar-toggle-right {
+    right: 0;
+}
+
+.sidebar-right.collapsed + .sidebar-toggle-right .toggle-icon {
+    transform: rotate(0deg);
+}
