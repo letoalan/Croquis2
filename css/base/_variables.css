@@ -1,0 +1,79 @@
+/* ==================== VARIABLES CSS ==================== */
+
+:root {
+    /* ========================================
+       COULEURS PRINCIPALES (GRADIENTS)
+       ======================================== */
+    --primary-gradient-start: #667eea;
+    --primary-gradient-end: #764ba2;
+    --secondary-gradient-start: #28a745;
+    --secondary-gradient-end: #20c997;
+    --danger-gradient-start: #f093fb;
+    --danger-gradient-end: #f5576c;
+    --warning-gradient-start: #ffb347;
+    --warning-gradient-end: #ffcc33;
+    --success-gradient-start: #11998e;
+    --success-gradient-end: #38ef7d;
+
+    /* ========================================
+       COULEURS NEUTRES & TEXTE
+       ======================================== */
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --gray: #e9ecef;
+    --medium-gray: #dee2e6;
+    --dark-gray: #495057;
+    --text-muted: #6c757d;
+    --text-primary: #2c3e50;           /* ✅ Texte principal (sombre) */
+    --text-secondary: #495057;          /* ✅ Texte secondaire (moyen) */
+    --text-light: #6c757d;              /* ✅ Texte léger (clair) */
+    --border-color: #e1e8ed;
+    --border-light: #f0f1f3;            /* ✅ Bordure très légère */
+
+    /* ========================================
+       COULEURS DE SURFACE
+       ======================================== */
+    --surface-light: #f5f6f7;           /* ✅ Fond très clair */
+    --surface-default: #ffffff;         /* ✅ Fond par défaut */
+    --surface-dark: #f0f1f3;            /* ✅ Fond légèrement gris */
+
+    /* ========================================
+       OMBRES
+       ======================================== */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 15px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 10px 40px rgba(0, 0, 0, 0.25);
+
+    /* ========================================
+       TRANSITIONS & ANIMATIONS
+       ======================================== */
+    --transition-base: all 0.3s ease;
+    --transition-fast: all 0.2s ease;
+    --transition-slow: all 0.5s ease;
+
+    /* ========================================
+       DIMENSIONS & ESPACEMENTS
+       ======================================== */
+    --sidebar-width: 320px;
+    --sidebar-right-width: 525px;
+    --toggle-button-width: 40px;
+    --toggle-button-height: 80px;
+
+    /* ========================================
+       BORDER RADIUS
+       ======================================== */
+    --border-radius-sm: 4px;
+    --border-radius-md: 6px;
+    --border-radius-lg: 8px;
+    --border-radius-xl: 12px;
+
+    /* ========================================
+       ESPACEMENTS (OPTIONNEL)
+       ======================================== */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+}

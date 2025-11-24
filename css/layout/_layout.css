@@ -1,0 +1,46 @@
+/* ==================== LISTE DES GÉOMÉTRIES ==================== */
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-fast);
+}
+
+.list-item:hover {
+    background-color: var(--light-gray);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.list-item.selected {
+    background: linear-gradient(135deg, var(--gray) 0%, var(--medium-gray) 100%);
+    border-color: var(--primary-gradient-start);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+}
+
+.list-item .btn-light {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.list-item input.form-control {
+    height: auto;
+    padding: 2px 6px;
+    font-size: 14px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-base);
+}
+
+.list-item input.form-control:focus {
+    border-color: var(--primary-gradient-start);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}

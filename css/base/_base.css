@@ -1,0 +1,75 @@
+/* ==================== STYLES DE BASE ==================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+}
+
+.vh-100 {
+    height: 100vh;
+}
+
+.d-flex.vh-100 {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ==================== SCROLLBAR PERSONNALISÉE ==================== */
+
+.sidebar::-webkit-scrollbar,
+.sidebar-right::-webkit-scrollbar,
+.text-editor::-webkit-scrollbar,
+.drop-zones-container::-webkit-scrollbar,
+.text-editor-multiline::-webkit-scrollbar,
+.available-symbols-palette::-webkit-scrollbar,
+.legend-control::-webkit-scrollbar,
+.context-menu-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.sidebar-right::-webkit-scrollbar-track,
+.text-editor::-webkit-scrollbar-track,
+.drop-zones-container::-webkit-scrollbar-track,
+.text-editor-multiline::-webkit-scrollbar-track,
+.available-symbols-palette::-webkit-scrollbar-track,
+.legend-control::-webkit-scrollbar-track,
+.context-menu-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: var(--border-radius-sm);
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.legend-control::-webkit-scrollbar-thumb,
+.context-menu-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+    border-radius: var(--border-radius-sm);
+}
+
+.sidebar-right::-webkit-scrollbar-thumb,
+.text-editor::-webkit-scrollbar-thumb,
+.drop-zones-container::-webkit-scrollbar-thumb,
+.text-editor-multiline::-webkit-scrollbar-thumb,
+.available-symbols-palette::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
+    border-radius: var(--border-radius-sm);
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.sidebar-right::-webkit-scrollbar-thumb:hover,
+.text-editor::-webkit-scrollbar-thumb:hover,
+.drop-zones-container::-webkit-scrollbar-thumb:hover,
+.text-editor-multiline::-webkit-scrollbar-thumb:hover,
+.available-symbols-palette::-webkit-scrollbar-thumb:hover,
+.legend-control::-webkit-scrollbar-thumb:hover,
+.context-menu-body::-webkit-scrollbar-thumb:hover {
+    opacity: 0.8;
+}

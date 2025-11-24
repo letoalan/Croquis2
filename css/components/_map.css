@@ -1,0 +1,109 @@
+/* ==================== CARTE ==================== */
+
+.map {
+    flex: 1;
+    position: relative;
+    transition: var(--transition-base);
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    transition: var(--transition-base);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* ==================== TITRE DE LA CARTE ==================== */
+
+.map-title-container {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    font-weight: bold;
+    text-align: center;
+    width: auto;
+    max-width: min(800px, 60vw);
+    min-width: 200px;
+    word-wrap: break-word;
+    white-space: normal;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    transition: var(--transition-base);
+}
+
+.map-title-container:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.map-title-display {
+    flex-grow: 1;
+    white-space: normal;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    color: var(--dark-gray);
+}
+
+.map-title-input-container {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.map-title-input {
+    width: 200px;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    transition: var(--transition-base);
+    font-weight: 500;
+}
+
+.map-title-input:focus {
+    border-color: var(--primary-gradient-start);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.toggle-icon {
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--primary-gradient-start);
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+}
+
+.toggle-icon:hover {
+    transform: scale(1.1);
+}
+
+.map-title-container.collapsed {
+    height: 50px;
+    overflow: hidden;
+    transition: var(--transition-base);
+}
+
+.map-title-container.expanded {
+    height: auto;
+    transition: var(--transition-base);
+}
