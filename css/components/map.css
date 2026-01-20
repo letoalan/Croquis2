@@ -1,20 +1,23 @@
 /* ==================== CARTE ==================== */
-/* Version corrigée pour Promethean/Chromium : hauteur dynamique + anti-overflow */
+/* Version Promethean v2 : marges agressives + contrôles repositionnés */
+
+:root {
+    --promethean-safe-margin: 80px; /* ajuster si besoin : 60, 80, 100 */
+}
 
 .map {
     flex: 1;
     position: relative;
     transition: var(--transition-base);
     min-width: 0;
-    /* SOLUTION PROMETHEAN : 100svh prioritaire, fallback calc puis 100vh */
-    height: 100svh;
-    height: calc(100dvh - 20px);
-    height: calc(100vh - 30px);
-    max-height: 100vh;
-    overflow: hidden;
-    /* Anti-bordure système */
+    /* HAUTEUR RÉDUITE pour barre Promethean */
+    height: calc(100vh - var(--promethean-safe-margin)) !important;
+    height: calc(100svh - var(--promethean-safe-margin)) !important;
+    max-height: calc(100vh - var(--promethean-safe-margin));
+    overflow: visible; /* permet aux contrôles de respirer */
     margin: 0;
     padding: 0;
+    padding-bottom: 10px; /* marge interne basse */
     box-sizing: border-box;
 }
 
@@ -27,26 +30,65 @@
     left: 0;
     right: 0;
     bottom: 0;
-    /* Anti-overflow tuiles */
     overflow: visible;
+}
+
+/* ==================== CONTRÔLES LEAFLET REPOSITIONNÉS ==================== */
+
+/* Échelle : remonter au-dessus de la barre */
+.leaflet-control-scale,
+.leaflet-control-scale-line {
+    bottom: 20px !important;
+    margin-bottom: 0 !important;
+}
+
+/* Tous les contrôles bas-gauche */
+.leaflet-bottom.leaflet-left {
+    bottom: 25px !important;
+}
+
+/* Tous les contrôles bas-droite (sélecteur tuiles) */
+.leaflet-bottom.leaflet-right {
+    bottom: 25px !important;
+}
+
+/* Sélecteur de couches/tuiles */
+.leaflet-control-layers {
+    margin-bottom: 10px !important;
+}
+
+/* Attribution Leaflet */
+.leaflet-control-attribution {
+    bottom: 5px !important;
+    margin-bottom: 0 !important;
+    font-size: 9px !important;
+    padding: 2px 5px !important;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Zoom contrôles (sécurité) */
+.leaflet-control-zoom {
+    margin-top: 60px !important; /* sous le titre */
 }
 
 /* ==================== TITRE DE LA CARTE ==================== */
 
 .map-title-container {
     position: absolute;
-    top: clamp(5px, 2vh, 10px); /* responsive top */
+    top: clamp(5px, 1.5vh, 10px);
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1001; /* +1 pour sécurité */
-    background: rgba(255, 255, 255, 0.98); /* +opaque */
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
-    padding: clamp(8px, 2vh, 12px) clamp(12px, 4vw, 20px);
+    padding: clamp(6px, 1.5vh, 12px) clamp(10px, 3vw, 20px);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
     font-weight: bold;
     text-align: center;
-    /* Responsive width optimisée */
     width: clamp(200px, 60vw, 800px);
     word-wrap: break-word;
     white-space: normal;
@@ -55,8 +97,6 @@
     gap: clamp(5px, 1.5vw, 10px);
     overflow: hidden;
     transition: var(--transition-base);
-    /* Anti-dépassement bas */
-    margin-bottom: 10px;
 }
 
 .map-title-container:hover {
@@ -84,7 +124,6 @@
 }
 
 .map-title-input {
-    /* Responsive width */
     width: clamp(150px, 25vw, 250px);
     flex-shrink: 0;
     border: 2px solid var(--border-color);
@@ -126,33 +165,49 @@
     transition: var(--transition-base);
 }
 
-/* ==================== MEDIA QUERIES PROMETHEAN/MOBILE ==================== */
-@media (max-height: 600px), (max-width: 1024px) {
-    .map {
-        height: calc(100vh - 40px) !important;
-    }
+/* ==================== MEDIA QUERIES PROMETHEAN ==================== */
 
+/* Écrans interactifs / tactiles */
+@media screen and (pointer: coarse) {
+    :root {
+        --promethean-safe-margin: 100px;
+    }
+    
+    .leaflet-bottom.leaflet-left,
+    .leaflet-bottom.leaflet-right {
+        bottom: 40px !important;
+    }
+    
+    .leaflet-control-attribution {
+        display: none; /* masquer si trop encombrant */
+    }
+}
+
+/* Petit viewport hauteur (TBI/kiosk) */
+@media (max-height: 800px) {
+    :root {
+        --promethean-safe-margin: 90px;
+    }
+    
     .map-title-container {
         top: 2px !important;
-        padding: 6px 10px !important;
-        font-size: 0.9rem !important;
+        padding: 5px 10px !important;
     }
-
-    .map-title-input {
-        width: 140px !important;
-    }
-}
-
-/* Anti-bug Chromium kiosk/Promethean */
-@supports not (height: 100svh) {
-    .map {
-        height: calc(100vh - 25px) !important;
+    
+    .leaflet-bottom.leaflet-left,
+    .leaflet-bottom.leaflet-right {
+        bottom: 35px !important;
     }
 }
 
-/* Force pour écrans interactifs */
-@media screen and (pointer: coarse) {
-    .map {
-        height: calc(100vh - 35px) !important;
+/* Très petit viewport */
+@media (max-height: 600px) {
+    :root {
+        --promethean-safe-margin: 100px;
+    }
+    
+    .leaflet-control-scale {
+        transform: scale(0.8);
+        transform-origin: bottom left;
     }
 }
