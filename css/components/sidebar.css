@@ -42,13 +42,14 @@
     gap: 8px;
 }
 
-/* Bouton Toggle Gauche */
+/* Bouton Toggle Gauche - Position basse par défaut */
 
 .sidebar-toggle-left {
     position: absolute;
-    top: 75%;
+    top: auto;
+    bottom: 20px; /* marge sécurité par défaut */
     left: 100%;
-    transform: translateY(-50%);
+    transform: translateY(0);
     width: var(--toggle-button-width);
     height: var(--toggle-button-height);
     background: var(--primary-gradient-end);
@@ -68,7 +69,7 @@
 
 .sidebar-toggle-left:hover {
     background: var(--primary-gradient-start);
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(0) scale(1.05);
 }
 
 .sidebar-toggle-left .toggle-icon {
@@ -127,13 +128,14 @@
     gap: 8px;
 }
 
-/* Bouton Toggle Droite */
+/* Bouton Toggle Droite - Position basse par défaut */
 
 .sidebar-toggle-right {
     position: absolute;
-    top: 30%;
+    top: auto;
+    bottom: 80px; /* plus haut que gauche pour éviter chevauchement */
     right: 100%;
-    transform: translateY(-50%);
+    transform: translateY(0);
     width: var(--toggle-button-width);
     height: var(--toggle-button-height);
     background: var(--primary-gradient-end);
@@ -153,7 +155,7 @@
 
 .sidebar-toggle-right:hover {
     background: var(--primary-gradient-start);
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(0) scale(1.05);
 }
 
 .sidebar-toggle-right .toggle-icon {
@@ -171,30 +173,18 @@
 }
 
 /* ==================== ADAPTATION PROMETHEAN ACTIVPANEL ==================== */
-/* Repositionnement toggles uniquement sur TBI tactiles larges */
+/* Marges augmentées pour éviter barre système */
 
 @media screen and (pointer: coarse) and (min-width: 1600px) and (orientation: landscape) {
     
     /* Toggle gauche : au-dessus de l'échelle Leaflet */
     .sidebar-toggle-left {
-        top: auto;
         bottom: calc(var(--promethean-safe-margin, 80px) + 60px);
-        transform: translateY(0);
-    }
-    
-    .sidebar-toggle-left:hover {
-        transform: translateY(0) scale(1.05);
     }
     
     /* Toggle droite : au-dessus du sélecteur de tuiles */
     .sidebar-toggle-right {
-        top: auto;
         bottom: calc(var(--promethean-safe-margin, 80px) + 120px);
-        transform: translateY(0);
-    }
-    
-    .sidebar-toggle-right:hover {
-        transform: translateY(0) scale(1.05);
     }
 }
 
@@ -219,29 +209,5 @@
     
     .sidebar-toggle-right {
         bottom: 180px;
-    }
-}
-
-/* Tablettes tactiles : garde position originale */
-@media screen and (pointer: coarse) and (max-width: 1599px) {
-    
-    .sidebar-toggle-left {
-        top: 75%;
-        bottom: auto;
-        transform: translateY(-50%);
-    }
-    
-    .sidebar-toggle-left:hover {
-        transform: translateY(-50%) scale(1.05);
-    }
-    
-    .sidebar-toggle-right {
-        top: 30%;
-        bottom: auto;
-        transform: translateY(-50%);
-    }
-    
-    .sidebar-toggle-right:hover {
-        transform: translateY(-50%) scale(1.05);
     }
 }
