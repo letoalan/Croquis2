@@ -1,24 +1,18 @@
 /* ==================== CARTE ==================== */
-/* Version Promethean v3 : suppression du vide noir + repositionnement toggles */
-
-:root {
-    --promethean-safe-margin: 0px; /* DÉSACTIVÉ par défaut */
-}
+/* Version optimisée Promethean ActivPanel */
 
 .map {
     flex: 1;
     position: relative;
     transition: var(--transition-base);
     min-width: 0;
-    /* HAUTEUR 100% par défaut, ajustée seulement sur Promethean */
-    height: 100vh;
+    /* Hauteur pleine - pas de réduction */
+    height: 100vh !important;
     max-height: 100vh;
     overflow: visible;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /* Fond blanc pour voir où s'arrête la carte */
-    background: white;
 }
 
 #map {
@@ -31,41 +25,38 @@
     right: 0;
     bottom: 0;
     overflow: visible;
-    /* Fond gris pour debug - retirer après test */
-    background: #f0f0f0;
 }
 
-/* ==================== CONTRÔLES LEAFLET (position par défaut) ==================== */
+/* ==================== CONTRÔLES LEAFLET REMONTÉS ==================== */
 
+/* Échelle : au-dessus de la barre Chromium */
 .leaflet-control-scale,
 .leaflet-control-scale-line {
-    bottom: 10px !important;
+    bottom: 95px !important;
     margin-bottom: 0 !important;
 }
 
+/* Tous les contrôles bas-gauche */
 .leaflet-bottom.leaflet-left {
-    bottom: 10px !important;
+    bottom: 90px !important;
 }
 
+/* Tous les contrôles bas-droite (sélecteur tuiles) */
 .leaflet-bottom.leaflet-right {
-    bottom: 10px !important;
+    bottom: 90px !important;
 }
 
+/* Sélecteur de couches/tuiles */
 .leaflet-control-layers {
-    margin-bottom: 5px !important;
+    margin-bottom: 10px !important;
 }
 
+/* Attribution masquée pour gagner de la place */
 .leaflet-control-attribution {
-    bottom: 5px !important;
-    margin-bottom: 0 !important;
-    font-size: 9px !important;
-    padding: 2px 5px !important;
-    max-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none !important;
 }
 
+/* Zoom contrôles */
 .leaflet-control-zoom {
     margin-top: 60px !important;
 }
@@ -74,13 +65,13 @@
 
 .map-title-container {
     position: absolute;
-    top: clamp(5px, 1.5vh, 10px);
+    top: 5px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1001;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
-    padding: clamp(6px, 1.5vh, 12px) clamp(10px, 3vw, 20px);
+    padding: 8px 15px;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
     font-weight: bold;
@@ -90,7 +81,7 @@
     white-space: normal;
     display: flex;
     align-items: center;
-    gap: clamp(5px, 1.5vw, 10px);
+    gap: 10px;
     overflow: hidden;
     transition: var(--transition-base);
 }
@@ -110,24 +101,24 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     color: var(--dark-gray);
-    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-size: 1rem;
 }
 
 .map-title-input-container {
     display: flex;
-    gap: clamp(5px, 1vw, 10px);
+    gap: 10px;
     flex-shrink: 0;
 }
 
 .map-title-input {
-    width: clamp(150px, 25vw, 250px);
+    width: 200px;
     flex-shrink: 0;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius-md);
-    padding: clamp(6px, 1.5vh, 8px) 12px;
+    padding: 8px 12px;
     transition: var(--transition-base);
     font-weight: 500;
-    font-size: clamp(0.85rem, 2vw, 1rem);
+    font-size: 1rem;
 }
 
 .map-title-input:focus {
@@ -138,7 +129,7 @@
 
 .toggle-icon {
     cursor: pointer;
-    font-size: clamp(18px, 3vw, 22px);
+    font-size: 20px;
     color: var(--primary-gradient-start);
     flex-shrink: 0;
     transition: var(--transition-fast);
@@ -151,7 +142,7 @@
 }
 
 .map-title-container.collapsed {
-    max-height: clamp(40px, 8vh, 55px);
+    max-height: 50px;
     overflow: hidden;
     transition: var(--transition-base);
 }
@@ -159,41 +150,4 @@
 .map-title-container.expanded {
     max-height: none;
     transition: var(--transition-base);
-}
-
-/* ==================== MEDIA QUERIES PROMETHEAN UNIQUEMENT ==================== */
-
-/* Détection Promethean : écran tactile large en paysage */
-@media screen and (pointer: coarse) and (min-width: 1600px) and (orientation: landscape) {
-    
-    /* Remonter les contrôles Leaflet au-dessus barre Chromium */
-    .leaflet-bottom.leaflet-left {
-        bottom: 90px !important;
-    }
-    
-    .leaflet-bottom.leaflet-right {
-        bottom: 90px !important;
-    }
-    
-    .leaflet-control-scale,
-    .leaflet-control-scale-line {
-        bottom: 95px !important;
-    }
-    
-    .leaflet-control-attribution {
-        display: none; /* masquer attribution sur Promethean */
-    }
-}
-
-/* Promethean 4K haute résolution */
-@media screen and (pointer: coarse) and (min-width: 3000px) {
-    
-    .leaflet-bottom.leaflet-left,
-    .leaflet-bottom.leaflet-right {
-        bottom: 110px !important;
-    }
-    
-    .leaflet-control-scale {
-        bottom: 115px !important;
-    }
 }
