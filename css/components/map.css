@@ -1,8 +1,8 @@
 /* ==================== CARTE ==================== */
-/* Version Promethean v2 : marges agressives + contrôles repositionnés */
+/* Version Promethean v3 : suppression du vide noir + repositionnement toggles */
 
 :root {
-    --promethean-safe-margin: 80px; /* ajuster si besoin : 60, 80, 100 */
+    --promethean-safe-margin: 0px; /* DÉSACTIVÉ par défaut */
 }
 
 .map {
@@ -10,15 +10,15 @@
     position: relative;
     transition: var(--transition-base);
     min-width: 0;
-    /* HAUTEUR RÉDUITE pour barre Promethean */
-    height: calc(100vh - var(--promethean-safe-margin)) !important;
-    height: calc(100svh - var(--promethean-safe-margin)) !important;
-    max-height: calc(100vh - var(--promethean-safe-margin));
-    overflow: visible; /* permet aux contrôles de respirer */
+    /* HAUTEUR 100% par défaut, ajustée seulement sur Promethean */
+    height: 100vh;
+    max-height: 100vh;
+    overflow: visible;
     margin: 0;
     padding: 0;
-    padding-bottom: 10px; /* marge interne basse */
     box-sizing: border-box;
+    /* Fond blanc pour voir où s'arrête la carte */
+    background: white;
 }
 
 #map {
@@ -31,33 +31,30 @@
     right: 0;
     bottom: 0;
     overflow: visible;
+    /* Fond gris pour debug - retirer après test */
+    background: #f0f0f0;
 }
 
-/* ==================== CONTRÔLES LEAFLET REPOSITIONNÉS ==================== */
+/* ==================== CONTRÔLES LEAFLET (position par défaut) ==================== */
 
-/* Échelle : remonter au-dessus de la barre */
 .leaflet-control-scale,
 .leaflet-control-scale-line {
-    bottom: 20px !important;
+    bottom: 10px !important;
     margin-bottom: 0 !important;
 }
 
-/* Tous les contrôles bas-gauche */
 .leaflet-bottom.leaflet-left {
-    bottom: 25px !important;
+    bottom: 10px !important;
 }
 
-/* Tous les contrôles bas-droite (sélecteur tuiles) */
 .leaflet-bottom.leaflet-right {
-    bottom: 25px !important;
+    bottom: 10px !important;
 }
 
-/* Sélecteur de couches/tuiles */
 .leaflet-control-layers {
-    margin-bottom: 10px !important;
+    margin-bottom: 5px !important;
 }
 
-/* Attribution Leaflet */
 .leaflet-control-attribution {
     bottom: 5px !important;
     margin-bottom: 0 !important;
@@ -69,9 +66,8 @@
     text-overflow: ellipsis;
 }
 
-/* Zoom contrôles (sécurité) */
 .leaflet-control-zoom {
-    margin-top: 60px !important; /* sous le titre */
+    margin-top: 60px !important;
 }
 
 /* ==================== TITRE DE LA CARTE ==================== */
@@ -165,49 +161,39 @@
     transition: var(--transition-base);
 }
 
-/* ==================== MEDIA QUERIES PROMETHEAN ==================== */
+/* ==================== MEDIA QUERIES PROMETHEAN UNIQUEMENT ==================== */
 
-/* Écrans interactifs / tactiles */
-@media screen and (pointer: coarse) {
-    :root {
-        --promethean-safe-margin: 100px;
+/* Détection Promethean : écran tactile large en paysage */
+@media screen and (pointer: coarse) and (min-width: 1600px) and (orientation: landscape) {
+    
+    /* Remonter les contrôles Leaflet au-dessus barre Chromium */
+    .leaflet-bottom.leaflet-left {
+        bottom: 90px !important;
     }
     
-    .leaflet-bottom.leaflet-left,
     .leaflet-bottom.leaflet-right {
-        bottom: 40px !important;
+        bottom: 90px !important;
+    }
+    
+    .leaflet-control-scale,
+    .leaflet-control-scale-line {
+        bottom: 95px !important;
     }
     
     .leaflet-control-attribution {
-        display: none; /* masquer si trop encombrant */
+        display: none; /* masquer attribution sur Promethean */
     }
 }
 
-/* Petit viewport hauteur (TBI/kiosk) */
-@media (max-height: 800px) {
-    :root {
-        --promethean-safe-margin: 90px;
-    }
-    
-    .map-title-container {
-        top: 2px !important;
-        padding: 5px 10px !important;
-    }
+/* Promethean 4K haute résolution */
+@media screen and (pointer: coarse) and (min-width: 3000px) {
     
     .leaflet-bottom.leaflet-left,
     .leaflet-bottom.leaflet-right {
-        bottom: 35px !important;
-    }
-}
-
-/* Très petit viewport */
-@media (max-height: 600px) {
-    :root {
-        --promethean-safe-margin: 100px;
+        bottom: 110px !important;
     }
     
     .leaflet-control-scale {
-        transform: scale(0.8);
-        transform-origin: bottom left;
+        bottom: 115px !important;
     }
 }
