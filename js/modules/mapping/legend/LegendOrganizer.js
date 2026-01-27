@@ -1,13 +1,11 @@
 // js/modules/mapping/legend/LegendOrganizer.js
 
+// js/modules/mapping/legend/LegendOrganizer.js
+
 export class LegendOrganizer {
     constructor(stateManager, legendManager) {
-        if (!stateManager) {
-            throw new Error('StateManager is required for LegendOrganizer initialization.');
-        }
-        if (!legendManager) {
-            throw new Error('LegendManager is required for LegendOrganizer initialization.');
-        }
+        if (!stateManager) throw new Error("StateManager is required for LegendOrganizer initialization.");
+        if (!legendManager) throw new Error("LegendManager is required for LegendOrganizer initialization.");
 
         this.stateManager = stateManager;
         this.legendManager = legendManager;
@@ -15,123 +13,40 @@ export class LegendOrganizer {
         this.draggedGeometryIndex = null;
         this.sourcePartId = null;
 
-        console.log('[LegendOrganizer] Initializing LegendOrganizer...');
+        // NOUVEAU : Support tactile
+        this.isDragging = false;
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.dragThreshold = 10; // pixels de mouvement pour déclencher le drag
+
+        console.log("[LegendOrganizer] Initializing with touch support...");
     }
 
-    /**
-     * ✅ Ajoute les boutons de gestion des parties et sous-parties
-     */
-    _createPartManagementControls(container, part, partIndex) {
-        const controls = document.createElement('div');
-        controls.className = 'part-management-controls';
+    // ==================== SETUP PRINCIPAL ====================
 
-        // ====== BOUTON : Ajouter une sous-partie ======
-        const addSubPartBtn = document.createElement('button');
-        addSubPartBtn.textContent = '+ Sous-partie';
-        addSubPartBtn.className = 'btn btn-sm btn-info';
-        addSubPartBtn.addEventListener('click', () => {
-            console.log('[LegendManager] Adding sub-part to part:', part.id);
-            const newSubPartCount = part.subParts?.length || 0;
-            this.stateManager.addLegendSubPart(part.id, 1);
-            this.updateLegend();
-        });
-
-        // ====== BOUTON : Renommer la partie ======
-        const renamePartBtn = document.createElement('button');
-        renamePartBtn.textContent = '✏️ Renommer';
-        renamePartBtn.className = 'btn btn-sm btn-warning';
-        renamePartBtn.addEventListener('click', () => {
-            const newTitle = prompt('Nouveau nom pour la partie:', part.title);
-            if (newTitle !== null && newTitle.trim()) {
-                console.log('[LegendManager] Renaming part:', part.id, '→', newTitle);
-                this.stateManager.updatePartTitle(part.id, newTitle.trim());
-                this.updateLegend();
-            }
-        });
-
-        // ====== BOUTON : Supprimer la partie ======
-        const deletePartBtn = document.createElement('button');
-        deletePartBtn.textContent = '🗑️ Supprimer';
-        deletePartBtn.className = 'btn btn-sm btn-danger';
-        deletePartBtn.addEventListener('click', () => {
-            if (confirm(`Supprimer la partie "${part.title}" et ses contenus ?`)) {
-                console.log('[LegendManager] Deleting part:', part.id);
-                this.stateManager.deleteLegendPart(part.id);
-                this.updateLegend();
-            }
-        });
-
-        controls.appendChild(addSubPartBtn);
-        controls.appendChild(renamePartBtn);
-        controls.appendChild(deletePartBtn);
-
-        return controls;
-    }
-
-    /**
-     * ✅ Ajoute les contrôles de gestion des sous-parties
-     */
-    _createSubPartManagementControls(container, part, subPart, subPartIndex) {
-        const controls = document.createElement('div');
-        controls.className = 'subpart-management-controls';
-
-        // ====== BOUTON : Renommer la sous-partie ======
-        const renameSubPartBtn = document.createElement('button');
-        renameSubPartBtn.textContent = '✏️ Renommer';
-        renameSubPartBtn.className = 'btn btn-sm btn-warning';
-        renameSubPartBtn.addEventListener('click', () => {
-            const newTitle = prompt('Nouveau nom pour la sous-partie:', subPart.title);
-            if (newTitle !== null && newTitle.trim()) {
-                console.log('[LegendManager] Renaming sub-part:', subPart.id, '→', newTitle);
-                this.stateManager.updateSubPartTitle(part.id, subPart.id, newTitle.trim());
-                this.updateLegend();
-            }
-        });
-
-        // ====== BOUTON : Supprimer la sous-partie ======
-        const deleteSubPartBtn = document.createElement('button');
-        deleteSubPartBtn.textContent = '🗑️ Supprimer';
-        deleteSubPartBtn.className = 'btn btn-sm btn-danger';
-        deleteSubPartBtn.addEventListener('click', () => {
-            if (confirm(`Supprimer la sous-partie "${subPart.title}" et ses contenus ?`)) {
-                console.log('[LegendManager] Deleting sub-part:', subPart.id);
-                this.stateManager.deleteLegendSubPart(part.id, subPart.id);
-                this.updateLegend();
-            }
-        });
-
-        controls.appendChild(renameSubPartBtn);
-        controls.appendChild(deleteSubPartBtn);
-
-        return controls;
-    }
-
-
-    /**
-     * ✅ Initialise tous les événements drag & drop
-     */
     setupDragAndDrop() {
-        console.log('[LegendOrganizer] Setting up drag and drop...');
+        console.log("[LegendOrganizer] Setting up drag and drop with touch support...");
 
         // Récupérer tous les items draggables
         const legendItems = document.querySelectorAll('.legend-item[draggable="true"]');
         legendItems.forEach(item => {
-            this._setupItemDrag(item);
+            this.setupItemDrag(item);
+            this.setupItemTouch(item); // NOUVEAU
         });
 
         // Récupérer toutes les drop zones
         const dropZones = document.querySelectorAll('.legend-drop-zone');
         dropZones.forEach(zone => {
-            this._setupDropZone(zone);
+            this.setupDropZone(zone);
+            this.setupDropZoneTouch(zone); // NOUVEAU
         });
 
-        console.log('[LegendOrganizer] Drag and drop setup complete');
+        console.log("[LegendOrganizer] Drag and drop setup complete:", legendItems.length, "items,", dropZones.length, "zones");
     }
 
-    /**
-     * ✅ Configure les événements drag pour un item
-     */
-    _setupItemDrag(item) {
+    // ==================== DRAG SOURIS (original) ====================
+
+    setupItemDrag(item) {
         // Drag start
         item.addEventListener('dragstart', (e) => {
             this.draggedElement = item;
@@ -140,15 +55,14 @@ export class LegendOrganizer {
             // Trouver la partie source
             const dropZone = item.closest('.legend-drop-zone');
             if (dropZone) {
-                this.sourcePartId = dropZone.getAttribute('data-part-id') ||
-                    dropZone.getAttribute('data-category-id');
+                this.sourcePartId = dropZone.getAttribute('data-part-id') || dropZone.getAttribute('data-category-id');
             }
 
             item.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', item.innerHTML);
 
-            console.log('[LegendOrganizer] Drag started:', {
+            console.log("[LegendOrganizer] Drag started:", {
                 geometryIndex: this.draggedGeometryIndex,
                 sourcePartId: this.sourcePartId
             });
@@ -167,14 +81,191 @@ export class LegendOrganizer {
             this.draggedGeometryIndex = null;
             this.sourcePartId = null;
 
-            console.log('[LegendOrganizer] Drag ended');
+            console.log("[LegendOrganizer] Drag ended");
         });
     }
 
-    /**
-     * ✅ Configure les événements drop pour une zone
-     */
-    _setupDropZone(zone) {
+    // ==================== DRAG TACTILE (NOUVEAU) ====================
+
+    setupItemTouch(item) {
+        let longPressTimer = null;
+
+        // Touch start
+        item.addEventListener('touchstart', (e) => {
+            // Ignorer si on touche un élément interactif
+            if (this.isInteractiveElement(e.target)) {
+                return;
+            }
+
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+
+            // Long press pour activer le drag (500ms)
+            longPressTimer = setTimeout(() => {
+                this.startTouchDrag(item, e);
+            }, 500);
+
+            e.preventDefault();
+        }, { passive: false });
+
+        // Touch move
+        item.addEventListener('touchmove', (e) => {
+            // Annuler le long press si on bouge avant
+            if (longPressTimer && !this.isDragging) {
+                const deltaX = Math.abs(e.touches[0].clientX - this.touchStartX);
+                const deltaY = Math.abs(e.touches[0].clientY - this.touchStartY);
+
+                if (deltaX > this.dragThreshold || deltaY > this.dragThreshold) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            }
+
+            if (this.isDragging) {
+                this.handleTouchMove(item, e);
+            }
+        }, { passive: false });
+
+        // Touch end
+        item.addEventListener('touchend', (e) => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+
+            if (this.isDragging) {
+                this.endTouchDrag(item, e);
+            }
+        });
+
+        // Touch cancel
+        item.addEventListener('touchcancel', (e) => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+
+            if (this.isDragging) {
+                this.cancelTouchDrag(item);
+            }
+        });
+    }
+
+    startTouchDrag(item, e) {
+        console.log("[LegendOrganizer] Touch drag started");
+
+        this.isDragging = true;
+        this.draggedElement = item;
+        this.draggedGeometryIndex = parseInt(item.getAttribute('data-geometry-index'));
+
+        // Trouver la partie source
+        const dropZone = item.closest('.legend-drop-zone');
+        if (dropZone) {
+            this.sourcePartId = dropZone.getAttribute('data-part-id') ||
+                dropZone.getAttribute('data-subpart-id') ||
+                dropZone.getAttribute('data-category-id');
+        }
+
+        item.classList.add('dragging');
+
+        // Feedback visuel
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    }
+
+    handleTouchMove(item, e) {
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Trouver la drop zone sous le doigt
+        const elementBelow = document.elementFromPoint(touchX, touchY);
+        const dropZone = elementBelow?.closest('.legend-drop-zone');
+
+        // Nettoyer tous les drag-over
+        document.querySelectorAll('.legend-drop-zone').forEach(zone => {
+            zone.classList.remove('drag-over');
+        });
+
+        // Ajouter drag-over à la zone actuelle
+        if (dropZone && dropZone !== item.closest('.legend-drop-zone')) {
+            dropZone.classList.add('drag-over');
+        }
+    }
+
+    endTouchDrag(item, e) {
+        console.log("[LegendOrganizer] Touch drag ended");
+
+        if (!this.isDragging) return;
+
+        const touch = e.changedTouches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Trouver la drop zone sous le doigt
+        const elementBelow = document.elementFromPoint(touchX, touchY);
+        const dropZone = elementBelow?.closest('.legend-drop-zone');
+
+        if (dropZone && this.draggedGeometryIndex !== null) {
+            // Gerer le drop
+            const targetPartId = dropZone.getAttribute('data-subpart-id') || // Priorité aux sous-parties
+                dropZone.getAttribute('data-part-id') ||
+                dropZone.getAttribute('data-category-id');
+
+            // Ne rien faire si on drop dans la même zone
+            if (targetPartId !== this.sourcePartId) {
+                console.log("[LegendOrganizer] Touch drop:", {
+                    geometryIndex: this.draggedGeometryIndex,
+                    from: this.sourcePartId,
+                    to: targetPartId
+                });
+
+                // Assigner la nouvelle partie
+                if (targetPartId === 'unclassified') {
+                    this.stateManager.assignGeometryToPart(this.draggedGeometryIndex, null);
+                } else {
+                    this.stateManager.assignGeometryToPart(this.draggedGeometryIndex, targetPartId);
+                }
+
+                // Feedback vibration succès
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 100, 50]);
+                }
+            }
+        }
+
+        // Cleanup
+        item.classList.remove('dragging');
+        document.querySelectorAll('.legend-drop-zone').forEach(zone => {
+            zone.classList.remove('drag-over');
+        });
+
+        this.isDragging = false;
+        this.draggedElement = null;
+        this.draggedGeometryIndex = null;
+        this.sourcePartId = null;
+    }
+
+    cancelTouchDrag(item) {
+        console.log("[LegendOrganizer] Touch drag cancelled");
+
+        item.classList.remove('dragging');
+        document.querySelectorAll('.legend-drop-zone').forEach(zone => {
+            zone.classList.remove('drag-over');
+        });
+
+        this.isDragging = false;
+        this.draggedElement = null;
+        this.draggedGeometryIndex = null;
+        this.sourcePartId = null;
+    }
+
+    // ==================== DROP ZONES (original + améliorations) ====================
+
+    setupDropZone(zone) {
         // Drag over (survol)
         zone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -195,7 +286,6 @@ export class LegendOrganizer {
 
         // Drag leave
         zone.addEventListener('dragleave', (e) => {
-            // Vérifier qu'on quitte vraiment la zone (pas juste un enfant)
             if (e.target === zone) {
                 zone.classList.remove('drag-over');
             }
@@ -209,91 +299,71 @@ export class LegendOrganizer {
             zone.classList.remove('drag-over');
 
             if (this.draggedElement && this.draggedGeometryIndex !== null) {
-                // ✅ Gérer les sous-parties et les parties
-                const targetPartId = zone.getAttribute('data-subpart-id') || // Priorité aux sous-parties
-                                   zone.getAttribute('data-part-id') ||
-                                   zone.getAttribute('data-category-id');
+                const targetPartId = zone.getAttribute('data-subpart-id') ||
+                    zone.getAttribute('data-part-id') ||
+                    zone.getAttribute('data-category-id');
 
-                // Ne rien faire si on drop dans la même zone
-                if (targetPartId === this.sourcePartId) {
-                    console.log('[LegendOrganizer] Dropped in same zone, no action');
-                    return;
+                if (targetPartId !== this.sourcePartId) {
+                    if (targetPartId === 'unclassified') {
+                        this.stateManager.assignGeometryToPart(this.draggedGeometryIndex, null);
+                    } else {
+                        this.stateManager.assignGeometryToPart(this.draggedGeometryIndex, targetPartId);
+                    }
                 }
-
-                // Assigner à la nouvelle partie
-                if (targetPartId === 'unclassified') {
-                    // Retirer de toute partie
-                    this.stateManager.assignGeometryToPart(this.draggedGeometryIndex, null);
-                    console.log('[LegendOrganizer] Geometry moved to unclassified');
-                } else {
-                    // Assigner à une partie spécifique
-                    this.stateManager.assignGeometryToPart(this.draggedGeometryIndex, targetPartId);
-                    console.log('[LegendOrganizer] Geometry moved to part:', targetPartId);
-                }
-
-                // L'UI sera mise à jour via updateUI() dans StateManager
             }
         });
     }
 
-    /**
-     * ✅ Réinitialise tous les listeners (appelé après updateLegend)
-     */
+    setupDropZoneTouch(zone) {
+        // Les événements touch sont déjà gérés via elementFromPoint dans handleTouchMove
+        // Mais on peut ajouter un feedback visuel supplémentaire
+        zone.style.transition = 'background-color 0.2s, border-color 0.2s';
+    }
+
+    // ==================== UTILITAIRES ====================
+
+    isInteractiveElement(element) {
+        const interactiveTags = ['INPUT', 'SELECT', 'BUTTON', 'A', 'TEXTAREA'];
+        return interactiveTags.includes(element.tagName) ||
+            element.closest('button') ||
+            element.closest('input') ||
+            element.closest('select');
+    }
+
     refresh() {
-        console.log('[LegendOrganizer] Refreshing drag and drop listeners...');
+        console.log("[LegendOrganizer] Refreshing drag and drop listeners...");
         this.setupDragAndDrop();
     }
 
-    /**
-     * ✅ Désactive temporairement le drag & drop
-     */
     disable() {
         const legendItems = document.querySelectorAll('.legend-item[draggable="true"]');
         legendItems.forEach(item => {
             item.setAttribute('draggable', 'false');
         });
-        console.log('[LegendOrganizer] Drag and drop disabled');
+        console.log("[LegendOrganizer] Drag and drop disabled");
     }
 
-    /**
-     * ✅ Réactive le drag & drop
-     */
     enable() {
         const legendItems = document.querySelectorAll('.legend-item');
         legendItems.forEach(item => {
             item.setAttribute('draggable', 'true');
         });
-        console.log('[LegendOrganizer] Drag and drop enabled');
+        console.log("[LegendOrganizer] Drag and drop enabled");
     }
 
-    /**
-     * ✅ Vérifie si un élément peut être droppé dans une zone
-     */
-    _canDropInZone(zone) {
-        if (!this.draggedElement) return false;
-
-        // Ne pas permettre de dropper dans la zone source
-        if (zone.contains(this.draggedElement)) return false;
-
-        return true;
-    }
-
-    /**
-     * ✅ Annule le drag en cours
-     */
     cancelDrag() {
         if (this.draggedElement) {
             this.draggedElement.classList.remove('dragging');
+            document.querySelectorAll('.legend-drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+
+            this.draggedElement = null;
+            this.draggedGeometryIndex = null;
+            this.sourcePartId = null;
+            this.isDragging = false;
+
+            console.log("[LegendOrganizer] Drag cancelled");
         }
-
-        document.querySelectorAll('.legend-drop-zone').forEach(zone => {
-            zone.classList.remove('drag-over');
-        });
-
-        this.draggedElement = null;
-        this.draggedGeometryIndex = null;
-        this.sourcePartId = null;
-
-        console.log('[LegendOrganizer] Drag cancelled');
     }
 }

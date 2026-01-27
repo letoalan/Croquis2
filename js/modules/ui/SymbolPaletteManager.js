@@ -642,8 +642,8 @@ export class SymbolPaletteManager {
         const geometryIndex = this.stateManager.geometries.indexOf(geometry);
         const partId = this.stateManager.getGeometryPart(geometryIndex);
         const partTitle = partId ?
-            (this.stateManager.legendParts.find(p => p.id === partId)?.title || 'Unclassified') :
-            'Unclassified';
+            (this.stateManager.legendParts.find(p => p.id === partId)?.title || 'Aucun figuré non classé') :
+            'Figurés non classés';
 
         // ✅ Chercher ou créer le conteneur de la partie
         let partContainer = storageContainer.querySelector(`[data-part-id="${partId}"]`);
