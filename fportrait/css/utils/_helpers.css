@@ -1,0 +1,180 @@
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1400px) {
+    .two-column-editor {
+        grid-template-columns: 70px 1fr;
+    }
+
+    .storage-columns {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --sidebar-right-width: 525px;
+    }
+
+    .two-column-editor {
+        grid-template-columns: 60px 1fr;
+        height: 350px;
+    }
+
+    .storage-columns {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 280px;
+        --sidebar-right-width: 350px;
+    }
+
+    .map-title-container {
+        max-width: 80vw;
+        font-size: 14px;
+    }
+
+    .sidebar,
+    .sidebar-right {
+        box-shadow: var(--shadow-xl);
+    }
+
+    .two-column-editor {
+        grid-template-columns: 50px 1fr;
+        height: 300px;
+    }
+
+    .storage-columns {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        max-height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --sidebar-width: 100vw;
+        --sidebar-right-width: 100vw;
+    }
+
+    .sidebar,
+    .sidebar-right {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        z-index: 2000;
+    }
+
+    .sidebar {
+        left: 0;
+    }
+
+    .sidebar-right {
+        right: 0;
+    }
+
+    .map-title-container {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .two-column-editor {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        height: auto;
+    }
+
+    .symbol-drop-column,
+    .text-content-column {
+        height: 150px;
+    }
+
+    .storage-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .storage-symbol-part {
+        min-height: auto;
+    }
+}
+
+
+
+/* ==================== ANIMATIONS SUPPLÉMENTAIRES ==================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.3s ease;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes contextMenuSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes contextMenuSlideOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+}
+
+/* ==================== PROMETHEAN ACTIVPANEL FIX ==================== */
+/* Add the 'promethean-device' class to the body element for this to apply */
+
+body.promethean-device .d-flex.vh-100 {
+    height: calc(100vh - 70px); /* Adjust this value based on the actual size of the bottom bar */
+}
+
+body.promethean-device .map {
+    height: 100%; /* The map should fill the new container height */
+}

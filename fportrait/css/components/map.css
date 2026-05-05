@@ -1,0 +1,153 @@
+/* ==================== CARTE ==================== */
+/* Version optimisée Promethean ActivPanel */
+
+.map {
+    flex: 1;
+    position: relative;
+    transition: var(--transition-base);
+    min-width: 0;
+    /* Hauteur pleine - pas de réduction */
+    height: 100vh !important;
+    max-height: 100vh;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#map {
+    height: 100% !important;
+    width: 100% !important;
+    transition: var(--transition-base);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: visible;
+}
+
+/* ==================== CONTRÔLES LEAFLET REMONTÉS ==================== */
+
+/* Échelle : au-dessus de la barre Chromium */
+.leaflet-control-scale,
+.leaflet-control-scale-line {
+    bottom: 95px !important;
+    margin-bottom: 0 !important;
+}
+
+/* Tous les contrôles bas-gauche */
+.leaflet-bottom.leaflet-left {
+    bottom: 90px !important;
+}
+
+/* Tous les contrôles bas-droite (sélecteur tuiles) */
+.leaflet-bottom.leaflet-right {
+    bottom: 90px !important;
+}
+
+/* Sélecteur de couches/tuiles */
+.leaflet-control-layers {
+    margin-bottom: 10px !important;
+}
+
+/* Attribution masquée pour gagner de la place */
+.leaflet-control-attribution {
+    display: none !important;
+}
+
+/* Zoom contrôles */
+.leaflet-control-zoom {
+    margin-top: 60px !important;
+}
+
+/* ==================== TITRE DE LA CARTE ==================== */
+
+.map-title-container {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 8px 15px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    font-weight: bold;
+    text-align: center;
+    width: clamp(200px, 60vw, 800px);
+    word-wrap: break-word;
+    white-space: normal;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    transition: var(--transition-base);
+}
+
+.map-title-container:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.map-title-display {
+    flex-grow: 1;
+    white-space: normal;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    color: var(--dark-gray);
+    font-size: 1rem;
+}
+
+.map-title-input-container {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.map-title-input {
+    width: 200px;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    transition: var(--transition-base);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.map-title-input:focus {
+    border-color: var(--primary-gradient-start);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.toggle-icon {
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--primary-gradient-start);
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+    padding: 4px;
+}
+
+.toggle-icon:hover {
+    transform: scale(1.1);
+    color: var(--primary-gradient-end);
+}
+
+.map-title-container.collapsed {
+    max-height: 50px;
+    overflow: hidden;
+    transition: var(--transition-base);
+}
+
+.map-title-container.expanded {
+    max-height: none;
+    transition: var(--transition-base);
+}

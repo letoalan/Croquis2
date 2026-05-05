@@ -1,0 +1,339 @@
+# Prolégomène-Contrat de Programmation
+## Refonte Interface Portrait Mobile Native — Projet Croquis `fportrait`
+
+---
+
+## 1. Philosophie Directrice
+
+La version `fportrait` doit être conçue comme une **application mobile native de fait**, et non comme une réduction de la version paysage. La finalité n’est pas de simplifier l’application, mais de **préserver l’intégralité des fonctions existantes** en les reconfigurant pour un usage tactile, vertical, contextuel et ergonomique. [file:52][file:53][file:55]
+
+La carte demeure l’espace souverain. En état neutre, elle occupe **100% de la surface visible utile**. Aucun panneau permanent ne doit empiéter durablement sur elle ; tout outil secondaire est appelé à la demande via navigation basse, bottom sheet, modale plein écran ou overlay contextuel. [file:52][file:53]
+
+Le principe général est le suivant :  
+- **aucune fonction métier existante n’est supprimée** ;  
+- **aucune donnée n’est dégradée** ;  
+- **toute interaction desktop doit recevoir un équivalent tactile explicite** ;  
+- **les adaptations JS sont autorisées lorsqu’elles sont nécessaires à la continuité fonctionnelle sur smartphone**. [file:52][file:53][file:55]
+
+---
+
+## 2. Fins de la transformation
+
+La refonte portrait doit satisfaire simultanément quatre fins :
+
+1. **Conserver toutes les fonctions pédagogiques et cartographiques** de `fpaysage`, y compris celles de légende, d’édition de texte, de stylisation des géométries et d’export. [file:53][file:55]
+2. **Adapter l’interface aux usages tactiles réels** : tap, long-press, swipe, drag tactile, focus, clavier virtuel, orientation portrait. [file:52][file:53]
+3. **Préserver l’architecture modulaire existante** : séparation des préoccupations, modules ES6, CSS modulaire, logique métier centralisée. [file:54][file:55]
+4. **Limiter la divergence entre `fpaysage` et `fportrait`** en ne modifiant que ce qui est requis pour la compatibilité et l’ergonomie mobile. [file:52][file:55]
+
+---
+
+## 3. Principe de parité fonctionnelle
+
+La version `fportrait` doit viser une **parité fonctionnelle complète** avec `fpaysage`.  
+Chaque fonction du desktop doit être classée dans l’une des catégories suivantes :
+
+- **Parité directe** : même fonction, même logique, interface adaptée.
+- **Parité traduite** : même fonction, geste ou dispositif d’accès différent.
+- **Parité assistée** : même fonction, mais avec aide UI supplémentaire (étapes, poignées, mode dédié, bouton d’action).
+- **Exception documentée** : uniquement si une fonction est techniquement impossible ou gravement dégradante sur smartphone ; toute exception doit être explicitement nommée et justifiée. [file:53][file:55]
+
+Aucune suppression implicite n’est admise.
+
+---
+
+## 4. Matrice de traduction des interactions
+
+| Fonction paysage | Forme actuelle | Problème mobile | Traduction tactile obligatoire |
+|---|---|---|---|
+| Liste des géométries | Sidebar gauche | Trop large, trop dense | Bottom sheet dédié avec sélection, recherche visuelle, actions groupées |
+| Outils export/import | Boutons fixes sidebar | Encombrement latéral | Intégration dans le sheet géométries avec barre d’actions sticky |
+| Outils de dessin | Toolbar Leaflet sur carte | Cibles trop petites, superposition | Grille tactile dans sheet ou palette flottante compacte |
+| Menu contextuel de style | Fenêtre flottante drag & drop | Non native sur smartphone | Bottom sheet contextuel ouvert à la sélection d’une géométrie |
+| Légende dynamique | En-tête + organisation drag & drop | Manipulation complexe au doigt | Overlay ou sheet dédié avec mode “réorganiser” tactile |
+| Éditeur WYSIWYG | Sidebar droite double colonne | Illisible sur petit écran | Modale plein écran multi-vues ou onglets internes |
+| Dépôt de figurés dans l’éditeur | Drag & drop souris | Précision insuffisante au doigt | Drag tactile assisté ou insertion par tap ciblé |
+| Palette des figurés utilisés | Zone latérale | Manque d’espace | Bandeau horizontal scrollable ou sheet secondaire |
+| Titre du croquis | Encart flottant sur carte | Risque de chevauchement | Overlay éditable compact avec mode focus |
+| Export PDF | Action latérale | Contrainte d’accès et de preview | Action dans sheet géométries ou menu plus avec retour visuel |
+
+[file:52][file:53][file:55]
+
+---
+
+## 5. Nouveau paradigme de navigation
+
+La navigation principale devient **contextuelle et basse**, via une **Bottom Navigation Bar** fixe à 5 entrées :
+
+```text
+[ 🗺️ Carte ] [ ✏️ Dessin ] [ 📋 Géométries ] [ 🧩 Légende ] [ 📝 Éditeur ]
+```
+
+- **Carte** : état neutre, aucun panneau ouvert, carte plein écran.
+- **Dessin** : ouvre l’environnement de dessin tactile.
+- **Géométries** : ouvre la liste des objets + export/import.
+- **Légende** : ouvre l’interface de construction et de réorganisation de la légende.
+- **Éditeur** : ouvre l’éditeur textuel pédagogique plein écran. [file:52][file:53]
+
+Un bouton d’action flottant secondaire peut être autorisé pour les opérations contextuelles rapides : “ajouter à la légende”, “insérer figuré”, “terminer dessin”, “appliquer style”. [file:52][file:53]
+
+---
+
+## 6. Contrat d’interaction tactile
+
+Toute interaction de `fpaysage` doit être convertie selon un vocabulaire tactile stable :
+
+- **Tap** : sélectionner, ouvrir, activer, valider.
+- **Double tap** : zoom ou action secondaire uniquement si non ambiguë.
+- **Long-press** : entrée en mode réorganisation, affichage d’actions avancées, lancement d’un drag tactile.
+- **Swipe up / down** : ouvrir ou fermer un bottom sheet.
+- **Swipe latéral** : naviguer entre sous-vues d’un module si utile.
+- **Drag tactile assisté** : réservé aux opérations nécessitant un repositionnement réel ; il doit comporter indices visuels, placeholder, zones de dépôt élargies et retour d’état. [file:52][file:53]
+
+Aucune interaction essentielle ne doit dépendre du `hover`, d’une précision souris fine, ni d’une fenêtre librement déplaçable à l’écran. [file:52][file:54]
+
+---
+
+## 7. Contrat de conservation fonctionnelle
+
+Les fonctions suivantes doivent être intégralement conservées dans `fportrait` :
+
+- Dessin de géométries via Leaflet-Geoman. [file:53][file:55]
+- Sélection et édition de style des objets. [file:53][file:55]
+- Liste complète des géométries avec accès aux actions. [file:53][file:55]
+- Construction de la légende, ajout de parties et sous-parties, réorganisation des éléments. [file:53][file:55]
+- Éditeur WYSIWYG avec outils de formatage. [file:53]
+- Association entre figurés cartographiques et texte explicatif. [file:53]
+- Zone de stockage des figurés utilisés. [file:53]
+- Compteurs, copie, effacement, export HTML. [file:53]
+- Export/import JSON et export PDF. [file:53][file:55]
+
+La refonte n’est validable que si ces fonctions demeurent accessibles et utilisables sur smartphone dans des conditions raisonnables.
+
+---
+
+## 8. Contrat spécifique pour la légende
+
+La légende ne doit pas être réduite à un simple affichage passif. Elle reste un **module éditorial actif**. [file:53][file:55]
+
+Le mode portrait doit proposer :
+
+- un **overlay ou sheet “Légende”** dédié ;
+- un bouton **“Ajouter une partie”** toujours accessible ;
+- un mode **“Réorganiser”** activable explicitement ;
+- des **poignées tactiles** ou zones de préhension pour déplacer parties, sous-parties et figurés ;
+- des zones de dépôt visuellement élargies ;
+- un retour visuel clair pendant le déplacement ;
+- une alternative à faible précision : **déplacer vers le haut / vers le bas** par boutons si le drag tactile est insuffisant. [file:53][file:55]
+
+Le drag & drop tactile ne doit donc pas être l’unique voie ; une voie assistée doit exister.
+
+---
+
+## 9. Contrat spécifique pour l’éditeur pédagogique
+
+L’éditeur WYSIWYG étant un outil pédagogique majeur, il doit être conservé comme **module plein écran autonome**. [file:53]
+
+Sa structure mobile doit être repensée en **vues internes** plutôt qu’en colonnes simultanées :
+
+- **Vue Texte** : rédaction `contenteditable`, formatage, compteurs.
+- **Vue Symboles** : palette des figurés utilisés, insertion, suppression, réaffectation.
+- **Vue Liaison** : association entre lignes de texte et figurés.
+- **Vue Export** : copie, effacement, export HTML. [file:53]
+
+Le système de correspondance texte/symboles ne doit pas disparaître.  
+S’il est impossible de maintenir un drag & drop précis entre colonnes sur smartphone, il doit être remplacé par une mécanique tactile explicite du type :
+
+1. sélectionner un figuré ;
+2. appuyer sur “insérer dans le texte” ;
+3. choisir une ligne ou un point d’insertion ;
+4. confirmer l’association. [file:53]
+
+La logique pédagogique est conservée ; seul le geste change.
+
+---
+
+## 10. Contrat spécifique pour les géométries et le menu de style
+
+La sélection d’une géométrie depuis la carte ou depuis `#geometryList` doit ouvrir un **sheet contextuel unifié** affichant :
+
+- aperçu de l’objet sélectionné ;
+- remplissage ;
+- contour ;
+- opacité ;
+- type de trait ;
+- épaisseur ;
+- taille du marqueur si pertinent ;
+- actions appliquer / réinitialiser / supprimer. [file:53]
+
+Le menu flottant librement déplaçable de `fpaysage` n’est pas reconduit tel quel ; sa fonction est conservée mais son expression devient stable, ancrée et tactile. [file:52][file:53]
+
+---
+
+## 11. Contrat HTML (`index.html`)
+
+La structure HTML portrait doit distinguer clairement :
+- la carte ;
+- les overlays légers ;
+- les sheets fonctionnels ;
+- la modale éditeur ;
+- la navigation principale.
+
+Structure cible :
+
+```html
+<body>
+  <main id="app-shell">
+    <section id="map-stage">
+      <div id="map"></div>
+      <div id="mapTitleContainer"></div>
+      <div id="legendHeader"></div>
+      <div id="legend-overlay" class="overlay-panel hidden"></div>
+    </section>
+
+    <aside id="sheet-draw" class="bottom-sheet"></aside>
+    <aside id="sheet-geometries" class="bottom-sheet"></aside>
+    <aside id="sheet-context" class="bottom-sheet"></aside>
+    <aside id="sheet-legend" class="bottom-sheet"></aside>
+
+    <dialog id="modal-editor"></dialog>
+
+    <nav id="bottom-nav" aria-label="Navigation principale">
+      <button data-panel="map">Carte</button>
+      <button data-panel="draw">Dessin</button>
+      <button data-panel="geometries">Géométries</button>
+      <button data-panel="legend">Légende</button>
+      <button data-panel="editor">Éditeur</button>
+    </nav>
+
+    <button id="fab-context" hidden></button>
+  </main>
+</body>
+```
+
+[file:52][file:53]
+
+---
+
+## 12. Contrat modulaire CSS
+
+L’architecture CSS modulaire est conservée et étendue :
+
+```text
+fportrait/css/
+├── styles.css
+├── base/
+│   ├── variables.css
+│   └── base.css
+├── layout/
+│   └── layout.css
+├── components/
+│   ├── bottom-nav.css
+│   ├── bottom-sheet.css
+│   ├── map.css
+│   ├── toolbar-touch.css
+│   ├── context-panel.css
+│   ├── geometry-list.css
+│   ├── legend-mobile.css
+│   ├── editor-modal.css
+│   ├── editor-symbols.css
+│   ├── editor-toolbar.css
+│   ├── drag-assist.css
+│   └── buttons.css
+├── vendors/
+│   └── leaflet.css
+└── utils/
+    └── helpers.css
+```
+
+Règles :
+- `styles.css` reste un index d’import uniquement. [file:54]
+- Un fichier = une responsabilité visuelle. [file:54]
+- Si un fichier dépasse 150 lignes, il est scindé. [file:52]
+- Les z-index critiques sont centralisés dans `variables.css`. [file:54]
+
+---
+
+## 13. Contrat de modifications JS
+
+Le principe n’est plus “zéro modification absolue”, mais **modification minimale justifiée par la parité fonctionnelle mobile**. [file:52][file:55]
+
+### Modifications autorisées
+
+| Fichier JS | Niveau autorisé | Finalité |
+|---|---|---|
+| `UIManager.js` | Élevé | Navigation basse, ouverture/fermeture sheets, modale éditeur, états mobiles |
+| `main.js` | Faible | Initialisation des contrôleurs mobiles |
+| `LegendOrganizer.js` | Moyen | Réorganisation tactile, poignées, alternatives au drag |
+| `LegendManager.js` | Faible à moyen | Adaptation DOM du mode légende mobile |
+| `MapManager.js` | Faible à moyen | Ajustements tactiles Leaflet-Geoman, conflits gestes/carte |
+| `GeometryManager.js` | Faible | Synchronisation sélection carte / sheet contextuel |
+| `ExportImportManager.js` | Faible | Raccords UI mobile si nécessaires |
+| `PDFExporter.js` | Faible à moyen | Adaptation du rendu portrait si requis |
+| `StateManager.js` | Aucun changement structurel | Sauf nécessité absolue documentée |
+
+[file:52][file:53][file:55]
+
+Toute modification hors `UIManager.js` doit être :
+- minimale ;
+- documentée ;
+- motivée par une impossibilité fonctionnelle mobile ;
+- sans altération du modèle de données. [file:52][file:55]
+
+---
+
+## 14. Contraintes techniques mobiles obligatoires
+
+- Touch targets ≥ 48px. [file:52]
+- `100dvh` / `100dvw` pour les conteneurs critiques. [file:52]
+- Compatibilité clavier virtuel : aucun champ essentiel ne doit être masqué durablement.
+- `touch-action` défini finement selon les zones : carte, sliders, drag, scroll interne.
+- Aucun flux essentiel ne doit exiger un zoom navigateur manuel.
+- Tous les états interactifs disposent d’un feedback visuel immédiat.
+- Les sheets doivent rester scrollables sans bloquer l’usage du reste.
+- Les modules doivent fonctionner au minimum sur largeur 375px. [file:52]
+
+---
+
+## 15. Séquençage des tâches
+
+1. Restructuration HTML portrait.
+2. Mise en place du shell mobile et de la bottom navigation.
+3. Intégration des sheets : dessin, géométries, contexte, légende.
+4. Refonte tactile de la toolbar de dessin.
+5. Migration du menu contextuel en sheet unifié.
+6. Refonte de la légende en mode tactile réorganisable.
+7. Refonte de l’éditeur en modale plein écran à vues internes.
+8. Adaptations JS minimales par module.
+9. Vérification export/import/PDF.
+10. Tests tactiles et ergonomiques réels. [file:52][file:53][file:55]
+
+---
+
+## 16. Critères de validation
+
+La refonte n’est validée que si :
+
+- [ ] La carte occupe 100% de l’écran en état neutre.
+- [ ] Toutes les fonctions présentes dans `fpaysage` existent toujours dans `fportrait`.
+- [ ] Toute fonction desktop dispose d’un équivalent tactile explicite.
+- [ ] Les géométries sont sélectionnables, éditables et supprimables sur smartphone.
+- [ ] La légende peut être créée, modifiée et réorganisée sur tactile.
+- [ ] L’éditeur WYSIWYG conserve ses fonctions de rédaction, formatage et liaison avec les figurés.
+- [ ] L’insertion ou l’association des figurés dans l’éditeur reste faisable sans souris.
+- [ ] Export JSON, import JSON, export HTML et export PDF restent accessibles.
+- [ ] Le clavier virtuel ne casse pas l’usage de l’éditeur.
+- [ ] Aucun changement n’a corrompu l’état global ou les données.
+- [ ] Toute divergence avec `fpaysage` est documentée et justifiée.
+- [ ] Les tests sont effectués sur smartphone réel ou émulation avancée + validation manuelle. [file:52][file:53][file:55]
+
+---
+
+## 17. Limite assumée
+
+Le smartphone n’impose pas une réduction des ambitions fonctionnelles ; il impose une **traduction ergonomique** plus exigeante.  
+La difficulté principale n’est pas visuelle, mais interactionnelle : convertir les logiques de panneau, de survol, de glisser-déposer précis et de double colonne en gestes tactiles robustes sans perte pédagogique. [file:52][file:53]
+
+---
+
+*Ce contrat constitue la version de référence à transmettre à toute IA ou tout développeur chargé d’implémenter la refonte portrait mobile du projet Croquis. Il impose la conservation des fonctions existantes, la parité fonctionnelle comme objectif, et la traduction explicite de toute interaction desktop en équivalent tactile exploitable.*

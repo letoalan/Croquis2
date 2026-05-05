@@ -1,0 +1,28 @@
+/* ================================
+   MAIN STYLESHEET – version Portrait (Mobile Native)
+   ================================ */
+
+/* 1. Base Styles */
+@import "base/variables.css";
+@import "base/base.css";
+
+/* 2. Layout */
+@import "layout/layout.css";
+
+/* 3. Components */
+@import "components/buttons.css";
+@import "components/map.css";
+@import "components/context-menu.css";
+@import "components/legend.css";
+@import "components/editor.css";
+
+/* 3.5 Mobile Specific Components */
+@import "components/bottom-nav.css";
+@import "components/bottom-sheet.css";
+@import "components/editor-modal.css";
+
+/* 4. Vendor-specific styles */
+@import "vendors/leaflet.css";
+
+/* 5. Utilities */
+@import "utils/helpers.css";

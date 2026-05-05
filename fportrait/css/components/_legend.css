@@ -1,0 +1,335 @@
+/* ==================== LÉGENDE INTERACTIVE ==================== */
+
+.legend-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
+    padding: 20px;
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    max-height: 70vh;
+    min-height: 300px;
+    width: 800px;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: var(--transition-base);
+    cursor: default;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Default max-width, can be overridden by body classes */
+    max-width: calc(100vw - 100px);
+}
+
+/* Responsive adjustments based on viewport and sidebar states */
+body:not(.left-sidebar-collapsed):not(.right-sidebar-collapsed) .legend-control {
+    max-width: calc(100vw - var(--sidebar-width) - var(--sidebar-right-width) - 100px);
+}
+
+body:not(.left-sidebar-collapsed) .legend-control {
+    max-width: calc(100vw - var(--sidebar-width) - 100px);
+}
+
+body:not(.right-sidebar-collapsed) .legend-control {
+    max-width: calc(100vw - var(--sidebar-right-width) - 100px);
+}
+
+@media (max-width: 992px) {
+    .legend-control {
+        width: 90vw;
+        max-width: 600px !important; /* Override body classes on smaller screens */
+    }
+}
+
+
+.legend-control .legend-header,
+.legend-control .legend-part,
+.legend-control .legend-part-column,
+.legend-control .legend-subpart-header {
+    background: transparent !important;
+}
+
+.legend-control .legend-item {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(2px);
+}
+
+.legend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.legend-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    letter-spacing: 0.5px;
+}
+
+.legend-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.legend-add-part-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition-base);
+    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.legend-add-part-btn:hover {
+    background: linear-gradient(135deg, var(--primary-gradient-end) 0%, var(--primary-gradient-start) 100%);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+}
+
+.legend-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.legend-part {
+    background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(233, 236, 239, 0.9) 100%);
+    border-radius: var(--border-radius-lg);
+    padding: 15px;
+    border-top: 4px solid var(--primary-gradient-start);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
+}
+
+.legend-part:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.legend-part-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark-gray);
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: var(--border-radius-md);
+    cursor: text;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid transparent;
+    transition: var(--transition-base);
+    font-family: inherit;
+}
+
+.legend-part-title:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
+.legend-part-title.editing {
+    outline: none;
+    border-color: var(--primary-gradient-start);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.legend-part-title span {
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 6px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.legend-part-title:hover span {
+    opacity: 1;
+}
+
+.legend-part-title.editing span {
+    display: none;
+}
+
+.legend-part-controls {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    justify-content: flex-end;
+}
+
+.legend-part-delete-btn {
+    background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-end) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    transition: var(--transition-base);
+    box-shadow: 0 1px 3px rgba(245, 87, 108, 0.3);
+}
+
+.legend-part-delete-btn:hover {
+    background: linear-gradient(135deg, var(--danger-gradient-end) 0%, var(--danger-gradient-start) 100%);
+    box-shadow: 0 2px 6px rgba(245, 87, 108, 0.4);
+    transform: scale(1.05);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--border-radius-md);
+    cursor: move;
+    transition: var(--transition-base);
+    border: 1px solid rgba(222, 226, 230, 0.5);
+}
+
+.legend-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    border-color: var(--primary-gradient-start);
+}
+
+.legend-item.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+    box-shadow: var(--shadow-lg);
+}
+
+.legend-item-handle {
+    margin-right: 10px;
+    color: var(--text-muted);
+    cursor: grab;
+    font-size: 14px;
+}
+
+.legend-item-handle:active {
+    cursor: grabbing;
+}
+
+.legend-symbol {
+    display: inline-block;
+    margin-right: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    pointer-events: none;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-item-name {
+    flex-grow: 1;
+    font-size: 13px;
+    color: var(--dark-gray);
+    cursor: default;
+    pointer-events: none;
+    font-weight: 500;
+}
+
+.legend-item-name:hover {
+    color: var(--primary-gradient-start);
+}
+
+.legend-unclassified {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px dashed rgba(102, 126, 234, 0.3);
+}
+
+.legend-unclassified-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.legend-empty-message {
+    pointer-events: none;
+    user-select: none;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.legend-drop-zone {
+    min-height: 50px;
+    border: 2px dashed transparent;
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-base);
+    padding: 10px;
+}
+
+.legend-drop-zone.drag-over {
+    border-color: var(--primary-gradient-start);
+    background: rgba(102, 126, 234, 0.05);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.legend-symbol.circle {
+    border-radius: 50%;
+}
+
+.legend-symbol.square {
+    border-radius: var(--border-radius-sm);
+}
+
+.legend-symbol.triangle {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    border: none;
+}
+
+.legend-symbol.hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    border: none;
+}
+
+.legend-symbol.polyline {
+    border-top: 3px solid currentColor;
+    margin-top: 10px;
+    border: none;
+    background: none;
+}
+
+.legend-symbol.polygon {
+    border: 2px solid currentColor;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.legend-symbol.custom-marker {
+    background-color: currentColor;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.legend-control.dragging,
+.legend-control.dragging * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.legend-empty-state {
+    padding: 20px;
+    text-align: center;
+    color: rgba(102, 126, 234, 0.6);
+    font-size: 13px;
+    font-style: italic;
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    margin: 10px;
+    background: rgba(102, 126, 234, 0.02);
+}
+
+.legend-empty-state p {
+    margin: 5px 0;
+}

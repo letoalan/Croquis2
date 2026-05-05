@@ -1,0 +1,59 @@
+/* ==================== BOTTOM SHEETS ==================== */
+.bottom-sheet {
+    position: fixed;
+    bottom: 60px; /* au dessus de la bottom-nav */
+    left: 0;
+    right: 0;
+    background: var(--white, #fff);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
+    z-index: 900;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(110%);
+}
+
+.bottom-sheet[aria-hidden="false"] {
+    transform: translateY(0);
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 12px auto;
+}
+
+.sheet-content {
+    padding: 0 16px 16px 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* FAB */
+.fab {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: var(--primary-color, #007bff);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    font-size: 24px;
+    z-index: 950;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.fab.hidden {
+    transform: scale(0);
+    opacity: 0;
+}
