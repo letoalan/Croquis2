@@ -18,20 +18,20 @@ function syncLauncher() {
     
     updateBackground(recommended);
     updateRecommendation(recommended);
-    updateCTA(recommended);
 }
 
 /**
  * Heuristic to detect the recommended version
- * Returns 'portrait' or 'paysage'
  */
 function detectRecommendedVersion() {
+    const ua = navigator.userAgent;
     const isPortrait = window.matchMedia("(orientation: portrait)").matches;
-    const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches || ('ontouchstart' in window);
     const isNarrow = window.innerWidth < 768;
+    const isUltraWide = window.innerWidth >= 1900;
+    const isPrometheanUA = /ActivPanel|Promethean/i.test(ua);
 
-    // Logic: Portrait or Touch or Narrow -> Portrait version
-    // Otherwise -> Landscape version
+    if (isPrometheanUA || (isUltraWide && isTouch)) return "promethean";
     return (isPortrait || isTouch || isNarrow) ? "portrait" : "paysage";
 }
 
@@ -42,7 +42,10 @@ function updateBackground(version) {
     const bg = document.getElementById('bg');
     if (!bg) return;
 
-    const imgPath = version === 'portrait' ? './assets/cp.jpg' : './assets/cl.jpg';
+    let imgPath = './assets/cl.jpg';
+    if (version === 'portrait') imgPath = './assets/cp.jpg';
+    if (version === 'promethean') imgPath = './assets/promethean.png';
+    
     bg.style.backgroundImage = `url('${imgPath}')`;
 }
 
@@ -54,31 +57,26 @@ function updateRecommendation(version) {
     const reason = document.getElementById('recommendationReason');
     const footerLabel = document.getElementById('versionLabel');
 
+    // Reset cards
+    document.querySelectorAll('.choice-card').forEach(card => card.classList.remove('recommended'));
+
     if (version === 'portrait') {
         badge.textContent = "Version recommandée : Portrait";
-        badge.style.backgroundColor = "#4f46e5"; // Indigo
+        badge.style.backgroundColor = "#4f46e5";
         reason.textContent = "Appareil tactile ou affichage vertical détecté. Idéal pour mobile.";
         footerLabel.textContent = "Recommandation active : Portrait";
+        document.getElementById('cardPortrait')?.classList.add('recommended');
+    } else if (version === 'promethean') {
+        badge.textContent = "Version recommandée : Promethean";
+        badge.style.backgroundColor = "#8b5cf6";
+        reason.textContent = "Grand écran tactile détecté. Idéal pour le travail collaboratif en classe.";
+        footerLabel.textContent = "Recommandation active : Promethean";
+        document.getElementById('cardPromethean')?.classList.add('recommended');
     } else {
         badge.textContent = "Version recommandée : Paysage";
-        badge.style.backgroundColor = "#0ea5e9"; // Sky blue
+        badge.style.backgroundColor = "#0ea5e9";
         reason.textContent = "Affichage large ou mode paysage détecté. Idéal pour ordinateur.";
         footerLabel.textContent = "Recommandation active : Paysage";
-    }
-}
-
-/**
- * Updates the main CTA link and text
- */
-function updateCTA(version) {
-    const cta = document.getElementById('ctaMain');
-    if (!cta) return;
-
-    if (version === 'portrait') {
-        cta.href = "fportrait/index.html";
-        cta.innerHTML = `Ouvrir la version Portrait <span class="btn-arrow" aria-hidden="true">→</span>`;
-    } else {
-        cta.href = "fpaysage/index.html";
-        cta.innerHTML = `Ouvrir la version Paysage <span class="btn-arrow" aria-hidden="true">→</span>`;
+        document.getElementById('cardPaysage')?.classList.add('recommended');
     }
 }

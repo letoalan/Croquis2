@@ -1,0 +1,266 @@
+/* ==================== CONTRÔLES LEAFLET ==================== */
+
+.leaflet-control {
+    background: var(--white);
+    border-radius: var(--border-radius-sm);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-control a {
+    color: #007bff;
+    transition: var(--transition-fast);
+}
+
+.leaflet-control a:hover {
+    color: #0056b3;
+}
+
+.leaflet-control-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: var(--white);
+    border-bottom: 1px solid #ccc;
+    transition: var(--transition-fast);
+}
+
+.leaflet-control-custom:last-child {
+    border-bottom: none;
+}
+
+.leaflet-control-custom:hover {
+    background: var(--light-gray);
+}
+
+.leaflet-control-custom svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ==================== BOUTON COURBE ==================== */
+
+.leaflet-pm-action.action-curve {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: var(--white);
+    border: none;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    color: #333;
+}
+
+.leaflet-pm-action.action-curve:hover {
+    background: #f4f4f4;
+}
+
+.leaflet-pm-action.action-curve.active {
+    background: #f4f4f4;
+    color: #333;
+}
+
+.leaflet-pm-action.action-curve svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ==================== POIGNÉES DE COURBE ==================== */
+
+.curve-handle {
+    cursor: move;
+}
+
+.curve-handle-dot {
+    width: 16px;
+    height: 16px;
+    background: #2196F3;
+    border: 3px solid var(--white);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-fast);
+}
+
+.curve-handle-dot:hover {
+    width: 20px;
+    height: 20px;
+    margin: -2px;
+    background: #1976D2;
+}
+
+/* ==================== SÉLECTEUR DE TUILES ==================== */
+
+.tile-selector-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: var(--white);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    color: #333;
+    text-decoration: none;
+}
+
+.tile-selector-button:hover {
+    background: #f4f4f4;
+}
+
+.tile-selector-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.tile-selector-popup {
+    position: fixed;
+    background: var(--white);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    max-width: 250px;
+    z-index: 10000;
+    padding: 4px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tile-option {
+    display: block;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: var(--transition-fast);
+    cursor: pointer;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    font-weight: 500;
+}
+
+.tile-option:hover {
+    background: var(--light-gray);
+    border-left-color: var(--secondary-gradient-start);
+}
+
+.tile-option.active {
+    background: #e8f5e9;
+    border-left-color: var(--secondary-gradient-start);
+    font-weight: 600;
+    color: var(--secondary-gradient-start);
+}
+
+/* ==================== ROSE DES VENTS ==================== */
+
+.orientation-control {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin: 10px;
+    cursor: default;
+}
+
+.compass-rose {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: var(--transition-base);
+}
+
+.compass-rose:hover {
+    transform: scale(1.1);
+}
+
+/* ==================== ÉCHELLE ==================== */
+
+.leaflet-control-scale {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(5px);
+    border-radius: var(--border-radius-sm) !important;
+    padding: 5px 10px !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.leaflet-control-scale-line {
+    border: 2px solid #333 !important;
+    border-top: none !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    padding: 2px 5px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ========================================
+   CORRECTION FLÈCHES POLYGONALES SVG
+   ======================================== */
+
+#arrow-svg-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+}
+
+.arrow-group {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.arrow-line,
+.arrow-tip-start,
+.arrow-tip-end {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.leaflet-overlay-pane {
+    overflow: visible !important;
+}
+
+/* ==================== MARQUEURS PERSONNALISÉS ==================== */
+
+.custom-marker {
+    pointer-events: all;
+    z-index: 1000;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.cursor-marker {
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+
+.cursor-marker .cross {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+}
+
+.cursor-marker .cross::before,
+.cursor-marker .cross::after {
+    content: '';
+    position: absolute;
+    background-color: #000;
+}
+
+.cursor-marker .cross::before {
+    width: 12px;
+    height: 2px;
+    top: 5px;
+}
+
+.cursor-marker .cross::after {
+    width: 2px;
+    height: 12px;
+    left: 5px;
+}

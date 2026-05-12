@@ -7,6 +7,7 @@
     <!-- Preload images for better performance -->
     <link rel="preload" as="image" href="./assets/cl.jpg">
     <link rel="preload" as="image" href="./assets/cp.jpg">
+    <link rel="preload" as="image" href="./assets/promethean.png">
     <!-- Google Fonts: Inter & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -40,19 +41,22 @@
                 Analyse de l’affichage en cours…
             </p>
 
-            <div class="cta-zone">
-                <a id="ctaMain" href="#" class="btn-primary">
-                    Ouvrir la version recommandée
-                    <span class="btn-arrow" aria-hidden="true">→</span>
+            <div class="choices-grid">
+                <a id="cardPaysage" href="fpaysage/index.html" class="choice-card">
+                    <span class="card-icon">🖥️</span>
+                    <span class="card-title">Paysage</span>
+                    <span class="card-desc">Ordinateur & Tablettes</span>
                 </a>
-            </div>
-
-            <div class="version-switcher">
-                <span class="switcher-label">Ou ouvrir directement :</span>
-                <div class="secondary-btns">
-                    <a href="fpaysage/index.html" class="btn-secondary">🖥️ Version paysage</a>
-                    <a href="fportrait/index.html" class="btn-secondary">📱 Version portrait</a>
-                </div>
+                <a id="cardPortrait" href="fportrait/index.html" class="choice-card">
+                    <span class="card-icon">📱</span>
+                    <span class="card-title">Portrait</span>
+                    <span class="card-desc">Smartphones & Mobiles</span>
+                </a>
+                <a id="cardPromethean" href="fpromethean/index.html" class="choice-card">
+                    <span class="card-icon">🏫</span>
+                    <span class="card-title">Promethean</span>
+                    <span class="card-desc">Écrans Géants Tactiles</span>
+                </a>
             </div>
 
             <details class="help-details">

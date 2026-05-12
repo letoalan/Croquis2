@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=2000, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes">
+    <title>Croquis - Mode Promethean</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet.PM CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/promethean-overrides.css">
+</head>
+
+<body>
+    <!-- ==================== CARTE ==================== -->
+    <div class="map-container-promethean">
+        <div id="map" style="height: 100%; width: 100%;"></div>
+
+        <!-- Titre flottant (Promethean) -->
+        <div class="map-title-container" id="mapTitleInputContainer" style="display: none;"></div> <!-- Gardé pour compatibilité avec UIManager mais caché -->
+        
+        <div class="map-title-overlay" id="mapTitleOverlay">
+            <div class="map-title-display" id="mapTitleDisplay">Sans titre</div>
+            <span id="toggleTitleIcon" class="toggle-icon" style="cursor: pointer; margin-left: 10px;">▼</span>
+        </div>
+    </div>
+
+    <!-- ==================== CONTENEUR DE PANNEAUX (DROITE) ==================== -->
+    <div id="panelsContainer" class="panels-container-right">
+        
+        <!-- Panel Projet & Fonds de carte -->
+        <aside id="panel-project" class="side-panel active">
+            <div class="panel-header">
+                <h3>📁 Projet & Fonds</h3>
+            </div>
+            <div class="panel-content">
+                <div class="map-title-container-static mb-4">
+                    <label class="form-label text-muted small">Titre de la carte</label>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="mapTitleInput" class="form-control" placeholder="Titre...">
+                        <button id="saveMapTitleBtn" class="btn btn-primary">OK</button>
+                    </div>
+                </div>
+
+                <h6 class="section-title">🗺️ Fonds de carte</h6>
+                <div id="tileSelectorGrid" class="tile-grid-panel"></div>
+            </div>
+        </aside>
+
+        <!-- Panel Éditeur de figurés (IDENTIQUE AU MODE PORTRAIT) -->
+        <aside id="panel-draw" class="side-panel">
+            <div class="panel-header">
+                <h3>✏️ Édition des Figurés</h3>
+            </div>
+            <div class="panel-content">
+                <!-- Liste des objets -->
+                <div class="draw-section mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="small fw-bold text-success">📋 Objets sur la carte</label>
+                        <span class="badge bg-light text-dark small" style="font-size: 0.7rem;">Cliquer sur ✏️ pour le style</span>
+                    </div>
+                    <div id="geometryList" class="geometry-list-panel"></div>
+                </div>
+
+                <hr>
+
+                <!-- Éditeur de style (IDENTIQUE AU SHEET-CONTEXT DU PORTRAIT) -->
+                <div id="styleEditorSection">
+                    <h6 class="m-0 mb-3">🎨 Édition de la géométrie</h6>
+
+                    <!-- Remplissage & Contour -->
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="small text-muted mb-1">Remplissage</label>
+                            <input type="color" id="contextColorPicker" class="form-control form-control-color w-100" value="#3388ff">
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted mb-1">Contour</label>
+                            <input type="color" id="contextLineColorPicker" class="form-control form-control-color w-100" value="#000000">
+                        </div>
+                    </div>
+
+                    <!-- Opacité -->
+                    <div class="mb-2">
+                        <label class="small text-muted d-flex justify-content-between">
+                            <span>Opacité</span>
+                            <span id="contextOpacityValue" class="fw-bold">1.0</span>
+                        </label>
+                        <input type="range" id="contextOpacitySlider" class="form-range" min="0" max="1" step="0.1" value="1">
+                    </div>
+
+                    <!-- Style & Épaisseur -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="small text-muted mb-1">Style de trait</label>
+                            <select id="contextLineDash" class="form-select form-select-sm">
+                                <option value="solid">Solide</option>
+                                <option value="dashed">Pointillé</option>
+                                <option value="dotted">Points</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted d-flex justify-content-between">
+                                <span>Épaisseur</span>
+                                <span class="fw-bold"><span id="contextLineWeightValue">2</span>px</span>
+                            </label>
+                            <input type="range" id="contextLineWeight" class="form-range" min="1" max="10" step="1" value="2">
+                        </div>
+                    </div>
+
+                    <!-- Taille du Marqueur -->
+                    <div id="contextMarkerSizeContainer" class="mb-3" style="display: none;">
+                        <label class="small text-muted d-flex justify-content-between">
+                            <span>Taille du marqueur</span>
+                            <span class="fw-bold"><span id="contextMarkerSizeValue">24</span>px</span>
+                        </label>
+                        <input type="range" id="contextMarkerSize" class="form-range" min="12" max="48" step="4" value="24">
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2">
+                        <button id="contextApplyBtn" class="btn btn-success flex-fill">✓ Appliquer</button>
+                        <button id="contextResetBtn" class="btn btn-secondary flex-fill">↺ Reset</button>
+                        <button id="contextDeleteBtn" class="btn btn-danger flex-fill">🗑️ Sup.</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Panel Légende -->
+        <aside id="panel-legend" class="side-panel">
+            <div class="panel-header">
+                <h3>📊 Légende Interactive</h3>
+                <button id="addPartBtn" class="btn btn-sm btn-primary">+ Partie</button>
+            </div>
+            <div class="panel-content">
+                <div id="legendContainer"></div>
+            </div>
+        </aside>
+
+        <!-- Panel Éditeur de Texte -->
+        <aside id="panel-text" class="side-panel">
+            <div class="panel-header">
+                <h3>📝 Éditeur Pédagogique</h3>
+            </div>
+            <div class="panel-content">
+                <!-- Barre d'outils de formatage -->
+                <div class="formatting-toolbar mb-2 p-2 bg-light rounded d-flex gap-1 flex-wrap">
+                    <button class="btn btn-sm btn-outline-dark format-btn" data-command="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
+                    <button class="btn btn-sm btn-outline-dark format-btn" data-command="italic" title="Italique (Ctrl+I)"><em>I</em></button>
+                    <button class="btn btn-sm btn-outline-dark format-btn" data-command="underline" title="Souligné (Ctrl+U)"><u>U</u></button>
+                 </div>
+                
+                <!-- Barre d'outils de surbrillance -->
+                <div class="formatting-toolbar mb-3 p-2 bg-light rounded d-flex gap-1 flex-wrap">
+                    <input type="color" id="highlightColorPicker" value="#FFFF00" title="Couleur de surbrillance" style="width: 36px; height: 36px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px;">
+                    <button class="btn btn-sm btn-outline-success format-btn" data-command="highlight" id="highlightBtn" title="Surligner avec la couleur choisie (Ctrl+H)" style="background: linear-gradient(to right, #FFFF00 0%, #FFFF00 100%);">🖍️ Fluo</button>
+                    <button class="btn btn-sm btn-outline-info format-btn" data-command="removeFormat" title="Effacer le formatage">🧹</button>
+                </div>
+
+                <!-- ÉDITEUR 2 COLONNES SYNCHRONISÉES -->
+                <div class="editor-layout-container">
+                    <!-- Section supérieure : 3 colonnes (Symboles | Texte) -->
+                    <div class="two-column-editor-wrapper">
+                        <!-- En-têtes fixes -->
+                        <div class="editor-headers mb-1">
+                            <div class="symbol-header" style="flex: 0 0 80px;">
+                                <label class="form-label fw-bold small">Symboles</label>
+                            </div>
+                            <div class="text-header">
+                                <label class="form-label fw-bold small">Votre texte</label>
+                            </div>
+                        </div>
+
+                        <!-- Conteneur unique scrollable contenant les deux colonnes -->
+                        <div class="synchronized-scroll-container d-flex gap-2" style="height: 300px; overflow-y: auto;">
+                            
+                            <!-- Colonne 1: Drop zones pour symboles -->
+                            <div class="symbol-drop-column">
+                                <div class="drop-zones-container" id="dropZonesContainer" style="flex: 0 0 80px;"></div>
+                            </div>
+
+                            <!-- Colonne 2: Texte éditable -->
+                            <div class="text-content-column" style="flex: 1;">
+                                <div id="textEditor" class="text-editor-multiline" contenteditable="true" style="min-height: 300px; border: 1px solid #ddd; padding: 8px;"></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Section inférieure : Conteneur de stockage -->
+                    <div class="symbols-storage-legend mt-2">
+                        <div class="storage-header mb-1">
+                            <h6 class="storage-title small">📦 Figurés utilisés</h6>
+                        </div>
+                        <div class="storage-columns" id="usedSymbolsStorage" style="height: 100px; overflow-y: auto; border: 1px solid #eee; padding: 4px;"></div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="text-editor-stats small text-muted mt-2 mb-2">
+                    Caractères : 0 | Mots : 0
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-1 mt-2">
+                    <button id="clearTextBtn" class="btn btn-sm btn-warning flex-fill">Effacer</button>
+                    <button id="copyTextBtn" class="btn btn-sm btn-success flex-fill">Copier</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Panel Export -->
+        <aside id="panel-export" class="side-panel">
+            <div class="panel-header">
+                <h3>💾 Sauvegarde & Export</h3>
+            </div>
+            <div class="panel-content">
+                <div class="d-grid gap-3">
+                    <div class="export-option p-3 border rounded bg-light">
+                        <h6>📤 Format Projet (JSON)</h6>
+                        <p class="small text-muted mb-2">Sauvegarder pour reprendre plus tard.</p>
+                        <div class="d-flex gap-2">
+                            <button id="exportBtn" class="btn btn-primary flex-fill">Exporter</button>
+                            <button id="importBtn" class="btn btn-secondary flex-fill">Importer</button>
+                        </div>
+                    </div>
+                    <div class="export-option p-3 border rounded bg-light">
+                        <h6>📄 Format Document (PDF)</h6>
+                        <p class="small text-muted mb-2">Générer une version imprimable du croquis.</p>
+                        <button id="exportPdfBtn" class="btn btn-danger w-100">Télécharger le PDF</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ==================== NAVIGATION RAIL (BORD DROIT) ==================== -->
+    <nav class="nav-rail-right" id="mainNavRail">
+        <button class="nav-item active" data-panel="project" title="Projet">
+            <span class="nav-icon">📂</span>
+            <span class="nav-label">Projet</span>
+        </button>
+        <button class="nav-item" data-panel="draw" title="Figurés">
+            <span class="nav-icon">✏️</span>
+            <span class="nav-label">Figurés</span>
+        </button>
+        <button class="nav-item" data-panel="legend" title="Légende">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Légende</span>
+        </button>
+        <button class="nav-item" data-panel="text" title="Éditeur">
+            <span class="nav-icon">📝</span>
+            <span class="nav-label">Éditeur</span>
+        </button>
+        <button class="nav-item" data-panel="export" title="Export">
+            <span class="nav-icon">💾</span>
+            <span class="nav-label">Export</span>
+        </button>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

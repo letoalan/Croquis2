@@ -142,145 +142,151 @@ export class PDFExporter {
         });
     }
 
-    async _manualLayerCapture(map, mapContainer) {
-        console.log('[PDFExporter] 📸 Manual layer-by-layer capture...');
-        const legendContainer = this.legendManager.legendControl?.getContainer?.();
-        let legendWasHidden = false;
+    /**
+     * Calcule une fenêtre de recadrage intelligente pour éviter la déformation (response2.md)
+     */
+    _computeSmartCropWindow(map, vectorData, baseWidth, baseHeight, targetRatio) {
+        let minX = baseWidth, minY = baseHeight, maxX = 0, maxY = 0;
+        let hasFigures = false;
 
-        if (legendContainer) {
-            const originalDisplay = legendContainer.style.display;
-            const originalVisibility = legendContainer.style.visibility;
-            if (originalDisplay === 'none' || originalVisibility === 'hidden') {
-                legendWasHidden = true;
+        vectorData.forEach(({ layer, type }) => {
+            let points = [];
+            if (layer.getLatLng) points = [layer.getLatLng()];
+            else if (layer.getLatLngs) {
+                const latlngs = layer.getLatLngs();
+                points = Array.isArray(latlngs[0]) ? latlngs.flat(Infinity) : latlngs;
+            } else if (layer.getBounds) {
+                const b = layer.getBounds();
+                points = [b.getSouthWest(), b.getNorthEast()];
             }
-            legendContainer.style.display = 'block';
-            legendContainer.style.visibility = 'visible';
-            legendContainer.style.opacity = '1';
-            legendContainer.style.backgroundColor = 'rgba(255,255,255,1)';
-            legendContainer.style.backdropFilter = 'none';
+
+            points.forEach(ll => {
+                if (ll && ll.lat !== undefined) {
+                    const p = map.latLngToContainerPoint(ll);
+                    minX = Math.min(minX, p.x);
+                    minY = Math.min(minY, p.y);
+                    maxX = Math.max(maxX, p.x);
+                    maxY = Math.max(maxY, p.y);
+                    hasFigures = true;
+                }
+            });
+        });
+
+        const targetHeight = baseWidth / targetRatio;
+        let cropY = 0;
+
+        if (!hasFigures) {
+            // Fallback centré
+            cropY = Math.max(0, (baseHeight - targetHeight) / 2);
+        } else {
+            // Marge de sécurité (10%)
+            const margin = 40;
+            const contentCenterY = (minY + maxY) / 2;
+            
+            // On essaie de centrer la fenêtre sur le contenu
+            cropY = contentCenterY - (targetHeight / 2);
+            
+            // Contraintes de bord
+            if (cropY < 0) cropY = 0;
+            if (cropY + targetHeight > baseHeight) cropY = baseHeight - targetHeight;
+            
+            // Si le contenu est trop grand pour la fenêtre, on s'assure de ne pas couper le haut
+            if (maxY - minY > targetHeight) {
+                cropY = minY - margin;
+                if (cropY < 0) cropY = 0;
+            }
         }
 
-        // ========== ÉTAPE 1 : CAPTURER LES VECTEURS ==========
+        return {
+            y: Math.max(0, cropY),
+            height: Math.min(baseHeight, targetHeight),
+            width: baseWidth
+        };
+    }
+
+    async _manualLayerCapture(map, mapContainer) {
+        console.log('[PDFExporter] 🚀 SMART CROP CAPTURE (response2.md strategy)');
+        
+        const legendContainer = (this.legendManager.legendControl?.getContainer?.()) || this.legendManager.container;
+        this._ensureLegendVisible(legendContainer);
+
+        // 1. Capture Legend Parts FIRST
+        const legendCanvases = [];
+        let maxLegendHeight = 0;
+        let totalLegendWidth = 0;
+        const captureScale = 2.5;
+
+        if (legendContainer) {
+            const parts = Array.from(legendContainer.querySelectorAll('.legend-part-column'));
+            for (const col of parts) {
+                if (this._hasVisibleSize(col)) {
+                    await new Promise(r => setTimeout(r, 50));
+                    const tempDiv = document.createElement('div');
+                    Object.assign(tempDiv.style, { position: 'absolute', top: '-20000px', left: '-20000px', width: col.offsetWidth + 'px', background: '#FFFFFF', padding: '15px' });
+                    document.body.appendChild(tempDiv);
+                    const clone = col.cloneNode(true);
+                    Object.assign(clone.style, { width: '100%', height: 'auto', display: 'block', visibility: 'visible', opacity: '1' });
+                    tempDiv.appendChild(clone);
+                    try {
+                        const colCanvas = await html2canvas(tempDiv, { backgroundColor: '#FFFFFF', scale: captureScale, logging: false, useCORS: true });
+                        if (colCanvas && colCanvas.width > 0) {
+                            legendCanvases.push({ canvas: colCanvas, width: col.offsetWidth, height: col.offsetHeight, element: col });
+                            maxLegendHeight = Math.max(maxLegendHeight, colCanvas.height);
+                            totalLegendWidth += colCanvas.width + (20 * captureScale);
+                        }
+                    } finally {
+                        document.body.removeChild(tempDiv);
+                    }
+                }
+            }
+        }
+
+        // 2. Capture vectors
         const vectorData = [];
         map.eachLayer(layer => {
-            if (
-                layer instanceof L.Polyline ||
-                layer instanceof L.Polygon ||
-                layer instanceof L.Marker ||
-                layer instanceof L.Circle ||
-                layer instanceof L.CircleMarker
-            ) {
-                let type;
+            if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker || layer instanceof L.Circle || layer instanceof L.CircleMarker) {
+                let type = 'polyline';
                 if (layer instanceof L.Marker) type = 'marker';
                 else if (layer instanceof L.Circle) type = layer.getRadius ? 'circle-geo' : 'circle-marker';
                 else if (layer instanceof L.CircleMarker) type = 'circle-marker';
                 else if (layer instanceof L.Polygon) type = 'polygon';
-                else type = 'polyline';
-
-                const arrowType = layer._arrowType || layer.arrowType || null;
-                vectorData.push({ layer, type, arrowType });
+                vectorData.push({ layer, type, arrowType: layer._arrowType || layer.arrowType || null });
                 map.removeLayer(layer);
             }
         });
 
-        console.log('[PDFExporter] ✅ Captured', vectorData.length, 'vector layers');
-
-        // ========== ÉTAPE 2 : RETIRER LES FLÈCHES SVG ==========
-        vectorData.forEach(({ layer, arrowType }) => {
-            if (arrowType && (arrowType === 'arrow' || arrowType === 'doubleArrow')) {
-                if (typeof SVGUtils !== 'undefined' && SVGUtils.removeArrowheadsFromPolylineSVG) {
-                    console.log('[PDFExporter] 🗑️ Removing SVG arrowheads:', arrowType);
-                    SVGUtils.removeArrowheadsFromPolylineSVG(layer);
-                }
-            }
-        });
-
-        // ========== ÉTAPE 3 : CAPTURER LES CONTRÔLES **AVANT** MASQUAGE ==========
-        console.log('[PDFExporter] 🎯 Pre-capturing scale & orientation controls...');
-
-        let scaleCanvas = null;
-        let orientationCanvas = null;
-
-        const scaleContainer = this.mapManager.scaleOrientationManager?.getScaleContainer?.();
-        const orientationContainer = this.mapManager.scaleOrientationManager?.getOrientationContainer?.();
-
-        console.log('[PDFExporter] Scale container:', scaleContainer ? '✅ Found' : '❌ Not found');
-        console.log('[PDFExporter] Orientation container:', orientationContainer ? '✅ Found' : '❌ Not found');
-
-        if (scaleContainer && scaleContainer.offsetWidth > 0) {
-            console.log('[PDFExporter] 📸 Capturing scale control (BEFORE hiding)...');
-            try {
-                scaleCanvas = await html2canvas(scaleContainer, {
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                    scale: 2,
-                    backgroundColor: 'transparent'
-                });
-                console.log('[PDFExporter] ✅ Scale control pre-captured:', scaleCanvas.width, 'x', scaleCanvas.height);
-            } catch (e) {
-                console.warn('[PDFExporter] ⚠️ Failed to pre-capture scale:', e.message);
-            }
-        }
-
-        if (orientationContainer && orientationContainer.offsetWidth > 0) {
-            console.log('[PDFExporter] 📸 Capturing orientation control (BEFORE hiding)...');
-            try {
-                orientationCanvas = await html2canvas(orientationContainer, {
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                    scale: 2,
-                    backgroundColor: 'transparent'
-                });
-                console.log('[PDFExporter] ✅ Orientation control pre-captured:', orientationCanvas.width, 'x', orientationCanvas.height);
-            } catch (e) {
-                console.warn('[PDFExporter] ⚠️ Failed to pre-capture orientation:', e.message);
-            }
-        }
-
-        // ========== ÉTAPE 4 : MASQUER LES CONTRÔLES ==========
-        console.log('[PDFExporter] 🚫 Hiding all Leaflet controls for base capture...');
         const controls = document.querySelectorAll('.leaflet-control-container');
         controls.forEach(c => (c.style.display = 'none'));
 
-        const vectorPane = map.getPane('overlayPane');
-        const oldZ = vectorPane.style.zIndex;
-        vectorPane.style.zIndex = '9999';
-        vectorPane.style.position = 'relative';
-
         try {
-            await new Promise(resolve => setTimeout(resolve, 300));
+            const scaleContainer = this.mapManager.scaleOrientationManager?.getScaleContainer?.();
+            const orientationContainer = this.mapManager.scaleOrientationManager?.getOrientationContainer?.();
+            
+            let scaleCanvas = null, orientationCanvas = null;
+            if (scaleContainer && this._hasVisibleSize(scaleContainer)) scaleCanvas = await html2canvas(scaleContainer, { useCORS: true, logging: false, scale: 2, backgroundColor: 'transparent' });
+            if (orientationContainer && this._hasVisibleSize(orientationContainer)) orientationCanvas = await html2canvas(orientationContainer, { useCORS: true, logging: false, scale: 2, backgroundColor: 'transparent' });
 
-            // ========== ÉTAPE 5 : CAPTURER LA CARTE DE BASE ==========
-            console.log('[PDFExporter] 📷 Capturing base map canvas...');
             const captureTarget = mapContainer.parentElement;
-            if (!captureTarget) {
-                throw new Error('Map container has no parent element to capture.');
-            }
-            console.log('[PDFExporter] 🎯 Capture target:', captureTarget.tagName, `.${captureTarget.className}`);
+            const baseCanvas = await html2canvas(captureTarget, { useCORS: true, logging: false, scale: 2, backgroundColor: '#FFFFFF' });
+            const canvasScale = baseCanvas.width / captureTarget.offsetWidth;
 
-            const baseCanvas = await html2canvas(captureTarget, {
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                scale: 2,
-                backgroundColor: '#FFFFFF',
-            });
-
-            console.log('[PDFExporter] ✅ Base canvas captured:', baseCanvas.width, 'x', baseCanvas.height);
-
-            // ========== ÉTAPE 6 : CRÉER LE CANVAS FINAL ==========
+            // --- PHASE 3: SMART CROP ASSEMBLY ---
+            const targetRatio = baseCanvas.width / (baseCanvas.height * 0.7); // On veut un bandeau d'environ 70% de la hauteur
+            const crop = this._computeSmartCropWindow(map, vectorData, captureTarget.offsetWidth, captureTarget.offsetHeight, targetRatio);
+            
             const titleHeight = this.stateManager.mapTitle ? 80 : 0;
+            const drawMapWidth = baseCanvas.width;
+            const drawMapHeight = crop.height * canvasScale;
+            const scaledMaxLegendHeight = (maxLegendHeight / captureScale) * canvasScale;
+
             const finalCanvas = document.createElement('canvas');
             finalCanvas.width = baseCanvas.width;
-            finalCanvas.height = baseCanvas.height + titleHeight;
-            const ctx = finalCanvas.getContext('2d');
+            finalCanvas.height = drawMapHeight + titleHeight + (legendCanvases.length > 0 ? scaledMaxLegendHeight + (100 * canvasScale) : 0);
+            let ctx = finalCanvas.getContext('2d');
 
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // Titre
             if (this.stateManager.mapTitle) {
                 ctx.fillStyle = '#000000';
                 ctx.font = 'bold 48px Arial';
@@ -289,102 +295,66 @@ export class PDFExporter {
                 ctx.fillText(this.stateManager.mapTitle, finalCanvas.width / 2, titleHeight / 2);
             }
 
-            // Carte de base
-            ctx.drawImage(baseCanvas, 0, titleHeight);
+            // Draw map CROPPED (no squash)
+            ctx.drawImage(
+                baseCanvas, 
+                0, crop.y * canvasScale, baseCanvas.width, crop.height * canvasScale, // Source
+                0, titleHeight, drawMapWidth, drawMapHeight // Destination
+            );
 
-            // ========== ÉTAPE 7 : DESSINER LES VECTEURS AVEC FLÈCHES ==========
-            const scale = baseCanvas.width / captureTarget.offsetWidth;
+            // Draw vectors with OFFSET
             ctx.save();
-            ctx.translate(0, titleHeight);
-
-            console.log('[PDFExporter] 🎨 Drawing vectors with arrowheads...');
+            ctx.translate(0, titleHeight - (crop.y * canvasScale));
             vectorData.forEach(({ layer, type, arrowType }) => {
-                if (type === 'polyline' || type === 'polygon') {
-                    this._drawPolyline(ctx, map, layer, scale, arrowType);
-                } else if (type === 'marker') {
-                    this._drawMarker(ctx, map, layer, scale);
-                } else if (type === 'circle-geo') {
-                    this._drawCircleGeo(ctx, map, layer, scale);
-                } else if (type === 'circle-marker') {
-                    this._drawCircleMarker(ctx, map, layer, scale);
-                }
+                if (type === 'polyline' || type === 'polygon') this._drawPolyline(ctx, map, layer, canvasScale, arrowType);
+                else if (type === 'marker') this._drawMarker(ctx, map, layer, canvasScale);
+                else if (type === 'circle-geo') this._drawCircleGeo(ctx, map, layer, canvasScale);
+                else if (type === 'circle-marker') this._drawCircleMarker(ctx, map, layer, canvasScale);
             });
-
             ctx.restore();
 
-            // ========== ÉTAPE 8 : DESSINER LES CONTRÔLES CAPTURÉS ==========
-            console.log('[PDFExporter] 🎯 Drawing pre-captured controls on final canvas...');
+            if (scaleCanvas && scaleCanvas.width > 0) ctx.drawImage(scaleCanvas, 20 * canvasScale, titleHeight + drawMapHeight - scaleCanvas.height - 20 * canvasScale);
+            if (orientationCanvas && orientationCanvas.width > 0) ctx.drawImage(orientationCanvas, 20 * canvasScale, titleHeight + 20 * canvasScale);
 
-            if (scaleCanvas) {
-                const scalePadding = 20;
-                const scaleX = scalePadding;
-                const scaleY = finalCanvas.height - scaleCanvas.height / 2 - scalePadding;
+            if (legendCanvases.length > 0) {
+                const legendY = titleHeight + drawMapHeight + (50 * canvasScale);
+                let currentX = 40 * canvasScale;
+                const totalWidthReal = (totalLegendWidth / captureScale) * canvasScale;
+                const availableW = finalCanvas.width - (80 * canvasScale);
+                const finalLegendScale = totalWidthReal > availableW ? availableW / totalWidthReal : 1;
 
-                ctx.drawImage(scaleCanvas, scaleX, scaleY);
-                console.log('[PDFExporter] ✅ Scale control drawn at:', { x: scaleX, y: scaleY });
-            } else {
-                console.warn('[PDFExporter] ⚠️ No scale canvas to draw');
-            }
-
-            if (orientationCanvas) {
-                const orientationPadding = 20;
-                const orientationX = orientationPadding;
-                const orientationY = titleHeight + orientationPadding;
-
-                ctx.drawImage(orientationCanvas, orientationX, orientationY);
-                console.log('[PDFExporter] ✅ Orientation control drawn at:', { x: orientationX, y: orientationY });
-            } else {
-                console.warn('[PDFExporter] ⚠️ No orientation canvas to draw');
-            }
-
-            // ========== ÉTAPE 9 : RESTAURER LES LAYERS ==========
-            console.log('[PDFExporter] 🔄 Restoring map layers...');
-            vectorData.forEach(({ layer }) => map.addLayer(layer));
-            controls.forEach(c => (c.style.display = 'block'));
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            vectorData.forEach(({ layer, arrowType }) => {
-                if (arrowType && (arrowType === 'arrow' || arrowType === 'doubleArrow')) {
-                    if (typeof SVGUtils !== 'undefined' && SVGUtils.addArrowheadsToPolylineSVG) {
-                        console.log('[PDFExporter] ✨ Restoring SVG arrowheads:', arrowType);
-                        SVGUtils.addArrowheadsToPolylineSVG(layer, arrowType);
-                    }
+                for (const item of legendCanvases) {
+                    const drawW = (item.canvas.width / captureScale) * canvasScale * finalLegendScale;
+                    const drawH = (item.canvas.height / captureScale) * canvasScale * finalLegendScale;
+                    ctx.drawImage(item.canvas, currentX, legendY, drawW, drawH);
+                    this._redrawAllLegendSymbolsInColumn(ctx, item.element, currentX, legendY, canvasScale * finalLegendScale, vectorData);
+                    currentX += drawW + (25 * canvasScale * finalLegendScale);
                 }
-            });
-
-            // ========== ÉTAPE 10 : DESSINER LA LÉGENDE ==========
-            if (legendContainer) {
-                await this._drawLegendOnCanvas(ctx, legendContainer, captureTarget, scale, titleHeight, vectorData);
             }
 
-            if (legendWasHidden && legendContainer) {
-                legendContainer.style.display = 'none';
-                legendContainer.style.visibility = 'hidden';
-            }
-
-            console.log('[PDFExporter] ✅ Canvas capture complete');
             return finalCanvas;
 
         } finally {
-            console.log('[PDFExporter] 🔧 Final cleanup...');
-
-            vectorData.forEach(({ layer }) => {
-                if (!map.hasLayer(layer)) map.addLayer(layer);
-            });
-
+            vectorData.forEach(({ layer }) => { if (!map.hasLayer(layer)) map.addLayer(layer); });
             controls.forEach(c => (c.style.display = 'block'));
-
-            vectorData.forEach(({ layer, arrowType }) => {
-                if (arrowType && (arrowType === 'arrow' || arrowType === 'doubleArrow')) {
-                    if (typeof SVGUtils !== 'undefined' && SVGUtils.addArrowheadsToPolylineSVG) {
-                        SVGUtils.addArrowheadsToPolylineSVG(layer, arrowType);
-                    }
-                }
-            });
-
-            vectorPane.style.zIndex = oldZ;
-            console.log('[PDFExporter] ✅ Map state fully restored');
+            if (map.invalidateSize) setTimeout(() => map.invalidateSize(), 100);
         }
+    }
+
+    _hasVisibleSize(el) {
+        if (!el) return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+    }
+
+    _ensureLegendVisible(legendContainer) {
+        if (!legendContainer) return;
+        legendContainer.style.setProperty('display', 'block', 'important');
+        legendContainer.style.setProperty('visibility', 'visible', 'important');
+        legendContainer.style.setProperty('opacity', '1', 'important');
+        legendContainer.style.setProperty('height', 'auto', 'important');
+        legendContainer.style.setProperty('max-height', 'none', 'important');
+        legendContainer.style.setProperty('overflow', 'visible', 'important');
     }
 
     _drawPolyline(ctx, map, layer, scale, arrowType) {
@@ -597,58 +567,10 @@ export class PDFExporter {
         ctx.stroke();
     }
 
-    async _drawLegendOnCanvas(ctx, legendContainer, mapContainer, scale, titleOffset = 0, vectorData = []) {
-        try {
-            console.log('[PDFExporter] 🎨 Drawing legend...');
-
-            const legendRect = legendContainer.getBoundingClientRect();
-            if (legendRect.width === 0 || legendRect.height === 0) {
-                console.warn('[PDFExporter] Legend has no dimensions, skipping');
-                return;
-            }
-
-            const mapRect = mapContainer.getBoundingClientRect();
-            const legendX = (legendRect.left - mapRect.left) * scale;
-            const legendY = (legendRect.top - mapRect.top) * scale + titleOffset;
-
-            console.log('[PDFExporter] 📷 Capturing legend with html2canvas...');
-            const legendCanvas = await html2canvas(legendContainer, {
-                backgroundColor: 'rgba(255,255,255,1)',
-                scale: 2,
-                logging: false,
-                willReadFrequently: true,
-            });
-
-            if (!legendCanvas || legendCanvas.width === 0 || legendCanvas.height === 0) {
-                console.log('[PDFExporter] Legend capture failed');
-                return;
-            }
-
-            const legendWidth = legendRect.width * scale;
-            const legendHeight = legendRect.height * scale;
-
-            ctx.drawImage(legendCanvas, legendX, legendY, legendWidth, legendHeight);
-            console.log('[PDFExporter] ✅ Legend background drawn');
-
-            console.log('[PDFExporter] 🎯 Manually drawing line symbols in legend...');
-            this._redrawAllLegendSymbols(ctx, legendContainer, legendX, legendY, scale, vectorData);
-
-        } catch (e) {
-            console.error('[PDFExporter] Failed to add legend:', e.message);
-        }
-    }
-
-    _redrawAllLegendSymbols(ctx, legendContainer, offsetX, offsetY, scale, vectorData) {
-        const allSymbols = legendContainer.querySelectorAll('.legend-item .legend-symbol');
-        console.log(`[PDFExporter] 🔍 Found ${allSymbols.length} potential symbols in legend to redraw.`);
-
-        if (allSymbols.length === 0) {
-            console.warn('[PDFExporter] ⚠️ No .legend-symbol elements found within .legend-item.');
-            return;
-        }
-
+    _redrawAllLegendSymbolsInColumn(ctx, columnElement, colX, colY, scale, vectorData) {
+        const allSymbols = columnElement.querySelectorAll('.legend-item .legend-symbol-wrapper');
         const styleMap = new Map();
-        this.stateManager.geometries.forEach((geom, index) => {
+        (this.stateManager.geometries || []).forEach((geom, index) => {
             if (geom.type === 'Polyline') {
                 styleMap.set(index, {
                     color: geom.lineColor || '#3388ff',
@@ -659,32 +581,18 @@ export class PDFExporter {
             }
         });
 
-        console.log('[PDFExporter] 🗺️ Created style map for', styleMap.size, 'polylines from StateManager.');
-
-        allSymbols.forEach((symbolDiv, symbolIndex) => {
+        allSymbols.forEach((symbolDiv) => {
             try {
                 const geometryItem = symbolDiv.closest('.legend-item');
-                if (!geometryItem) {
-                    console.warn(`[PDFExporter] Symbol ${symbolIndex} has no .legend-item parent, skipping.`);
-                    return;
-                }
-
-                const geomIndex = parseInt(geometryItem.dataset.index || geometryItem.dataset.geometryIndex);
-                if (isNaN(geomIndex)) {
-                    console.warn(`[PDFExporter] Invalid geometry index for symbol ${symbolIndex}, skipping.`);
-                    return;
-                }
-
+                if (!geometryItem) return;
+                const geomIndex = parseInt(geometryItem.dataset.geometryIndex);
                 const style = styleMap.get(geomIndex);
-                if (!style) {
-                    return;
-                }
+                if (!style) return;
 
                 const symbolRect = symbolDiv.getBoundingClientRect();
-                const legendRect = legendContainer.getBoundingClientRect();
-
-                const x = offsetX + (symbolRect.left - legendRect.left) * scale;
-                const y = offsetY + (symbolRect.top - legendRect.top) * scale;
+                const colRect = columnElement.getBoundingClientRect();
+                const x = colX + (symbolRect.left - colRect.left) * scale;
+                const y = colY + (symbolRect.top - colRect.top) * scale;
                 const width = symbolRect.width * scale;
                 const height = symbolRect.height * scale;
 
@@ -692,46 +600,33 @@ export class PDFExporter {
                 ctx.strokeStyle = style.color;
                 ctx.lineWidth = Math.max(style.weight * scale * 0.5, 2);
                 ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-
                 if (style.dashArray) {
                     const dashes = style.dashArray.split(',').map(d => parseFloat(d) * scale * 0.5);
                     ctx.setLineDash(dashes);
-                } else {
-                    ctx.setLineDash([]);
                 }
 
                 const lineY = y + height / 2;
-                const startX = x + 5;
-                const endX = x + width - 5;
+                const startX = x + 2;
+                const endX = x + width - 2;
 
                 ctx.beginPath();
                 ctx.moveTo(startX, lineY);
                 ctx.lineTo(endX, lineY);
                 ctx.stroke();
-
                 ctx.setLineDash([]);
 
                 if (style.arrowType) {
-                    const arrowSize = Math.min(width * 0.2, 8);
-
+                    const arrowSize = Math.min(width * 0.25, 8 * scale);
                     if (style.arrowType === 'arrow' || style.arrowType === 'doubleArrow') {
                         this._drawSmallArrowhead(ctx, endX, lineY, 0, arrowSize, style.color);
                     }
-
                     if (style.arrowType === 'doubleArrow') {
                         this._drawSmallArrowhead(ctx, startX, lineY, Math.PI, arrowSize, style.color);
                     }
                 }
-
                 ctx.restore();
-
-            } catch (e) {
-                console.error(`[PDFExporter] ❌ Error redrawing symbol ${symbolIndex}:`, e);
-            }
+            } catch (e) { console.error('[PDFExporter] Error redrawing legend symbol:', e); }
         });
-
-        console.log('[PDFExporter] ✅ All legend symbols redrawn');
     }
 
     _drawSmallArrowhead(ctx, x, y, angle, size, color) {

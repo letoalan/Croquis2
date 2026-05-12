@@ -48,7 +48,7 @@ body {
 /* Content Container */
 .launcher-content {
     width: 100%;
-    max-width: 480px;
+    max-width: 720px;
     padding: 2rem;
     text-align: center;
     z-index: 10;
@@ -138,23 +138,72 @@ body {
 .version-switcher { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border); }
 .switcher-label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
 
-.secondary-btns { display: flex; gap: 1rem; }
+/* Choice Cards Grid */
+.choices-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
 
-.btn-secondary {
-    flex: 1;
-    padding: 0.875rem;
-    background: var(--glass-bg);
-    color: var(--text-main);
-    text-decoration: none;
-    border-radius: 12px;
-    font-size: 0.9rem;
+.choice-card {
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
     transition: var(--transition);
 }
 
-.btn-secondary:hover { background: var(--glass-border); }
+.choice-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
 
-/* Details */
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-title {
+    font-weight: 700;
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+}
+
+.card-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* Highlight for Recommended Card */
+.choice-card.recommended {
+    border-color: var(--primary);
+    background: rgba(79, 70, 229, 0.15);
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+    border-width: 2px;
+}
+
+#cardPromethean.recommended {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.15);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+#cardPaysage.recommended {
+    border-color: #0ea5e9;
+    background: rgba(14, 165, 233, 0.15);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+}
+
+/* Footer */
 .help-details { margin-top: 2rem; text-align: left; }
 .help-details summary { font-size: 0.85rem; color: var(--text-muted); cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
 .help-details summary:hover { opacity: 1; }
@@ -169,8 +218,10 @@ body {
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .launcher-content { padding: 1.5rem; }
     .recommendation-panel { padding: 1.5rem; }
-    .secondary-btns { flex-direction: column; }
+    .choices-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .choice-card { flex-direction: row; text-align: left; padding: 1rem; gap: 1.5rem; }
+    .card-icon { font-size: 2rem; margin-bottom: 0; }
 }
