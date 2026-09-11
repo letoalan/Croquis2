@@ -2,6 +2,10 @@
 
 Ce document sert de point d'entrée pour toute intelligence artificielle ou développeur souhaitant comprendre, planifier et exécuter des modifications sur le projet **Croquis**.
 
+> 📚 **Documentation Wiki Exhaustive :**  
+> Une documentation complète, modulaire et interconnectée couvrant l'intégralité des répertoires et fichiers du projet est accessible dans le **[Wiki Central](wiki/index.md)**.  
+> Chaque fichier source dispose de sa propre fiche descriptive interconnectée à son dossier parent et au présent document.
+
 ## 1. Vue d'ensemble du Dépôt
 Le projet **Croquis** est une application web de cartographie interactive à but pédagogique. Elle permet de dessiner des formes géométriques (lignes, polygones, flèches, marqueurs) sur une carte, de les styliser, de construire une légende dynamique et d'exporter le travail.
 
