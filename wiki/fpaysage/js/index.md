@@ -16,7 +16,7 @@ Scripts d'orchestration JavaScript de la version Paysage.
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `main.js` | 46.6 KB | Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événements DOM et la configuration de l'application. | [Consulter la fiche](main.js.md) | [Code Source](../../../fpaysage/js/main.js) |
+| `main.js` | 2.3 KB | Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événements DOM et la configuration de l'application. | [Consulter la fiche](main.js.md) | [Code Source](../../../fpaysage/js/main.js) |
 
 ---
 

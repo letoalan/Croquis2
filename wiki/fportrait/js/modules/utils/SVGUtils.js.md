@@ -17,8 +17,8 @@ Calculateur géométrique et générateur SVG vectoriel pour les flèches dynami
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fportrait/js/modules/utils/SVGUtils.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 42.85 Ko (43877 octets)
-- **Nombre de lignes :** 1065 lignes
+- **Poids du fichier :** 2.97 Ko (3043 octets)
+- **Nombre de lignes :** 85 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,12 @@ Calculateur géométrique et générateur SVG vectoriel pour les flèches dynami
 
 ### Éléments Exportés
 - `SVGUtils`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./svg_parts/ArrowRenderer.js` | `ArrowRenderer` |
+| `./svg_parts/MarkerSVGFactory.js` | `MarkerSVGFactory` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

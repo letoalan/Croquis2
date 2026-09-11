@@ -1,0 +1,88 @@
+/* Module part 6 for _editor.css */
+
+.text-editor-export:hover {
+    background: linear-gradient(135deg, var(--primary-gradient-end) 0%, var(--primary-gradient-start) 100%);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.text-editor.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    max-height: none;
+    border-radius: 0;
+    border: none;
+    padding: 20px;
+    background: var(--white);
+}
+
+.text-editor-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: none;
+}
+
+.text-editor-overlay.active {
+    display: block;
+}
+
+.storage-symbol-preview-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    border-radius: 2px;
+}
+
+.storage-symbol-preview.shape-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.storage-symbol-preview.marker-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 2px;
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+}
+
+.storage-symbol-preview.marker-preview img {
+    max-width: 36px;
+    max-height: 36px;
+    object-fit: contain;
+}
+
+.storage-symbol-preview.arrow-preview {
+    width: 75px;
+    height: 48px;
+}
+
+.dropped-symbol-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.dropped-symbol {
+    width: 45px;
+    height: 45px;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}

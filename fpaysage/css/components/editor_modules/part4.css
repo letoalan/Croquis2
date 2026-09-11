@@ -1,0 +1,164 @@
+/* Module part 4 for _editor.css */
+
+.text-editor-multiline {
+    position: relative !important;
+    padding: 4px 8px !important;
+    font-size: 14px;
+    line-height: 28px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    outline: none;
+    resize: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+}
+
+.text-editor-multiline strong, .text-editor strong {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.text-editor-multiline em, .text-editor em {
+    font-style: italic;
+    color: #34495e;
+}
+
+.text-editor-multiline u, .text-editor u {
+    text-decoration: underline;
+    color: #2980b9;
+}
+
+.text-editor-multiline s, .text-editor s {
+    text-decoration: line-through;
+    color: #7f8c8d;
+}
+
+.text-editor-multiline mark, .text-editor mark {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #856404;
+}
+
+.text-editor-multiline ul, .text-editor ul,
+.text-editor-multiline ol, .text-editor ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.text-editor-multiline li, .text-editor li {
+    margin-bottom: 5px;
+}
+
+.text-editor-multiline h1, .text-editor h1,
+.text-editor-multiline h2, .text-editor h2,
+.text-editor-multiline h3, .text-editor h3,
+.text-editor-multiline h4, .text-editor h4,
+.text-editor-multiline h5, .text-editor h5,
+.text-editor-multiline h6, .text-editor h6 {
+    margin: 15px 0 10px 0;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.text-editor-multiline h1, .text-editor h1 { font-size: 1.5em; }
+.text-editor-multiline h2, .text-editor h2 { font-size: 1.3em; }
+.text-editor-multiline h3, .text-editor h3 { font-size: 1.1em; }
+
+.text-editor-multiline blockquote, .text-editor blockquote {
+    border-left: 4px solid var(--secondary-gradient-start);
+    padding-left: 15px;
+    margin: 15px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    background: var(--light-gray);
+    padding: 10px 15px;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+
+.text-editor-multiline code, .text-editor code {
+    background: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #e83e8c;
+}
+
+.text-editor-multiline pre, .text-editor pre {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 15px;
+    border-radius: var(--border-radius-md);
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.text-editor-multiline pre code, .text-editor pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+}
+
+.synchronized-scroll {
+    /* Sera synchronisé via JavaScript */
+}
+
+.symbols-storage-legend {
+    background: linear-gradient(135deg, var(--light-gray) 0%, var(--gray) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 15px;
+    box-shadow: var(--shadow-md);
+}
+
+.storage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(40, 167, 69, 0.2);
+}
+
+.storage-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark-gray);
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.storage-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    min-height: 100px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.storage-symbol-part {
+    background: linear-gradient(135deg, var(--white) 0%, #f5f7fa 100%);
+    border-radius: var(--border-radius-md);
+    padding: 12px;
+    border-left: 4px solid var(--secondary-gradient-start);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.storage-symbol-part:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-left-color: var(--secondary-gradient-end);
+}

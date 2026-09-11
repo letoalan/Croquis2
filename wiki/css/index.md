@@ -16,13 +16,15 @@ Styles transverses et feuilles de style de la page d'accueil.
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `landing.css` | 5.9 KB | Fichier technique (landing.css) composant le module css. | [Consulter la fiche](landing.css.md) | [Code Source](../../css/landing.css) |
+| `landing.css` | 127 B | Fichier technique (landing.css) composant le module css. | [Consulter la fiche](landing.css.md) | [Code Source](../../css/landing.css) |
 
 ---
 
 ## 📂 Sous-Dossiers
 
-*Ce dossier ne contient aucun sous-dossier direct.*
+| Sous-Dossier | Description | Lien Wiki |
+| :--- | :--- | :--- |
+| `/landing_modules` | Module technique et organisationnel `css/landing_modules`. | [Accéder au dossier (landing_modules)](landing_modules/index.md) |
 
 ---
 

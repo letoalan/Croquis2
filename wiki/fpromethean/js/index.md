@@ -16,7 +16,7 @@ Version de l'application spécifiquement conçue pour les tableaux blancs intera
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `main.js` | 35.2 KB | Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événements DOM et la configuration de l'application. | [Consulter la fiche](main.js.md) | [Code Source](../../../fpromethean/js/main.js) |
+| `main.js` | 2.3 KB | Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événements DOM et la configuration de l'application. | [Consulter la fiche](main.js.md) | [Code Source](../../../fpromethean/js/main.js) |
 
 ---
 

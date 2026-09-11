@@ -17,8 +17,8 @@ Pilote cartographique Leaflet & Leaflet-Geoman orchestrant les couches, fonds de
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fportrait/js/modules/MapManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 28.49 Ko (29176 octets)
-- **Nombre de lignes :** 940 lignes
+- **Poids du fichier :** 3.55 Ko (3634 octets)
+- **Nombre de lignes :** 84 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -32,16 +32,17 @@ Pilote cartographique Leaflet & Leaflet-Geoman orchestrant les couches, fonds de
 | Module Importé | Symboles Importés |
 | :--- | :--- |
 | `./mapping/layers/TileLayerManager.js` | `TileLayerManager` |
+| `./mapping/layers/TileSelectorControl.js` | `TileSelectorControl` |
 | `./mapping/layers/LayerGroupManager.js` | `LayerGroupManager` |
 | `./mapping/markers/MarkerControlManager.js` | `MarkerControlManager` |
 | `./mapping/lines/LineControlManager.js` | `LineControlManager` |
-| `./mapping/events/EventManager.js` | `EventManager` |
-| `./mapping/events/EventHandlers.js` | `EventHandlers` |
-| `./mapping/geometry/GeometryHandler.js` | `GeometryHandler` |
 | `./mapping/lines/CurveControlManager.js` | `CurveControlManager` |
-| `./mapping/legend/LegendManager.js` | `LegendManager` |
-| `./utils/SVGUtils.js` | `SVGUtils` |
+| `./mapping/geometry/GeometryHandler.js` | `GeometryHandler` |
 | `./mapping/controls/ScaleOrientationManager.js` | `ScaleOrientationManager` |
+| `./mapping/io/PDFExporter.js` | `PDFExporter` |
+| `./utils/SVGUtils.js` | `SVGUtils` |
+| `./map_parts/TileSources.js` | `TILE_SOURCES` |
+| `./map_parts/MapEditingEvents.js` | `MapEditingEvents` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

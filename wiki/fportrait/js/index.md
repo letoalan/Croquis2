@@ -16,7 +16,7 @@ Version de l'application adaptée aux terminaux mobiles et tablettes (format Por
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `main.js` | 41.8 KB | Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événements DOM et la configuration de l'application. | [Consulter la fiche](main.js.md) | [Code Source](../../../fportrait/js/main.js) |
+| `main.js` | 2.3 KB | Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événements DOM et la configuration de l'application. | [Consulter la fiche](main.js.md) | [Code Source](../../../fportrait/js/main.js) |
 
 ---
 

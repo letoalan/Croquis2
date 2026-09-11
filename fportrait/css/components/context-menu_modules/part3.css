@@ -1,0 +1,5 @@
+/* Module part 3 for _context-menu.css */
+
+.context-menu.closing .context-menu-content {
+    animation: contextMenuSlideOut 0.2s ease forwards;
+}

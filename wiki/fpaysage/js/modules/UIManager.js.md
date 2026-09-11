@@ -17,8 +17,8 @@ Gestionnaire d'interface utilisateur contrôlant les barres d'outils, menus cont
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpaysage/js/modules/UIManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 26.66 Ko (27299 octets)
-- **Nombre de lignes :** 660 lignes
+- **Poids du fichier :** 1.9 Ko (1943 octets)
+- **Nombre de lignes :** 55 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -32,6 +32,8 @@ Gestionnaire d'interface utilisateur contrôlant les barres d'outils, menus cont
 | Module Importé | Symboles Importés |
 | :--- | :--- |
 | `./ContextMenuDragger.js` | `ContextMenuDragger` |
+| `./ui_parts/ContextMenuHandler.js` | `ContextMenuHandler` |
+| `./ui_parts/UIActionsHandler.js` | `UIActionsHandler` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

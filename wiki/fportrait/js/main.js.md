@@ -17,8 +17,8 @@ Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événe
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fportrait/js/main.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 41.79 Ko (42798 octets)
-- **Nombre de lignes :** 1042 lignes
+- **Poids du fichier :** 2.28 Ko (2334 octets)
+- **Nombre de lignes :** 56 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,18 +27,14 @@ Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événe
 | :--- | :--- |
 | `./modules/GeometryManager.js` | `GeometryManager` |
 | `./modules/utils/SVGUtils.js` | `SVGUtils` |
+| `./modules/utils/ZoomManager.js` | `ZoomManager` |
+| `./modules/utils/DiagnosticsManager.js` | `DiagnosticsManager` |
+| `./modules/utils/TextEditorController.js` | `TextEditorController` |
 
 ### Fonctions Clés Définies
-- `function calculateBaseWidth()`
-- `function getEffectiveZoomLevel()`
-- `function diagnoseZoomDetection()`
-- `function detectAndAdaptZoom()`
-- `function showZoomIndicator()`
-- `function monitorZoomChanges()`
 - `function initSidebar()`
-- `function initFullscreenMode()`
-- `function initTextEditor()`
-- `function updateButtonStates()`
+- `function forceMapResize()`
+- `function initializeApplication()`
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

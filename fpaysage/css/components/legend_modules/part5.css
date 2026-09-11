@@ -1,0 +1,38 @@
+/* Module part 5 for legend.css */
+.legend-control.dragging,
+.legend-control.dragging * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    cursor: grabbing !important;
+}
+
+/* ==================== ACCESSIBILITÉ ==================== */
+
+.legend-item:focus-visible,
+.legend-add-part-btn:focus-visible,
+.part-management-controls .btn:focus-visible {
+    outline: 3px solid var(--primary-gradient-start);
+    outline-offset: 2px;
+}
+
+/* ==================== ANIMATIONS SUPPLÉMENTAIRES ==================== */
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.legend-part-column {
+    animation: fade-in 0.3s ease-out;
+}
+
+.legend-item {
+    animation: fade-in 0.2s ease-out;
+}

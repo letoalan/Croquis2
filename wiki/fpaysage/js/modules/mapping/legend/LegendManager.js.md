@@ -17,8 +17,8 @@ Moteur de rendu et synchronisation de la légende dynamique multi-niveaux (parti
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpaysage/js/modules/mapping/legend/LegendManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 57.55 Ko (58928 octets)
-- **Nombre de lignes :** 1353 lignes
+- **Poids du fichier :** 2.26 Ko (2315 octets)
+- **Nombre de lignes :** 64 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -32,6 +32,7 @@ Moteur de rendu et synchronisation de la légende dynamique multi-niveaux (parti
 | Module Importé | Symboles Importés |
 | :--- | :--- |
 | `./LegendOrganizer.js` | `LegendOrganizer` |
+| `./legend_parts/LegendDomBuilder.js` | `LegendDomBuilder` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

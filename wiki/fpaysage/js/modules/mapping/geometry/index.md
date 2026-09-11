@@ -16,7 +16,8 @@ Modules cartographiques de la version Paysage : contrôles Leaflet, moteurs de d
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `GeometryHandler.js` | 8.9 KB | Gestionnaire utilitaire de standardisation des géométries, coordonnées et conversions Leaflet vers l'état interne. | [Consulter la fiche](GeometryHandler.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/geometry/GeometryHandler.js) |
+| `GeometryHandler.js` | 1.2 KB | Gestionnaire utilitaire de standardisation des géométries, coordonnées et conversions Leaflet vers l'état interne. | [Consulter la fiche](GeometryHandler.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/geometry/GeometryHandler.js) |
+| `GeometryObjectFactory.js` | 3.1 KB | Fichier technique (GeometryObjectFactory.js) composant le module fpaysage/js/modules/mapping/geometry. | [Consulter la fiche](GeometryObjectFactory.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/geometry/GeometryObjectFactory.js) |
 
 ---
 

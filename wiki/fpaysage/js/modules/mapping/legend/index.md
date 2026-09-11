@@ -16,14 +16,17 @@ Modules cartographiques de la version Paysage : contrôles Leaflet, moteurs de d
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `LegendManager.js` | 57.5 KB | Moteur de rendu et synchronisation de la légende dynamique multi-niveaux (parties, sous-parties, figurés). | [Consulter la fiche](LegendManager.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/legend/LegendManager.js) |
-| `LegendOrganizer.js` | 12.3 KB | Gestionnaire de glisser-déposer (Drag & Drop) pour la réorganisation interactive de la hiérarchie de la légende. | [Consulter la fiche](LegendOrganizer.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/legend/LegendOrganizer.js) |
+| `LegendManager.js` | 2.3 KB | Moteur de rendu et synchronisation de la légende dynamique multi-niveaux (parties, sous-parties, figurés). | [Consulter la fiche](LegendManager.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/legend/LegendManager.js) |
+| `LegendOrganizer.js` | 4.6 KB | Gestionnaire de glisser-déposer (Drag & Drop) pour la réorganisation interactive de la hiérarchie de la légende. | [Consulter la fiche](LegendOrganizer.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/legend/LegendOrganizer.js) |
+| `LegendTouchDragHandler.js` | 4.4 KB | Fichier technique (LegendTouchDragHandler.js) composant le module fpaysage/js/modules/mapping/legend. | [Consulter la fiche](LegendTouchDragHandler.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/legend/LegendTouchDragHandler.js) |
 
 ---
 
 ## 📂 Sous-Dossiers
 
-*Ce dossier ne contient aucun sous-dossier direct.*
+| Sous-Dossier | Description | Lien Wiki |
+| :--- | :--- | :--- |
+| `/legend_parts` | Modules cartographiques de la version Paysage : contrôles Leaflet, moteurs de dessin vectoriel, géométrie, légende et exports. | [Accéder au dossier (legend_parts)](legend_parts/index.md) |
 
 ---
 

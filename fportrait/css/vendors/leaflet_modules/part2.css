@@ -1,0 +1,103 @@
+/* Module part 2 for _leaflet.css */
+
+.compass-rose {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: var(--transition-base);
+}
+
+.compass-rose:hover {
+    transform: scale(1.1);
+}
+
+/* ==================== ÉCHELLE ==================== */
+
+.leaflet-control-scale {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(5px);
+    border-radius: var(--border-radius-sm) !important;
+    padding: 5px 10px !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.leaflet-control-scale-line {
+    border: 2px solid #333 !important;
+    border-top: none !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    padding: 2px 5px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ========================================
+   CORRECTION FLÈCHES POLYGONALES SVG
+   ======================================== */
+
+#arrow-svg-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+}
+
+.arrow-group {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.arrow-line,
+.arrow-tip-start,
+.arrow-tip-end {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.leaflet-overlay-pane {
+    overflow: visible !important;
+}
+
+/* ==================== MARQUEURS PERSONNALISÉS ==================== */
+
+.custom-marker {
+    pointer-events: all;
+    z-index: 1000;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.cursor-marker {
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+
+.cursor-marker .cross {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+}
+
+.cursor-marker .cross::before,
+.cursor-marker .cross::after {
+    content: '';
+    position: absolute;
+    background-color: #000;
+}
+
+.cursor-marker .cross::before {
+    width: 12px;
+    height: 2px;
+    top: 5px;
+}
+
+.cursor-marker .cross::after {
+    width: 2px;
+    height: 12px;
+    left: 5px;
+}

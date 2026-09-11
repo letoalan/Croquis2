@@ -16,7 +16,8 @@ Modules de cartographie adaptés aux interactions tactiles et contraintes d'affi
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `CurveControlManager.js` | 12.0 KB | Contrôleur spécialisé dans la manipulation, le traçage et l'ajustement des propriétés des lignes, courbes ou marqueurs. | [Consulter la fiche](CurveControlManager.js.md) | [Code Source](../../../../../../fportrait/js/modules/mapping/lines/CurveControlManager.js) |
+| `BezierMath.js` | 1.4 KB | Fichier technique (BezierMath.js) composant le module fportrait/js/modules/mapping/lines. | [Consulter la fiche](BezierMath.js.md) | [Code Source](../../../../../../fportrait/js/modules/mapping/lines/BezierMath.js) |
+| `CurveControlManager.js` | 7.1 KB | Contrôleur spécialisé dans la manipulation, le traçage et l'ajustement des propriétés des lignes, courbes ou marqueurs. | [Consulter la fiche](CurveControlManager.js.md) | [Code Source](../../../../../../fportrait/js/modules/mapping/lines/CurveControlManager.js) |
 | `LineControlManager.js` | 6.7 KB | Contrôleur spécialisé dans la manipulation, le traçage et l'ajustement des propriétés des lignes, courbes ou marqueurs. | [Consulter la fiche](LineControlManager.js.md) | [Code Source](../../../../../../fportrait/js/modules/mapping/lines/LineControlManager.js) |
 
 ---

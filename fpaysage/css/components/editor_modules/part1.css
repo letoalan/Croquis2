@@ -1,0 +1,165 @@
+/* Module part 1 for _editor.css */
+/* ==================== ÉDITEUR DE TEXTE WYSIWYG ==================== */
+
+.formatting-toolbar {
+    background: linear-gradient(135deg, var(--light-gray) 0%, var(--gray) 100%);
+    padding: 15px;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow-sm);
+}
+
+.formatting-toolbar .btn-group {
+    margin-bottom: 8px;
+}
+
+.formatting-toolbar .btn-group:last-child {
+    margin-bottom: 0;
+}
+
+.format-btn {
+    font-size: 12px;
+    padding: 8px 10px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-base);
+    font-weight: 600;
+    background: var(--white);
+}
+
+.format-btn:hover {
+    border-color: var(--secondary-gradient-start);
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
+    transform: translateY(-1px);
+}
+
+.format-btn.active {
+    background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
+    color: var(--white);
+    border-color: var(--secondary-gradient-start);
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+}
+
+/* ========================================
+   CONTENEUR PRINCIPAL DE L'ÉDITEUR LAYOUT
+   ======================================== */
+
+.editor-layout-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
+    height: auto;
+}
+
+/* ========================================
+   ÉDITEUR 2 COLONNES SYNCHRONISÉES
+   ======================================== */
+
+.two-column-editor {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 10px;
+    height: 100%;
+    min-height: 400px;
+    overflow: hidden;
+}
+
+.drop-zones-container,
+.text-editor-multiline {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    margin: 0;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--white);
+}
+
+.text-editor-multiline {
+    font-size: 14px;
+    line-height: 28px;
+    font-family: 'Segoe UI', sans-serif;
+    resize: none;
+    outline: none;
+}
+
+.symbol-drop-zone {
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--border-color);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 150ms ease;
+}
+
+.symbol-drop-zone:hover {
+    background: rgba(240, 240, 240, 0.8);
+    border-color: var(--primary-gradient-start);
+}
+
+.symbol-drop-zone.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-gradient-start);
+    border-style: solid;
+}
+
+
+/* ========================================
+   COLONNE 1 : ZONES DE DROP POUR SYMBOLES
+   ======================================== */
+
+.symbol-drop-column {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.symbol-drop-column label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dark-gray);
+    padding: 8px;
+    text-align: center;
+    background: rgba(40, 167, 69, 0.05);
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+
+}
+
+
+/* ==================== ÉDITEUR 2 COLONNES AVEC SCROLL SYNCHRONISÉ ==================== */
+
+.two-column-editor-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    background: var(--light-gray);
+    border-radius: var(--border-radius-lg);
+    padding: 8px;
+    box-shadow: var(--shadow-md);
+    gap: 8px;
+}
+
+.editor-headers {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 10px;
+    min-height: 40px;
+    background: transparent;
+    flex-shrink: 0;
+}

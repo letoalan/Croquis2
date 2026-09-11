@@ -17,27 +17,10 @@ Styles du menu contextuel flottant d'édition de forme, palettes de couleurs et 
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/css/components/_context-menu.css`
 - **Type de fichier :** `.css`
-- **Poids du fichier :** 7.8 Ko (7990 octets)
-- **Nombre de lignes :** 331 lignes
+- **Poids du fichier :** 0.18 Ko (186 octets)
+- **Nombre de lignes :** 5 lignes
 
 ## 2. Analyse des Styles et Sélecteurs
-
-### Sélecteurs CSS Majeurs
-- `.context-menu.dragging`
-- `.context-menu-content`
-- `.context-menu-header`
-- `.context-menu-header.dragging`
-- `.drag-handle`
-- `.drag-handle:hover, .context-menu-header:hover .drag-handle`
-- `.context-menu-header h6`
-- `.context-menu-close`
-- `.context-menu-close:hover`
-- `.context-menu-close:active`
-- `.context-menu-body`
-- `.context-menu-field`
-- `.context-menu-field label`
-- `.label-icon`
-- `.value-badge`
 
 ## 3. Rôle dans la Charte Graphique
 Assure l'ergonomie, la cohérence visuelle et l'adaptation responsive selon le profil de l'édition (desktop, mobile ou TBI).

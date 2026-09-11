@@ -17,8 +17,8 @@ Module de sérialisation et désérialisation de l'état du projet au format JSO
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/modules/mapping/io/ExportImportManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 47.35 Ko (48487 octets)
-- **Nombre de lignes :** 1145 lignes
+- **Poids du fichier :** 1.34 Ko (1370 octets)
+- **Nombre de lignes :** 36 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,12 @@ Module de sérialisation et désérialisation de l'état du projet au format JSO
 
 ### Éléments Exportés
 - `ExportImportManager`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./io_parts/StateSerializer.js` | `StateSerializer` |
+| `./io_parts/StateDeserializer.js` | `StateDeserializer` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

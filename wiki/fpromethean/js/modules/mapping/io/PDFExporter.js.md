@@ -17,8 +17,8 @@ Module d'exportation PDF vectoriel/raster haute définition intégrant le cadrag
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/modules/mapping/io/PDFExporter.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 32.49 Ko (33267 octets)
-- **Nombre de lignes :** 663 lignes
+- **Poids du fichier :** 1.55 Ko (1586 octets)
+- **Nombre de lignes :** 36 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,12 @@ Module d'exportation PDF vectoriel/raster haute définition intégrant le cadrag
 
 ### Éléments Exportés
 - `PDFExporter`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./pdf_parts/SmartCropEngine.js` | `SmartCropEngine` |
+| `./pdf_parts/PdfCanvasComposer.js` | `PdfCanvasComposer` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

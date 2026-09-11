@@ -16,13 +16,15 @@ Gestionnaires d'état et d'interface pour le format mobile/portrait.
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `SymbolPaletteManager.js` | 58.6 KB | Gestionnaire de la palette de symboles et figurés prédéfinis pour l'annotation cartographique. | [Consulter la fiche](SymbolPaletteManager.js.md) | [Code Source](../../../../../fportrait/js/modules/ui/SymbolPaletteManager.js) |
+| `SymbolPaletteManager.js` | 2.3 KB | Gestionnaire de la palette de symboles et figurés prédéfinis pour l'annotation cartographique. | [Consulter la fiche](SymbolPaletteManager.js.md) | [Code Source](../../../../../fportrait/js/modules/ui/SymbolPaletteManager.js) |
 
 ---
 
 ## 📂 Sous-Dossiers
 
-*Ce dossier ne contient aucun sous-dossier direct.*
+| Sous-Dossier | Description | Lien Wiki |
+| :--- | :--- | :--- |
+| `/palette_parts` | Gestionnaires d'état et d'interface pour le format mobile/portrait. | [Accéder au dossier (palette_parts)](palette_parts/index.md) |
 
 ---
 

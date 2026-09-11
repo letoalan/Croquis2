@@ -1,0 +1,163 @@
+/* Module part 3 for _editor.css */
+
+.drop-zone-remove-btn:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: scale(1.1);
+}
+
+.symbol-drop-zone {
+    position: relative;
+}
+
+.symbol-drop-zone:hover .drop-zone-remove-btn {
+    display: flex;
+}
+
+.storage-symbol-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.storage-symbol-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.storage-symbol-item:active {
+    transform: translateY(0);
+}
+
+.storage-symbol-item::after {
+    content: 'Double-clic pour placer';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    background: var(--primary-gradient-start);
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.storage-symbol-item:hover::after {
+    opacity: 1;
+}
+
+
+.symbol-drop-column,
+.text-content-column {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    min-height: 0;
+}
+
+
+.drop-zones-container.synchronized-scroll {
+    /* Sera synchronisé via JavaScript */
+}
+
+.symbol-drop-zone {
+    height: 28px;
+    min-height: 28px;
+    border: 2px dashed transparent;
+    border-radius: var(--border-radius-sm);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+
+.symbol-drop-zone.drag-over {
+    border-color: var(--secondary-gradient-start);
+    background: rgba(40, 167, 69, 0.1);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+}
+
+.symbol-drop-zone.filled {
+    background: rgba(40, 167, 69, 0.2);
+    border-color: var(--secondary-gradient-start);
+}
+
+.dropped-symbol {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: grab;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-sm);
+}
+
+.dropped-symbol:active {
+    cursor: grabbing;
+}
+
+.text-content-column {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.text-content-column label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dark-gray);
+    padding: 8px;
+    background: rgba(40, 167, 69, 0.05);
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+}
+
+.text-editor-multiline {
+    flex: 1;
+    background: var(--white);
+    overflow-y: scroll;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    line-height: 28px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    transition: var(--transition-base);
+    resize: none;
+    outline: none;
+}
+
+
+.text-editor-multiline:focus {
+    outline: none;
+    background: rgba(40, 167, 69, 0.02);
+}
+
+.text-editor-multiline[contenteditable="true"]:empty:before {
+    content: 'Collez ou tapez votre texte ici...';
+    color: var(--text-muted);
+    font-style: italic;
+    pointer-events: none;
+    opacity: 0.7;
+    display: block;
+}
+
+.text-editor-multiline[contenteditable="true"]:empty:focus:before {
+    opacity: 0.4;
+}
+
+.text-editor-multiline[contenteditable="true"]:not(:empty):before {
+    display: none;
+}

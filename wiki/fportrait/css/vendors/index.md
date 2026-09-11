@@ -16,14 +16,16 @@ Feuilles de styles optimisées pour l'ergonomie mobile, tablettes et écrans ver
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `leaflet.css` | 5.7 KB | Surcharges de styles pour la bibliothèque Leaflet et ses composants graphiques intégrés. | [Consulter la fiche](leaflet.css.md) | [Code Source](../../../../fportrait/css/vendors/leaflet.css) |
-| `_leaflet.css` | 5.6 KB | Surcharges de styles pour la bibliothèque Leaflet et ses composants graphiques intégrés. | [Consulter la fiche](_leaflet.css.md) | [Code Source](../../../../fportrait/css/vendors/_leaflet.css) |
+| `leaflet.css` | 127 B | Surcharges de styles pour la bibliothèque Leaflet et ses composants graphiques intégrés. | [Consulter la fiche](leaflet.css.md) | [Code Source](../../../../fportrait/css/vendors/leaflet.css) |
+| `_leaflet.css` | 128 B | Surcharges de styles pour la bibliothèque Leaflet et ses composants graphiques intégrés. | [Consulter la fiche](_leaflet.css.md) | [Code Source](../../../../fportrait/css/vendors/_leaflet.css) |
 
 ---
 
 ## 📂 Sous-Dossiers
 
-*Ce dossier ne contient aucun sous-dossier direct.*
+| Sous-Dossier | Description | Lien Wiki |
+| :--- | :--- | :--- |
+| `/leaflet_modules` | Feuilles de styles optimisées pour l'ergonomie mobile, tablettes et écrans verticaux. | [Accéder au dossier (leaflet_modules)](leaflet_modules/index.md) |
 
 ---
 

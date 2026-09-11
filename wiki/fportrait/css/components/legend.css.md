@@ -17,27 +17,10 @@ Mise en page des boîtes de légende, parties, sous-parties, poignées de drag &
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fportrait/css/components/legend.css`
 - **Type de fichier :** `.css`
-- **Poids du fichier :** 16.94 Ko (17348 octets)
-- **Nombre de lignes :** 695 lignes
+- **Poids du fichier :** 0.23 Ko (235 octets)
+- **Nombre de lignes :** 7 lignes
 
 ## 2. Analyse des Styles et Sélecteurs
-
-### Sélecteurs CSS Majeurs
-- `.legend-control .legend-item`
-- `.legend-title`
-- `.legend-header-actions`
-- `.legend-add-part-btn`
-- `.legend-add-part-btn:hover`
-- `.legend-add-part-btn:active`
-- `.legend-part-column`
-- `.legend-part-column:hover`
-- `.legend-part-title`
-- `.legend-part-title:hover`
-- `.legend-part-title.editing`
-- `.legend-part-title.editing .legend-part-edit-icon`
-- `.part-management-controls .btn`
-- `.part-management-controls .btn-sm`
-- `.part-management-controls .btn-info`
 
 ## 3. Rôle dans la Charte Graphique
 Assure l'ergonomie, la cohérence visuelle et l'adaptation responsive selon le profil de l'édition (desktop, mobile ou TBI).

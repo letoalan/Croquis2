@@ -1,10 +1,12 @@
-# 🗺️ Projet Croquis – Documentation technique et Architecture
+# 🗺️ Projet Croquis – Documentation Technique et Architecture Remaniée
 
 Ce document sert de point d'entrée pour toute intelligence artificielle ou développeur souhaitant comprendre, planifier et exécuter des modifications sur le projet **Croquis**.
 
 > 📚 **Documentation Wiki Exhaustive :**  
 > Une documentation complète, modulaire et interconnectée couvrant l'intégralité des répertoires et fichiers du projet est accessible dans le **[Wiki Central](wiki/index.md)**.  
 > Chaque fichier source dispose de sa propre fiche descriptive interconnectée à son dossier parent et au présent document.
+
+---
 
 ## 1. Vue d'ensemble du Dépôt
 Le projet **Croquis** est une application web de cartographie interactive à but pédagogique. Elle permet de dessiner des formes géométriques (lignes, polygones, flèches, marqueurs) sur une carte, de les styliser, de construire une légende dynamique et d'exporter le travail.
@@ -14,72 +16,87 @@ Le dépôt est structuré autour de **trois versions spécialisées** :
 - `fportrait/` : Version optimisée pour le format **Portrait (Mobile/Tablette)**, avec une ergonomie tactile et une navigation par panneaux superposés.
 - `fpaysage/` : Version classique optimisée pour le format **Paysage (Desktop)**.
 
-## 2. Arborescence et Structure du Code
+---
 
-L'architecture a évolué vers une structure hautement modulaire et hiérarchique pour gérer la complexité croissante des outils de dessin et d'export.
+## 2. Architecture Remaniée & Modularisation (< 200 Lignes)
+
+Pour garantir une maintenabilité optimale et respecter le principe de responsabilité unique (SRP), **l'ensemble des fichiers JS et CSS du projet a été modélisé pour ne jamais excéder 200 lignes**. L'architecture repose sur des **façades d'orchestration** déléguant à des sous-modules spécialisés :
 
 ```text
 Croquis/
-├── fpromethean/ | fportrait/ | fpaysage/
-│   ├── index.html             # Point d'entrée spécifique
-│   ├── css/                   # Styles modulaires (layout, components, etc.)
+├── projet.md                         # Architecture globale de référence
+├── wiki/                             # Wiki complet interconnecté (233+ pages)
+├── fpaysage/ | fportrait/ | fpromethean/
+│   ├── index.html                    # Point d'entrée de l'édition
+│   ├── css/                          # Feuilles modulaires composées via @import
+│   │   ├── base/                     # variables, base
+│   │   ├── components/
+│   │   │   ├── editor.css            # Maître (< 20 lignes) -> editor_modules/
+│   │   │   ├── legend.css            # Maître (< 20 lignes) -> legend_modules/
+│   │   │   ├── context-menu.css      # Maître (< 20 lignes) -> context-menu_modules/
+│   │   │   ├── buttons.css, map.css, sidebar.css
+│   │   ├── layout/ & utils/
+│   │   └── vendors/leaflet.css       # Maître -> leaflet_modules/
 │   └── js/
-│       ├── main.js            # Initialisation
-│       └── modules/           # Architecture hiérarchique
-│           ├── mapping/       # Logique métier cartographique
-│           │   ├── controls/  # Contrôles UI de la carte (Sélecteur de fonds)
-│           │   ├── geometry/  # Création et gestion des formes
-│           │   ├── io/        # Import/Export (JSON, PDF)
-│           │   ├── legend/    # Gestion de la légende (Manager, Organizer)
-│           │   └── layers/    # Gestion des couches Leaflet
-│           ├── ui/            # Composants d'interface (Palettes, Menus)
-│           ├── utils/         # Utilitaires (Maths, SVG, Helpers)
-│           ├── StateManager.js    # Source de vérité unique
-│           ├── MapManager.js      # Orchestrateur Leaflet
-│           └── UIManager.js       # Orchestrateur d'interface
+│       ├── main.js                   # Point d'entrée (< 60 lignes)
+│       └── modules/
+│           ├── StateManager.js       # Façade d'état réactif (< 140 lignes)
+│           ├── state_parts/          # LegendStateStore.js, GeometryListRenderer.js
+│           ├── MapManager.js         # Façade carte Leaflet (< 90 lignes)
+│           ├── map_parts/            # TileSources.js, MapEditingEvents.js
+│           ├── UIManager.js          # Façade interface (< 60 lignes)
+│           ├── ui_parts/             # ContextMenuHandler.js, UIActionsHandler.js
+│           ├── ContextMenuDragger.js # Contrôleur drag menu contextuel
+│           ├── ContextMenuPositionManager.js # Stockage et calibration coordonnées
+│           ├── mapping/
+│           │   ├── geometry/         # GeometryHandler.js, GeometryObjectFactory.js
+│           │   ├── lines/            # CurveControlManager.js, BezierMath.js, LineControlManager.js
+│           │   ├── legend/           # LegendManager.js, LegendOrganizer.js, LegendTouchDragHandler.js
+│           │   │   └── legend_parts/ # LegendSymbolBuilder.js, LegendDomBuilder.js
+│           │   ├── io/               # ExportImportManager.js, PDFExporter.js
+│           │   │   ├── io_parts/     # StateSerializer.js, StateDeserializer.js
+│           │   │   └── pdf_parts/    # SmartCropEngine.js, PdfCanvasComposer.js
+│           │   └── layers/ & controls/
+│           ├── ui/
+│           │   ├── SymbolPaletteManager.js # Façade palette (< 70 lignes)
+│           │   └── palette_parts/    # PaletteDropZones.js, PalettePreviewRenderer.js
+│           └── utils/
+│               ├── SVGUtils.js       # Façade vectorielle (< 90 lignes)
+│               ├── svg_parts/        # ArrowRenderer.js, MarkerSVGFactory.js
+│               ├── ZoomManager.js    # Détection zoom viewport & DPR
+│               ├── DiagnosticsManager.js # Outils d'inspection console
+│               └── TextEditorController.js # Éditeur WYSIWYG
 ```
 
-## 3. Architecture Logicielle (js/modules/)
+---
 
-### Cœur du Système
-- **`StateManager.js`** : Gère l'état global. C'est l'unique source de vérité pour les géométries et la légende.
-- **`MapManager.js`** : Pilote Leaflet et Leaflet-Geoman. Gère l'initialisation de la carte et les modes de dessin.
-- **`UIManager.js`** : Gère les interactions globales, la navigation entre panneaux et la réactivité de l'interface.
+## 3. Détail des Modules Remaniés
 
-### Modules Spécialisés (sous `mapping/`)
-- **`legend/LegendManager.js`** : Rendu dynamique de la légende avec support des parties et sous-parties.
-- **`legend/LegendOrganizer.js`** : Logique de Drag & Drop pour organiser les figurés.
-- **`io/PDFExporter.js`** : Export PDF haute définition. Intègre le **"Smart Crop"** pour préserver l'aspect ratio sans distorsion en mode paysage.
-- **`io/ExportImportManager.js`** : Sérialisation complète du projet au format JSON.
+### A. Cœur d'État & Orchestration
+- **`StateManager.js`** : Coordonne les flux d'état entre carte, légende et UI. Délègue la persistance des parties de légende à `LegendStateStore` et l'affichage de la liste à `GeometryListRenderer`.
+- **`MapManager.js`** : Pilote l'instance Leaflet, les contrôles Geoman, les couches et sources de tuiles (`TileSources`).
+- **`UIManager.js`** : Orchestre les interactions du DOM, avec `ContextMenuHandler` (styles des objets) et `UIActionsHandler` (exports, imports, titres).
 
-### Modules Spécialisés (sous `utils/`)
-- **`utils/SVGUtils.js`** : Moteur de rendu mathématique pour les flèches polygonales et les marqueurs géométriques complexes.
+### B. Moteur Vectoriel & Cartographique
+- **`SVGUtils.js`** : Façade statique pour les flèches dynamiques (`ArrowRenderer`) et la génération de marqueurs personnalisés (`MarkerSVGFactory`).
+- **`CurveControlManager.js`** : Gestion des poignées de courbure interactives avec interpolation mathématique (`BezierMath`).
+- **`LegendOrganizer.js`** : Glisser-déposer hiérarchique avec support tactile complet (`LegendTouchDragHandler`).
 
-### Modules Spécifiques (Promethean)
-- **`PointerRouter.js`** : Analyse les événements `pointer` pour différencier l'usage du stylet (dessin précis), du doigt (navigation) et de la paume (rejet).
+### C. Import / Export & Rendu PDF
+- **`ExportImportManager.js`** : Sérialisation (`StateSerializer`) et reconstruction d'état (`StateDeserializer`) au format JSON.
+- **`PDFExporter.js`** : Capture haute définition avec cadrage intelligent (`SmartCropEngine`) et composition vectorielle (`PdfCanvasComposer`).
 
-## 4. Fonctionnalités Clés et Innovations
+---
 
-- **Smart Crop PDF Export** : Algorithme intelligent qui ajuste le cadrage lors de l'export paysage pour inclure la légende et le titre sans écraser la géométrie de la carte.
-- **Navigation "Smart Overlay"** : Système de gestion des panneaux (Dessin, Légende, Save) qui assure une visibilité optimale, particulièrement sur mobile où les panneaux s'excluent mutuellement.
-- **Légende Hiérarchique** : Capacité à créer des structures complexes (Parties > Sous-parties > Figurés) pour répondre aux exigences académiques des croquis de géographie.
-- **Menu Contextuel Flottant** : Interface d'édition directe (`ContextMenuDragger.js`) permettant de modifier les propriétés d'un objet (couleur, opacité, épaisseur) sans quitter la carte des yeux.
+## 4. Guide de Développement et Débogage
 
-## 5. Guide de Développement et Débogage
+### Commandes de Diagnostic en Console
+- `checkZoom()` : Détection et affichage du zoom visuel estimé.
+- `diagnoseVisualArrows()` : Diagnostic des dimensions et visibilité des flèches SVG.
+- `diagnoseDuplicationIssue()` : Vérification de l'unicité des chemins SVG dans le DOM.
+- `forceArrowRefresh()` : Redessin forcé des flèches vectorielles sur la carte.
 
-### Flux de données
-1. L'utilisateur interagit avec la carte (Leaflet-Geoman).
-2. Le `GeometryManager` capte l'événement et met à jour le `StateManager`.
-3. Le `StateManager` notifie les abonnés (Légende, UI).
-4. L'interface se met à jour.
-
-### Débogage en Console
-Des outils de diagnostic sont intégrés pour vérifier l'intégrité du système :
-- `checkInterfaceState()` : Rapport sur la visibilité des panneaux.
-- `diagnoseVisualArrows()` : Analyse du rendu SVG des flèches.
-- `diagnoseDuplicationIssue()` : Vérification des doublons de IDs ou d'éléments.
-
-## 6. Dépendances Critiques
-- **Leaflet.js** : Moteur cartographique.
-- **Leaflet-Geoman** : Outils d'édition de géométrie.
-- **html2canvas / jsPDF** : Moteur de rendu et génération PDF.
+### Dépendances Externes
+- **Leaflet.js** (v1.9.4) : Moteur cartographique.
+- **Leaflet-Geoman** : Outils de création et édition vectorielle.
+- **html2canvas / jsPDF** : Moteur de rendu graphique et écriture PDF A4.

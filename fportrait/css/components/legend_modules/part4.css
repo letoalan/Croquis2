@@ -1,0 +1,161 @@
+/* Module part 4 for legend.css */
+
+/* ==================== ZONES DE DROP ==================== */
+
+.legend-drop-zone,
+.legend-part-items,
+.legend-subpart-items,
+.legend-unclassified-items {
+    min-height: 60px;
+    border: 2px dashed rgba(102, 126, 234, 0.25);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-base);
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(2px);
+
+    /* Support tactile */
+    touch-action: pan-y;
+}
+
+/* État de survol drag */
+.legend-drop-zone.drag-over,
+.legend-part-items.drag-over,
+.legend-subpart-items.drag-over {
+    border-color: var(--primary-gradient-start) !important;
+    border-style: solid !important;
+    border-width: 3px !important;
+    background: rgba(102, 126, 234, 0.12) !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+
+    /* Animation pulsation */
+    animation: drop-zone-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes drop-zone-pulse {
+    0%, 100% { background: rgba(102, 126, 234, 0.12); }
+    50% { background: rgba(102, 126, 234, 0.18); }
+}
+
+/* ==================== NON CLASSÉS ==================== */
+
+.legend-unclassified-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px dashed rgba(102, 126, 234, 0.3);
+}
+
+.legend-unclassified-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: rgba(102, 126, 234, 0.8);
+    margin-bottom: 12px;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.legend-folder-icon {
+    font-size: 16px;
+}
+
+/* ==================== MESSAGES VIDES ==================== */
+
+.legend-empty-message {
+    pointer-events: none;
+    user-select: none;
+    color: rgba(102, 126, 234, 0.5);
+    font-style: italic;
+    text-align: center;
+    padding: 16px;
+    font-size: 13px;
+}
+
+.legend-empty-state {
+    padding: 24px;
+    text-align: center;
+    color: rgba(102, 126, 234, 0.6);
+    font-size: 14px;
+    font-style: italic;
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+    border-radius: var(--border-radius-md);
+    margin: 12px 0;
+    background: rgba(102, 126, 234, 0.03);
+}
+
+.legend-empty-state p {
+    margin: 6px 0;
+}
+
+/* ==================== PROMETHEAN ACTIVPANEL ==================== */
+/* Adaptations pour écrans tactiles larges */
+
+@media screen and (pointer: coarse) and (min-width: 1600px) {
+
+    /* Items plus grands pour meilleure manipulation tactile */
+    .legend-item {
+        padding: 14px 18px;
+        min-height: 52px;
+        margin-bottom: 12px;
+    }
+
+    /* Symboles plus visibles */
+    .legend-symbol-preview,
+    .legend-symbol {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* Feedback drag plus visible */
+    .legend-item.dragging {
+        opacity: 0.6 !important;
+        transform: scale(1.08) !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Zone drop plus large */
+    .legend-drop-zone,
+    .legend-part-items,
+    .legend-subpart-items {
+        min-height: 80px;
+        border-width: 3px;
+    }
+
+    /* Boutons plus grands */
+    .legend-add-part-btn {
+        min-height: 52px;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .part-management-controls .btn {
+        min-height: 44px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* ==================== SCROLLBAR CUSTOM ==================== */
+
+.legend-control::-webkit-scrollbar {
+    width: 8px;
+}
+
+.legend-control::-webkit-scrollbar-track {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 4px;
+}
+
+.legend-control::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 4px;
+    transition: var(--transition-fast);
+}
+
+.legend-control::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+}
+
+/* ==================== ANTI-SÉLECTION PENDANT DRAG ==================== */
+

@@ -17,8 +17,8 @@ Gestionnaire de la palette de symboles et figurés prédéfinis pour l'annotatio
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpaysage/js/modules/ui/SymbolPaletteManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 58.64 Ko (60044 octets)
-- **Nombre de lignes :** 1388 lignes
+- **Poids du fichier :** 2.28 Ko (2337 octets)
+- **Nombre de lignes :** 61 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,12 @@ Gestionnaire de la palette de symboles et figurés prédéfinis pour l'annotatio
 
 ### Éléments Exportés
 - `SymbolPaletteManager`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./palette_parts/PaletteDropZones.js` | `PaletteDropZones` |
+| `./palette_parts/PalettePreviewRenderer.js` | `PalettePreviewRenderer` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

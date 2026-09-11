@@ -17,8 +17,8 @@ Gestionnaire utilitaire de standardisation des géométries, coordonnées et con
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fportrait/js/modules/mapping/geometry/GeometryHandler.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 8.94 Ko (9156 octets)
-- **Nombre de lignes :** 227 lignes
+- **Poids du fichier :** 1.23 Ko (1259 octets)
+- **Nombre de lignes :** 37 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,11 @@ Gestionnaire utilitaire de standardisation des géométries, coordonnées et con
 
 ### Éléments Exportés
 - `GeometryHandler`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./GeometryObjectFactory.js` | `GeometryObjectFactory` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

@@ -16,14 +16,18 @@ Gestionnaires d'état et pilotes d'interface spécialisés pour tableaux interac
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `SVGUtils-OLD.js` | 28.2 KB | Calculateur géométrique et générateur SVG vectoriel pour les flèches dynamiques, pointes orientées et figurés complexes. | [Consulter la fiche](SVGUtils-OLD.js.md) | [Code Source](../../../../../fpromethean/js/modules/utils/SVGUtils-OLD.js) |
-| `SVGUtils.js` | 43.1 KB | Calculateur géométrique et générateur SVG vectoriel pour les flèches dynamiques, pointes orientées et figurés complexes. | [Consulter la fiche](SVGUtils.js.md) | [Code Source](../../../../../fpromethean/js/modules/utils/SVGUtils.js) |
+| `DiagnosticsManager.js` | 1.5 KB | Fichier technique (DiagnosticsManager.js) composant le module fpromethean/js/modules/utils. | [Consulter la fiche](DiagnosticsManager.js.md) | [Code Source](../../../../../fpromethean/js/modules/utils/DiagnosticsManager.js) |
+| `SVGUtils.js` | 3.0 KB | Calculateur géométrique et générateur SVG vectoriel pour les flèches dynamiques, pointes orientées et figurés complexes. | [Consulter la fiche](SVGUtils.js.md) | [Code Source](../../../../../fpromethean/js/modules/utils/SVGUtils.js) |
+| `TextEditorController.js` | 1.8 KB | Fichier technique (TextEditorController.js) composant le module fpromethean/js/modules/utils. | [Consulter la fiche](TextEditorController.js.md) | [Code Source](../../../../../fpromethean/js/modules/utils/TextEditorController.js) |
+| `ZoomManager.js` | 2.5 KB | Fichier technique (ZoomManager.js) composant le module fpromethean/js/modules/utils. | [Consulter la fiche](ZoomManager.js.md) | [Code Source](../../../../../fpromethean/js/modules/utils/ZoomManager.js) |
 
 ---
 
 ## 📂 Sous-Dossiers
 
-*Ce dossier ne contient aucun sous-dossier direct.*
+| Sous-Dossier | Description | Lien Wiki |
+| :--- | :--- | :--- |
+| `/svg_parts` | Gestionnaires d'état et pilotes d'interface spécialisés pour tableaux interactifs (TBI). | [Accéder au dossier (svg_parts)](svg_parts/index.md) |
 
 ---
 

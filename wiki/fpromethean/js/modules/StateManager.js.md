@@ -17,8 +17,8 @@ Source de vérité unique et gestionnaire d'état réactif centralisant les géo
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/modules/StateManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 41.48 Ko (42477 octets)
-- **Nombre de lignes :** 1314 lignes
+- **Poids du fichier :** 4.35 Ko (4452 octets)
+- **Nombre de lignes :** 135 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -32,6 +32,8 @@ Source de vérité unique et gestionnaire d'état réactif centralisant les géo
 | Module Importé | Symboles Importés |
 | :--- | :--- |
 | `./utils/SVGUtils.js` | `SVGUtils` |
+| `./state_parts/LegendStateStore.js` | `LegendStateStore` |
+| `./state_parts/GeometryListRenderer.js` | `GeometryListRenderer` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

@@ -17,33 +17,10 @@ Surcharges spécifiques d'accessibilité et de dimensionnement tactile pour l'af
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/css/promethean-overrides.css`
 - **Type de fichier :** `.css`
-- **Poids du fichier :** 4.67 Ko (4787 octets)
-- **Nombre de lignes :** 215 lignes
+- **Poids du fichier :** 0.16 Ko (166 octets)
+- **Nombre de lignes :** 4 lignes
 
 ## 2. Analyse des Styles et Sélecteurs
-
-### Variables CSS Déclarées
-- `--sidebar-width`
-- `--rail-width`
-- `--glass-bg`
-- `--accent-color`
-
-### Sélecteurs CSS Majeurs
-- `body`
-- `.nav-item`
-- `.nav-item.active`
-- `.nav-item .nav-icon`
-- `.nav-item .nav-label`
-- `.side-panel`
-- `.side-panel.active`
-- `.panel-content`
-- `.panel-content::-webkit-scrollbar`
-- `.panel-content::-webkit-scrollbar-thumb`
-- `.section-title`
-- `.tile-category-header`
-- `.tile-category-row`
-- `.tile-grid-btn`
-- `.tile-grid-btn:hover`
 
 ## 3. Rôle dans la Charte Graphique
 Assure l'ergonomie, la cohérence visuelle et l'adaptation responsive selon le profil de l'édition (desktop, mobile ou TBI).

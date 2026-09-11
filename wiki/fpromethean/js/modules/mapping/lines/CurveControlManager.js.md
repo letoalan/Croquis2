@@ -17,8 +17,8 @@ Contrôleur spécialisé dans la manipulation, le traçage et l'ajustement des p
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/modules/mapping/lines/CurveControlManager.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 11.95 Ko (12241 octets)
-- **Nombre de lignes :** 344 lignes
+- **Poids du fichier :** 7.11 Ko (7279 octets)
+- **Nombre de lignes :** 187 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,11 @@ Contrôleur spécialisé dans la manipulation, le traçage et l'ajustement des p
 
 ### Éléments Exportés
 - `CurveControlManager`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./BezierMath.js` | `BezierMath` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

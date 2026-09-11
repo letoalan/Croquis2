@@ -17,8 +17,8 @@ Contrôleur de déplacement et positionnement flottant du panneau d'édition de 
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/modules/ContextMenuDragger.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 10.08 Ko (10319 octets)
-- **Nombre de lignes :** 302 lignes
+- **Poids du fichier :** 5.24 Ko (5364 octets)
+- **Nombre de lignes :** 149 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,11 @@ Contrôleur de déplacement et positionnement flottant du panneau d'édition de 
 
 ### Éléments Exportés
 - `ContextMenuDragger`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./ContextMenuPositionManager.js` | `ContextMenuPositionManager` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

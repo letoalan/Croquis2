@@ -17,8 +17,8 @@ Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événe
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/main.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 35.25 Ko (36092 octets)
-- **Nombre de lignes :** 883 lignes
+- **Poids du fichier :** 2.28 Ko (2334 octets)
+- **Nombre de lignes :** 56 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,18 +27,14 @@ Point d'entrée JavaScript initialisant les gestionnaires, l'écoute des événe
 | :--- | :--- |
 | `./modules/GeometryManager.js` | `GeometryManager` |
 | `./modules/utils/SVGUtils.js` | `SVGUtils` |
+| `./modules/utils/ZoomManager.js` | `ZoomManager` |
+| `./modules/utils/DiagnosticsManager.js` | `DiagnosticsManager` |
+| `./modules/utils/TextEditorController.js` | `TextEditorController` |
 
 ### Fonctions Clés Définies
-- `function detectAndAdaptZoom()`
-- `function showZoomIndicator()`
-- `function monitorZoomChanges()`
 - `function initSidebar()`
-- `function initFullscreenMode()`
-- `function initTextEditor()`
-- `function initEditorModal()`
-- `function initFormattingButtons()`
-- `function initClearButton()`
-- `function initCopyButton()`
+- `function forceMapResize()`
+- `function initializeApplication()`
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

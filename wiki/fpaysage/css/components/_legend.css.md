@@ -17,27 +17,10 @@ Mise en page des boîtes de légende, parties, sous-parties, poignées de drag &
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpaysage/css/components/_legend.css`
 - **Type de fichier :** `.css`
-- **Poids du fichier :** 8.03 Ko (8218 octets)
-- **Nombre de lignes :** 335 lignes
+- **Poids du fichier :** 0.16 Ko (162 octets)
+- **Nombre de lignes :** 5 lignes
 
 ## 2. Analyse des Styles et Sélecteurs
-
-### Sélecteurs CSS Majeurs
-- `.legend-control .legend-item`
-- `.legend-header`
-- `.legend-title`
-- `.legend-header-actions`
-- `.legend-add-part-btn`
-- `.legend-add-part-btn:hover`
-- `.legend-columns`
-- `.legend-part`
-- `.legend-part:hover`
-- `.legend-part-title`
-- `.legend-part-title:hover`
-- `.legend-part-title.editing`
-- `.legend-part-title span`
-- `.legend-part-title:hover span`
-- `.legend-part-title.editing span`
 
 ## 3. Rôle dans la Charte Graphique
 Assure l'ergonomie, la cohérence visuelle et l'adaptation responsive selon le profil de l'édition (desktop, mobile ou TBI).

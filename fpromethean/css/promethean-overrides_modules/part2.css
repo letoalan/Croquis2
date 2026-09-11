@@ -1,0 +1,54 @@
+/* Module part 2 for promethean-overrides.css */
+
+/* --- ÉDITEUR TEXTE --- */
+.text-editor-container {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 300px;
+    outline: none;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.text-editor-container:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(72, 52, 212, 0.1);
+}
+
+/* --- TITRE SUR LA CARTE --- */
+.map-title-overlay {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    padding: 10px 25px;
+    border-radius: 30px;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+}
+
+.map-title-overlay .toggle-icon {
+    font-size: 0.9rem;
+    color: #636e72;
+}
+
+/* CARTE */
+.map-container-promethean {
+    flex: 1;
+    height: 85vh !important;
+    margin-top: 15vh;
+    position: relative;
+    z-index: 1;
+}

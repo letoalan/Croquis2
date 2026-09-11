@@ -17,8 +17,8 @@ Gestionnaire de glisser-déposer (Drag & Drop) pour la réorganisation interacti
 ### Métadonnées Techniques
 - **Emplacement relatif :** `fpromethean/js/modules/mapping/legend/LegendOrganizer.js`
 - **Type de fichier :** `.js`
-- **Poids du fichier :** 12.33 Ko (12630 octets)
-- **Nombre de lignes :** 369 lignes
+- **Poids du fichier :** 4.57 Ko (4682 octets)
+- **Nombre de lignes :** 124 lignes
 
 ## 2. Architecture & Analyse du Code
 
@@ -27,6 +27,11 @@ Gestionnaire de glisser-déposer (Drag & Drop) pour la réorganisation interacti
 
 ### Éléments Exportés
 - `LegendOrganizer`
+
+### Dépendances et Modules Importés
+| Module Importé | Symboles Importés |
+| :--- | :--- |
+| `./LegendTouchDragHandler.js` | `LegendTouchDragHandler` |
 
 ## 3. Intégration dans le Cycle de Vie du Projet
 Ce fichier s'inscrit dans la chaîne réactive de l'application Croquis :

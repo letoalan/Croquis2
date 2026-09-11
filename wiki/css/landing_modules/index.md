@@ -1,0 +1,33 @@
+# 📁 Dossier : `css/landing_modules`
+
+**Fil d'Ariane :** [🏠 Wiki Central](../../index.md) / [Dossier Parent (css)](../index.md) / `css/landing_modules`
+
+> **Interconnexions globales :** [🗺️ Projet Croquis (projet.md)](../../../projet.md) | [📚 Wiki Central](../../index.md)
+
+---
+
+## 🎯 Rôle et Responsabilité du Dossier
+
+Module technique et organisationnel `css/landing_modules`.
+
+---
+
+## 📄 Fichiers Contenus dans ce Dossier
+
+| Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
+| :--- | :--- | :--- | :--- | :--- |
+| `part1.css` | 4.3 KB | Fichier technique (part1.css) composant le module css/landing_modules. | [Consulter la fiche](part1.css.md) | [Code Source](../../../css/landing_modules/part1.css) |
+| `part2.css` | 2.0 KB | Fichier technique (part2.css) composant le module css/landing_modules. | [Consulter la fiche](part2.css.md) | [Code Source](../../../css/landing_modules/part2.css) |
+
+---
+
+## 📂 Sous-Dossiers
+
+*Ce dossier ne contient aucun sous-dossier direct.*
+
+---
+
+### 🔗 Navigation Rapide
+- [Retour au dossier parent](../index.md)
+- [Retour au Wiki Central](../../index.md)
+- [Documentation Technique Globale (projet.md)](../../../projet.md)

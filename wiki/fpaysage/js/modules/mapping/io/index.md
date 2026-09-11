@@ -16,14 +16,17 @@ Modules cartographiques de la version Paysage : contrôles Leaflet, moteurs de d
 
 | Nom du Fichier | Taille | Rôle & Utilité | Documentation Dédiée | Code Source |
 | :--- | :--- | :--- | :--- | :--- |
-| `ExportImportManager.js` | 47.4 KB | Module de sérialisation et désérialisation de l'état du projet au format JSON pour la sauvegarde et restauration. | [Consulter la fiche](ExportImportManager.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/io/ExportImportManager.js) |
-| `PDFExporter.js` | 30.8 KB | Module d'exportation PDF vectoriel/raster haute définition intégrant le cadrage Smart Crop, la capture de légende et l'échelle. | [Consulter la fiche](PDFExporter.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/io/PDFExporter.js) |
+| `ExportImportManager.js` | 1.3 KB | Module de sérialisation et désérialisation de l'état du projet au format JSON pour la sauvegarde et restauration. | [Consulter la fiche](ExportImportManager.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/io/ExportImportManager.js) |
+| `PDFExporter.js` | 1.5 KB | Module d'exportation PDF vectoriel/raster haute définition intégrant le cadrage Smart Crop, la capture de légende et l'échelle. | [Consulter la fiche](PDFExporter.js.md) | [Code Source](../../../../../../fpaysage/js/modules/mapping/io/PDFExporter.js) |
 
 ---
 
 ## 📂 Sous-Dossiers
 
-*Ce dossier ne contient aucun sous-dossier direct.*
+| Sous-Dossier | Description | Lien Wiki |
+| :--- | :--- | :--- |
+| `/io_parts` | Modules cartographiques de la version Paysage : contrôles Leaflet, moteurs de dessin vectoriel, géométrie, légende et exports. | [Accéder au dossier (io_parts)](io_parts/index.md) |
+| `/pdf_parts` | Modules cartographiques de la version Paysage : contrôles Leaflet, moteurs de dessin vectoriel, géométrie, légende et exports. | [Accéder au dossier (pdf_parts)](pdf_parts/index.md) |
 
 ---
 
