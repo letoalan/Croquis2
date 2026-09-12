@@ -1,7 +1,7 @@
 // MarkerSVGFactory.js - Générateur de marqueurs vectoriels géométriques
 
 export class MarkerSVGFactory {
-    static createMarkerSVG(type, latlng, options = {}) {
+    static createMarkerIcon(type, options = {}) {
         const svgNS = "http://www.w3.org/2000/svg";
         const svgElement = document.createElementNS(svgNS, "svg");
         const markerSize = options.markerSize || 24;
@@ -55,8 +55,33 @@ export class MarkerSVGFactory {
             iconUrl: dataUrl,
             iconSize: [markerSize, markerSize],
             iconAnchor: [markerSize / 2, markerSize / 2],
-            popupAnchor: [0, -markerSize / 2]
+            popupAnchor: [0, -markerSize / 2],
+            className: 'custom-marker'
         });
+    }
+
+    static createMarkerSVG(type, latlng, options = {}) {
+        const markerSize = options.markerSize || 24;
+        const icon = MarkerSVGFactory.createMarkerIcon(type, options);
+        const marker = L.marker(latlng, {
+            icon: icon,
+            draggable: options.draggable || false,
+            interactive: true
+        });
+
+        marker.originalOptions = {
+            type: type,
+            color: options.color || "#007bff",
+            lineColor: options.lineColor || "#000000",
+            opacity: options.opacity || 1,
+            lineWeight: options.lineWeight || 2,
+            lineDash: options.lineDash || 'solid',
+            markerSize: markerSize
+        };
+        marker._markerType = type;
+        marker._markerOptions = marker.originalOptions;
+
+        return marker;
     }
 
     static convertMarkerToPolygon(marker) {

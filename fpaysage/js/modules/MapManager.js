@@ -36,22 +36,22 @@ export class MapManager {
         window.map = this.map;
 
         this.tileLayerManager = new TileLayerManager(this.map, this.tileSources);
-        this.tileSelectorControl = new TileSelectorControl(this.tileLayerManager);
-        this.tileSelectorControl.addTo(this.map);
+        this.tileSelectorControl = new TileSelectorControl(this.map, this.tileLayerManager, this.tileSources);
+        this.tileSelectorControl.addTileSelector();
 
         this.layerGroupManager = new LayerGroupManager(this.map);
         this.geometryHandler = new GeometryHandler(this.map, this.layerGroupManager);
 
-        this.markerControlManager = new MarkerControlManager(this.map, this.stateManager);
-        this.markerControlManager.init();
+        const markerTypes = ['circle', 'square', 'triangle', 'hexagon'];
+        this.markerControlManager = new MarkerControlManager(this.map, markerTypes, this.stateManager, this.geometryHandler);
+        this.markerControlManager.addCustomMarkerControls();
 
-        this.lineControlManager = new LineControlManager(this.map, this.stateManager);
-        this.lineControlManager.init();
+        const lineTypes = ['line', 'arrow', 'doubleArrow'];
+        this.lineControlManager = new LineControlManager(this.map, lineTypes, this.stateManager, this.geometryHandler);
+        this.lineControlManager.addCustomLineControls();
 
         this.curveControlManager = new CurveControlManager(this.map, this.stateManager);
         this.curveControlManager.addCurveControl();
-
-        this.scaleOrientationManager = new ScaleOrientationManager(this.map);
 
         if (this.stateManager.legendManager) {
             this.pdfExporter = new PDFExporter(this, this.stateManager.legendManager, this.stateManager, this.tileLayerManager);
@@ -60,17 +60,19 @@ export class MapManager {
         this.map.pm?.addControls({
             position: 'topleft',
             drawCircle: true,
-            drawMarker: true,
+            drawCircleMarker: false,
+            drawMarker: false,
             drawPolygon: true,
             drawPolyline: false,
             drawRectangle: true,
+            drawText: false,
             editMode: true,
             dragMode: true,
             cutPolygon: false,
             removalMode: true
         });
 
-        MapEditingEvents.setup(this.map, this.stateManager);
+        MapEditingEvents.setup(this.map, this.stateManager, this.geometryHandler, this.lineControlManager);
         console.log('[MapManager] Map initialized successfully');
     }
 

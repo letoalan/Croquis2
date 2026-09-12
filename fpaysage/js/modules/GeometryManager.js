@@ -52,6 +52,7 @@ export class GeometryManager {
 
         // ✅ 9. Initialiser PDFExporter
         this.pdfExporter = new PDFExporter(this.mapManager, this.legendManager, this.stateManager);
+        this.mapManager.pdfExporter = this.pdfExporter;
         console.log('[GeometryManager] PDFExporter initialized');
 
         // ✅ 9b. Injecter TileLayerManager depuis MapManager
@@ -72,6 +73,7 @@ export class GeometryManager {
 
         // ✅ 11. Initialiser UIManager avec StateManager
         this.uiManager = new UIManager(this.stateManager);
+        this.stateManager.setUIManager(this.uiManager);
         console.log('[GeometryManager] UIManager initialized:', this.uiManager);
 
         // ✅ 12. Initialiser les gestionnaires d'événements de l'UI

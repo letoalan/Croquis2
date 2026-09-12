@@ -181,9 +181,9 @@ def get_rel_link(from_wiki_file, to_target_file):
 
 def generate_central_index(all_files, dir_to_files, dir_to_subdirs):
     index_path = os.path.join(WIKI_ROOT, 'index.md')
-    rel_projet = get_rel_link(os.path.join('wiki', 'index.md'), 'projet.md')
-    rel_exportpdf = get_rel_link(os.path.join('wiki', 'index.md'), 'exportpdf.md')
-    rel_readme = get_rel_link(os.path.join('wiki', 'index.md'), 'README.md')
+    rel_projet = get_rel_link(os.path.join('wiki', 'index.md'), '../projet.md')
+    rel_exportpdf = get_rel_link(os.path.join('wiki', 'index.md'), '../exportpdf.md')
+    rel_readme = get_rel_link(os.path.join('wiki', 'index.md'), '../README.md')
     
     lines = [
         "# 📚 Wiki Central – Documentation de l'Application Croquis",
@@ -309,7 +309,7 @@ def generate_dir_index(rel_dir, files, subdirs, all_dirs):
     index_file = os.path.join(target_dir, 'index.md')
     
     wiki_rel_index = os.path.join('wiki', rel_dir, 'index.md') if rel_dir else os.path.join('wiki', 'index.md')
-    link_projet = get_rel_link(wiki_rel_index, 'projet.md')
+    link_projet = get_rel_link(wiki_rel_index, '../projet.md')
     link_wiki_root = get_rel_link(wiki_rel_index, os.path.join('wiki', 'index.md'))
     
     parent_rel_dir = os.path.dirname(rel_dir).replace('\\', '/') if rel_dir else None
@@ -405,7 +405,7 @@ def generate_file_doc(info):
     wiki_rel_file = os.path.join('wiki', rel_dir, f"{fn}.md") if rel_dir else os.path.join('wiki', f"{fn}.md")
     dir_index_rel = get_rel_link(wiki_rel_file, os.path.join('wiki', rel_dir, 'index.md') if rel_dir else os.path.join('wiki', 'index.md'))
     wiki_root_rel = get_rel_link(wiki_rel_file, os.path.join('wiki', 'index.md'))
-    projet_rel = get_rel_link(wiki_rel_file, 'projet.md')
+    projet_rel = get_rel_link(wiki_rel_file, '../projet.md')
     source_rel = get_rel_link(wiki_rel_file, rel_p)
     
     dir_name = rel_dir if rel_dir else "Racine du projet"

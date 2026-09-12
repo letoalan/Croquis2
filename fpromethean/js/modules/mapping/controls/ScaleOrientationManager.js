@@ -11,8 +11,8 @@ export class ScaleOrientationManager {
         this.orientationControl = null;
 
         console.log('[ScaleOrientationManager] Initializing...');
-        this.initScale();
         this.initOrientation();
+        this.initScale();
     }
 
     /**
@@ -21,7 +21,7 @@ export class ScaleOrientationManager {
     initScale() {
         // Options de l'échelle
         const scaleOptions = {
-            position: 'bottomleft',
+            position: 'topleft',
             maxWidth: 200, // Largeur maximale en pixels
             metric: true, // Afficher en mètres/kilomètres
             imperial: false, // Désactiver miles/pieds
@@ -41,7 +41,7 @@ export class ScaleOrientationManager {
     initOrientation() {
         const OrientationControl = L.Control.extend({
             options: {
-                position: 'bottomleft' // Position de la rose des vents
+                position: 'topleft' // Position de la rose des vents
             },
 
             onAdd: (map) => {

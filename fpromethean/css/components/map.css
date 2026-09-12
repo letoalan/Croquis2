@@ -29,10 +29,9 @@
 
 /* ==================== CONTRÔLES LEAFLET REMONTÉS ==================== */
 
-/* Échelle : au-dessus de la barre Chromium */
+/* Échelle : style de base */
 .leaflet-control-scale,
 .leaflet-control-scale-line {
-    bottom: 95px !important;
     margin-bottom: 0 !important;
 }
 
@@ -58,7 +57,7 @@
 
 /* Zoom contrôles */
 .leaflet-control-zoom {
-    margin-top: 60px !important;
+    display: none !important;
 }
 
 /* ==================== TITRE DE LA CARTE ==================== */

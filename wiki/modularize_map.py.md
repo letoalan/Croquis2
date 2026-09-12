@@ -1,12 +1,12 @@
-# 📄 Fiche Documentaire : `modularize_map.py`
+# 📄 Fiche Documentaire : `../python/modularize_map.py`
 
-**Fil d'Ariane :** [🏠 Wiki Central](index.md) / [📁 Dossier Racine du projet](index.md) / `modularize_map.py`
+**Fil d'Ariane :** [🏠 Wiki Central](index.md) / [📁 Dossier Racine du projet](index.md) / `../python/modularize_map.py`
 
 > **Interconnexions :**
 > - **Dossier Parent :** [Racine du projet](index.md)
 > - **Documentation Technique Globale :** [🗺️ projet.md](../projet.md)
 > - **Portail Wiki :** [📚 Wiki Central](index.md)
-> - **Code Source Réel :** [💻 Voir `modularize_map.py`](../modularize_map.py)
+> - **Code Source Réel :** [💻 Voir `../python/modularize_map.py`](../python/modularize_map.py)
 
 ---
 
@@ -15,7 +15,7 @@
 Fichier technique (modularize_map.py) composant le module .
 
 ### Métadonnées Techniques
-- **Emplacement relatif :** `modularize_map.py`
+- **Emplacement relatif :** `../python/modularize_map.py`
 - **Type de fichier :** `.py`
 - **Poids du fichier :** 6.45 Ko (6605 octets)
 
@@ -25,4 +25,4 @@ Fichier technique (modularize_map.py) composant le module .
 - [📁 Consulter l'index du dossier (Racine du projet)](index.md)
 - [🗺️ Consulter la documentation d'architecture globale (projet.md)](../projet.md)
 - [📚 Revenir à l'accueil du Wiki Central](index.md)
-- [💻 Ouvrir le code source (modularize_map.py)](../modularize_map.py)
+- [💻 Ouvrir le code source (modularize_map.py)](../python/modularize_map.py)

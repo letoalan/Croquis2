@@ -16,16 +16,61 @@ export class UIActionsHandler {
     _setupTitleHandlers() {
         const toggleIcon = document.getElementById('toggleTitleIcon');
         const titleContent = document.getElementById('titleContent');
-        const mapTitleInput = document.getElementById('mapTitle');
+        const mapTitleInput = document.getElementById('mapTitleInput') || document.getElementById('mapTitle');
+        const saveMapTitleBtn = document.getElementById('saveMapTitleBtn');
+        const mapTitleDisplay = document.getElementById('mapTitleDisplay');
 
-        toggleIcon?.addEventListener('click', () => {
-            const isCollapsed = titleContent?.classList.toggle('collapsed');
-            if (toggleIcon) toggleIcon.textContent = isCollapsed ? '▼' : '▲';
-            this.stateManager.isTitlePanelCollapsed = isCollapsed;
+        const toggleTitleEdit = () => {
+            if (this.uiManager?.setActivePanel) {
+                const navItemProject = document.querySelector('.nav-item[data-panel="project"]');
+                navItemProject?.click();
+                return;
+            }
+            const container = document.getElementById('mapTitleContainer') || titleContent;
+            const inputContainer = document.getElementById('mapTitleInputContainer');
+            if (inputContainer) {
+                const isEditing = inputContainer.style.display !== 'none';
+                inputContainer.style.display = isEditing ? 'none' : 'flex';
+                if (mapTitleDisplay) mapTitleDisplay.style.display = isEditing ? 'block' : 'none';
+                if (!isEditing && mapTitleInput) {
+                    mapTitleInput.value = this.stateManager.mapTitle || '';
+                    setTimeout(() => mapTitleInput.focus(), 50);
+                }
+                if (toggleIcon) toggleIcon.textContent = isEditing ? '▼' : '▲';
+                if (container) container.classList.toggle('editing', !isEditing);
+            } else if (container) {
+                const isCollapsed = container.classList.toggle('collapsed');
+                if (toggleIcon) toggleIcon.textContent = isCollapsed ? '▼' : '▲';
+                this.stateManager.isTitlePanelCollapsed = isCollapsed;
+            }
+        };
+
+        toggleIcon?.addEventListener('click', toggleTitleEdit);
+        mapTitleDisplay?.addEventListener('click', toggleTitleEdit);
+
+        const updateTitle = (val) => {
+            const title = val.trim() || 'Sans titre';
+            this.stateManager.setMapTitle(title);
+            if (mapTitleDisplay) mapTitleDisplay.textContent = title;
+            const inputContainer = document.getElementById('mapTitleInputContainer');
+            if (inputContainer && !this.uiManager?.setActivePanel) {
+                inputContainer.style.display = 'none';
+                if (mapTitleDisplay) mapTitleDisplay.style.display = 'block';
+                if (toggleIcon) toggleIcon.textContent = '▼';
+            }
+        };
+
+        saveMapTitleBtn?.addEventListener('click', () => {
+            if (mapTitleInput) updateTitle(mapTitleInput.value);
+        });
+
+        mapTitleInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') updateTitle(e.target.value);
         });
 
         mapTitleInput?.addEventListener('input', (e) => {
             this.stateManager.setMapTitle(e.target.value);
+            if (mapTitleDisplay) mapTitleDisplay.textContent = e.target.value || 'Sans titre';
         });
     }
 
@@ -72,6 +117,7 @@ export class UIActionsHandler {
 
     _setupSliders() {
         const pairs = [
+            ['contextOpacitySlider', 'contextOpacityValue'],
             ['contextOpacity', 'contextOpacityValue'],
             ['contextLineWeight', 'contextLineWeightValue'],
             ['contextMarkerSize', 'contextMarkerSizeValue']

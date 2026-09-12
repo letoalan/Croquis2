@@ -35,16 +35,6 @@ export class GeometryObjectFactory {
             };
         }
 
-        if (layer instanceof L.CircleMarker && !(layer instanceof L.Circle)) {
-            return {
-                type: 'CircleMarker',
-                coordinates: { lat: layer.getLatLng().lat, lng: layer.getLatLng().lng },
-                radius: layer.getRadius(),
-                color, opacity, lineColor, lineWeight, lineDash,
-                layer
-            };
-        }
-
         if (layer instanceof L.Circle) {
             return {
                 type: 'Circle',
@@ -52,6 +42,16 @@ export class GeometryObjectFactory {
                     center: { lat: layer.getLatLng().lat, lng: layer.getLatLng().lng },
                     radius: layer.getRadius()
                 },
+                color, opacity, lineColor, lineWeight, lineDash,
+                layer
+            };
+        }
+
+        if (layer instanceof L.CircleMarker) {
+            return {
+                type: 'CircleMarker',
+                coordinates: { lat: layer.getLatLng().lat, lng: layer.getLatLng().lng },
+                radius: layer.getRadius(),
                 color, opacity, lineColor, lineWeight, lineDash,
                 layer
             };

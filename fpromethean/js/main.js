@@ -34,8 +34,6 @@ function initializeApplication() {
     window.geometryManager = new GeometryManager();
 
     TextEditorController.init();
-    initSidebar('editionPanel', 'sidebarToggle', { side: 'left' });
-    initSidebar('textEditorPanel', 'textEditorToggle', { side: 'right' });
 
     window.diagnoseDuplicationIssue = DiagnosticsManager.diagnoseDuplicationIssue;
     window.diagnoseVisualArrows = DiagnosticsManager.diagnoseVisualArrows;

@@ -16,16 +16,39 @@ export class UIActionsHandler {
     _setupTitleHandlers() {
         const toggleIcon = document.getElementById('toggleTitleIcon');
         const titleContent = document.getElementById('titleContent');
-        const mapTitleInput = document.getElementById('mapTitle');
+        const mapTitleInput = document.getElementById('mapTitleInput') || document.getElementById('mapTitle');
+        const saveMapTitleBtn = document.getElementById('saveMapTitleBtn');
+        const mapTitleDisplay = document.getElementById('mapTitleDisplay');
 
         toggleIcon?.addEventListener('click', () => {
-            const isCollapsed = titleContent?.classList.toggle('collapsed');
-            if (toggleIcon) toggleIcon.textContent = isCollapsed ? '▼' : '▲';
-            this.stateManager.isTitlePanelCollapsed = isCollapsed;
+            // En mode Promethean, bascule le panneau Projet
+            if (this.uiManager?.setActivePanel) {
+                const navItemProject = document.querySelector('.nav-item[data-panel="project"]');
+                navItemProject?.click();
+            } else {
+                const isCollapsed = titleContent?.classList.toggle('collapsed');
+                if (toggleIcon) toggleIcon.textContent = isCollapsed ? '▼' : '▲';
+                this.stateManager.isTitlePanelCollapsed = isCollapsed;
+            }
+        });
+
+        const updateTitle = (val) => {
+            const title = val.trim() || 'Sans titre';
+            this.stateManager.setMapTitle(title);
+            if (mapTitleDisplay) mapTitleDisplay.textContent = title;
+        };
+
+        saveMapTitleBtn?.addEventListener('click', () => {
+            if (mapTitleInput) updateTitle(mapTitleInput.value);
+        });
+
+        mapTitleInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') updateTitle(e.target.value);
         });
 
         mapTitleInput?.addEventListener('input', (e) => {
             this.stateManager.setMapTitle(e.target.value);
+            if (mapTitleDisplay) mapTitleDisplay.textContent = e.target.value || 'Sans titre';
         });
     }
 
@@ -72,6 +95,7 @@ export class UIActionsHandler {
 
     _setupSliders() {
         const pairs = [
+            ['contextOpacitySlider', 'contextOpacityValue'],
             ['contextOpacity', 'contextOpacityValue'],
             ['contextLineWeight', 'contextLineWeightValue'],
             ['contextMarkerSize', 'contextMarkerSizeValue']

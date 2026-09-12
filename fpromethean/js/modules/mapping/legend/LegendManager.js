@@ -15,18 +15,26 @@ export class LegendManager {
     }
 
     initLegend() {
-        const LegendControl = L.Control.extend({
-            options: { position: 'bottomright' },
-            onAdd: () => {
-                const c = L.DomUtil.create('div', 'legend-control');
-                L.DomEvent.disableClickPropagation(c);
-                L.DomEvent.disableScrollPropagation(c);
-                return c;
-            }
-        });
+        // En mode Promethean, on utilise le conteneur HTML fixe dans le panneau #panel-legend
+        const prometheanContainer = document.getElementById('legendContainer');
+        if (prometheanContainer) {
+            this.container = prometheanContainer;
+            console.log('[LegendManager] Promethean mode: using #legendContainer');
+        } else {
+            // Mode Leaflet standard (fpaysage / fportrait)
+            const LegendControl = L.Control.extend({
+                options: { position: 'bottomright' },
+                onAdd: () => {
+                    const c = L.DomUtil.create('div', 'legend-control');
+                    L.DomEvent.disableClickPropagation(c);
+                    L.DomEvent.disableScrollPropagation(c);
+                    return c;
+                }
+            });
 
-        this.legendControl = new LegendControl();
-        this.map.addControl(this.legendControl);
+            this.legendControl = new LegendControl();
+            this.map.addControl(this.legendControl);
+        }
 
         if (this.stateManager.legendParts.length === 0) {
             this.stateManager.addLegendPart('I');
@@ -36,23 +44,28 @@ export class LegendManager {
     }
 
     updateLegend() {
-        const container = this.legendControl?.getContainer();
+        const container = this.container || this.legendControl?.getContainer();
         if (!container) return;
 
-        container.innerHTML = `
-            <div class="legend-header">
+        container.innerHTML = '';
+
+        // En mode Leaflet Control (hors Promethean), afficher l'en-tête interne
+        if (!this.container) {
+            const header = document.createElement('div');
+            header.className = 'legend-header';
+            header.innerHTML = `
                 <span class="legend-title">✏️ Légende</span>
                 <button class="legend-add-part-btn" id="addPartBtn">+ Partie</button>
-            </div>
-        `;
-
-        container.querySelector('#addPartBtn')?.addEventListener('click', () => {
-            const name = prompt('Nom de la partie:');
-            if (name?.trim()) {
-                this.stateManager.addLegendPart(name.trim());
-                this.updateLegend();
-            }
-        });
+            `;
+            header.querySelector('#addPartBtn')?.addEventListener('click', () => {
+                const name = prompt('Nom de la partie:');
+                if (name?.trim()) {
+                    this.stateManager.addLegendPart(name.trim());
+                    this.updateLegend();
+                }
+            });
+            container.appendChild(header);
+        }
 
         LegendDomBuilder.renderColumns(container, this.stateManager, () => this.updateLegend());
         this.legendOrganizer.setupDragAndDrop();

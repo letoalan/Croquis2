@@ -14,59 +14,36 @@ export class SVGUtils {
     }
 
     static addArrowheadsToPolylineSVG(polyline, arrowType) {
-        if (!polyline?._map) return false;
-        const map = polyline._map;
-        const group = ArrowRenderer.ensureArrowContainer(map);
-        if (!group) return false;
-
-        polyline._arrowType = arrowType;
-        if (polyline._path) {
-            polyline._path.style.opacity = '0';
-            polyline._path.style.pointerEvents = 'stroke';
-        }
-
-        const render = () => {
-            const coords = polyline.getLatLngs();
-            if (coords.length < 2) return;
-            const pts = coords.map(ll => map.latLngToLayerPoint(ll));
-
-            let pathEl = polyline._svgPath;
-            if (!pathEl) {
-                pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                polyline._svgPath = pathEl;
-                group.appendChild(pathEl);
-            }
-
-            const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-            pathEl.setAttribute('d', d);
-            pathEl.setAttribute('stroke', polyline.options.color || '#3388ff');
-            pathEl.setAttribute('stroke-width', polyline.options.weight || 3);
-            pathEl.setAttribute('fill', 'none');
-        };
-
-        polyline._arrowRenderHandler = render;
-        map.on('zoom move', render);
-        render();
-        return true;
+        return ArrowRenderer.addArrowheadsToPolyline(polyline, arrowType);
     }
 
     static cleanupArrowheads(polyline) {
-        if (polyline._svgPath) {
-            polyline._svgPath.remove();
-            delete polyline._svgPath;
-        }
-        if (polyline._arrowRenderHandler && polyline._map) {
-            polyline._map.off('zoom move', polyline._arrowRenderHandler);
-            delete polyline._arrowRenderHandler;
+        ArrowRenderer.cleanupArrowheads(polyline);
+    }
+
+    static maskPolylineWhenReady(polyline, attempt = 0) {
+        const MAX_ATTEMPTS = 5;
+        if (attempt >= MAX_ATTEMPTS) return;
+        if (!polyline || !polyline._map) return;
+        if (polyline._path) {
+            polyline._path.style.display = 'none';
+        } else {
+            requestAnimationFrame(() => {
+                SVGUtils.maskPolylineWhenReady(polyline, attempt + 1);
+            });
         }
     }
 
     static updateArrowPath(polyline) {
-        if (polyline._arrowRenderHandler) polyline._arrowRenderHandler();
+        if (polyline._arrowRenderHandler) polyline._arrowRenderHandler.call(polyline);
     }
 
     static restoreArrowsAfterDrag(polyline) {
-        if (polyline._arrowRenderHandler) polyline._arrowRenderHandler();
+        if (polyline._arrowRenderHandler) polyline._arrowRenderHandler.call(polyline);
+    }
+
+    static createMarkerIcon(type, options = {}) {
+        return MarkerSVGFactory.createMarkerIcon(type, options);
     }
 
     static createMarkerSVG(type, latlng, options = {}) {
@@ -78,8 +55,17 @@ export class SVGUtils {
     }
 
     static updateMarkerStyle(marker, newOptions) {
-        const type = marker._markerType || 'circle';
-        const newIcon = MarkerSVGFactory.createMarkerSVG(type, marker.getLatLng(), newOptions);
-        marker.setIcon(newIcon);
+        try {
+            const originalOptions = marker.originalOptions || {};
+            const options = { ...originalOptions, ...newOptions };
+            const type = options.markerType || marker._markerType || (typeof options.type === 'string' ? options.type.replace(/^Marker_/, '') : null) || 'circle';
+            const newIcon = MarkerSVGFactory.createMarkerIcon(type, options);
+            marker.setIcon(newIcon);
+            marker._markerType = type;
+            marker.originalOptions = { ...options, type, markerType: type };
+            marker._markerOptions = marker.originalOptions;
+        } catch (error) {
+            console.error('[SVGUtils] Error updating marker style:', error);
+        }
     }
 }

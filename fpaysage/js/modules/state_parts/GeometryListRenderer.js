@@ -1,7 +1,7 @@
 // GeometryListRenderer.js - Rendu du panneau latéral listant les géométries
 
 export class GeometryListRenderer {
-    static render(geometries, selectedIndex, onSelect, onDelete) {
+    static render(geometries, selectedIndex, onSelect, onDelete, onDuplicate) {
         const list = document.getElementById('geometryList');
         if (!list) return;
         list.innerHTML = '';
@@ -22,20 +22,34 @@ export class GeometryListRenderer {
             const editBtn = document.createElement('button');
             editBtn.className = 'btn btn-sm btn-outline-primary';
             editBtn.textContent = '✏️';
+            editBtn.title = 'Éditer';
             editBtn.onclick = (e) => {
                 e.stopPropagation();
                 onSelect(idx);
             };
 
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'btn btn-sm btn-outline-secondary';
+            copyBtn.textContent = '📋';
+            copyBtn.title = 'Tamponner (dupliquer en continu)';
+            copyBtn.onclick = (e) => {
+                e.stopPropagation();
+                onDuplicate?.(idx);
+            };
+
             const delBtn = document.createElement('button');
             delBtn.className = 'btn btn-sm btn-outline-danger';
             delBtn.textContent = '🗑️';
+            delBtn.title = 'Supprimer toutes les copies';
             delBtn.onclick = (e) => {
                 e.stopPropagation();
-                onDelete(idx);
+                if (confirm('Supprimer ce figuré et toutes ses copies ?')) {
+                    onDelete(idx);
+                }
             };
 
             actions.appendChild(editBtn);
+            actions.appendChild(copyBtn);
             actions.appendChild(delBtn);
             item.appendChild(nameInput);
             item.appendChild(actions);

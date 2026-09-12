@@ -1,4 +1,4 @@
-// StateSerializer.js - Sérialisation JSON de l'état applicatif complet
+// StateSerializer.js - Sérialisation JSON de l'état applicatif complet avec support multi-instances
 
 export class StateSerializer {
     static serialize(stateManager, mapManager) {
@@ -11,6 +11,7 @@ export class StateSerializer {
             type: geom.type,
             name: geom.name,
             coordinates: geom.coordinates,
+            coordinatesList: geom.coordinatesList || [geom.coordinates],
             color: geom.color,
             lineColor: geom.lineColor,
             opacity: geom.opacity,

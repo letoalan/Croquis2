@@ -3,3 +3,43 @@
 .context-menu.closing .context-menu-content {
     animation: contextMenuSlideOut 0.2s ease forwards;
 }
+
+.btn-context-duplicate {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: var(--white, #fff);
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--border-radius-lg, 8px);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition-base, all 0.2s ease);
+    box-shadow: 0 3px 8px rgba(79, 172, 254, 0.3);
+    width: 100%;
+}
+
+.btn-context-duplicate:hover {
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    box-shadow: var(--shadow-lg, 0 4px 12px rgba(0,0,0,0.15));
+    transform: translateY(-2px);
+}
+
+.btn-context-duplicate:active {
+    transform: translateY(0);
+}
+
+.btn-context-duplicate.stamp-active, #contextDuplicateBtn.stamp-active {
+    background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 8px rgba(255, 88, 88, 0.4) !important;
+    animation: pulse-stamp 1.5s infinite;
+}
+
+@keyframes pulse-stamp {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.cursor-stamp, .cursor-stamp .leaflet-container {
+    cursor: crosshair !important;
+}

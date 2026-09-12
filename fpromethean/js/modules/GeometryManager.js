@@ -8,7 +8,6 @@ import { ExportImportManager } from './mapping/io/ExportImportManager.js';
 import { ScaleOrientationManager } from './mapping/controls/ScaleOrientationManager.js';
 import { PDFExporter } from './mapping/io/PDFExporter.js';
 import { SymbolPaletteManager } from './ui/SymbolPaletteManager.js';
-import { PointerRouter } from './PointerRouter.js';
 
 export class GeometryManager {
     constructor() {
@@ -38,13 +37,10 @@ export class GeometryManager {
         this.stateManager.setLegendManager(this.legendManager);
         console.log('[GeometryManager] LegendManager passed to StateManager');
 
-        // ✅ 7. Initialiser ScaleOrientationManager (nécessite la carte initialisée)
-        this.scaleOrientationManager = new ScaleOrientationManager(this.mapManager.map);
-        console.log('[GeometryManager] ScaleOrientationManager initialized');
-
-        // ✅ AJOUT CRITIQUE : Lier l'instance au MapManager pour qu'elle soit accessible
+        // ✅ 7. Récupérer ou initialiser ScaleOrientationManager
+        this.scaleOrientationManager = this.mapManager.scaleOrientationManager || new ScaleOrientationManager(this.mapManager.map);
         this.mapManager.scaleOrientationManager = this.scaleOrientationManager;
-        console.log('[GeometryManager] ✅ ScaleOrientationManager linked to MapManager');
+        console.log('[GeometryManager] ScaleOrientationManager initialized and linked');
 
         // ✅ 8. Initialiser ExportImportManager
         this.exportImportManager = new ExportImportManager(this.stateManager, this.mapManager);
@@ -53,6 +49,7 @@ export class GeometryManager {
 
         // ✅ 9. Initialiser PDFExporter
         this.pdfExporter = new PDFExporter(this.mapManager, this.legendManager, this.stateManager);
+        this.mapManager.pdfExporter = this.pdfExporter;
         console.log('[GeometryManager] PDFExporter initialized');
 
         // ✅ 9b. Injecter TileLayerManager depuis MapManager
@@ -73,19 +70,11 @@ export class GeometryManager {
 
         // ✅ 11. Initialiser UIManager avec StateManager
         this.uiManager = new UIManager(this.stateManager);
-        console.log('[GeometryManager] UIManager initialized:', this.uiManager);
-
-        // ✅ 11b. Lier UIManager au StateManager
         this.stateManager.setUIManager(this.uiManager);
-        console.log('[GeometryManager] UIManager linked to StateManager');
+        console.log('[GeometryManager] UIManager initialized:', this.uiManager);
 
         // ✅ 12. Initialiser les gestionnaires d'événements de l'UI
         this.uiManager.initUI();
-
-        // ✅ 13. Initialiser PointerRouter (Orchestration matériel Promethean)
-        this.pointerRouter = new PointerRouter(this.uiManager);
-        console.log('[GeometryManager] PointerRouter initialized');
-
         console.log('[GeometryManager] ========== Initialization complete ==========');
     }
 

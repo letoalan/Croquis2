@@ -16,6 +16,9 @@ export class TileLayerManager {
         this.currentTileLayer = null; // Couche de tuiles principale (objet L.TileLayer)
         this.currentLabelsLayer = null; // Couche de labels pour le mode hybrid
         this.currentTileType = 'osm'; // ✅ AJOUT : Identifiant de la tuile active (string)
+
+        // ✅ Charger la tuile par défaut
+        this.setTileLayer(this.currentTileType);
     }
 
     /**
