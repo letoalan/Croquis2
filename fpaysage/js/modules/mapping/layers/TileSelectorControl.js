@@ -186,4 +186,14 @@ export class TileSelectorControl {
         this.map.addControl(this.control);
         console.log('[TileSelectorControl] Tile selector added to map');
     }
+
+    setSelectedTile(tileValue) {
+        this.currentTile = tileValue;
+        if (this.dropdown) {
+            this.dropdown.querySelectorAll('.tile-option').forEach(opt => {
+                const isMatch = opt.getAttribute('data-value') === tileValue;
+                opt.classList.toggle('active', isMatch);
+            });
+        }
+    }
 }

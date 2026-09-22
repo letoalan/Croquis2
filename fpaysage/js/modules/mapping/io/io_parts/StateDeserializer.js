@@ -50,6 +50,17 @@ export class StateDeserializer {
         if (state.mapTitle) stateManager.setMapTitle(state.mapTitle);
         if (state.legendParts) stateManager.legendParts = state.legendParts;
 
+        // Restaurer la vue carte et le fond de carte (tuiles)
+        if (state.mapState && mapManager?.map) {
+            if (state.mapState.center && state.mapState.zoom !== undefined) {
+                mapManager.map.setView([state.mapState.center.lat, state.mapState.center.lng], state.mapState.zoom);
+            }
+            if (state.mapState.tileLayer && mapManager.tileLayerManager) {
+                mapManager.tileLayerManager.setTileLayer(state.mapState.tileLayer);
+                mapManager.tileSelectorControl?.setSelectedTile?.(state.mapState.tileLayer);
+            }
+        }
+
         // Reconstruire les géométries
         state.geometries.forEach(g => {
             const allCoords = g.coordinatesList && g.coordinatesList.length > 0 ? g.coordinatesList : [g.coordinates];
@@ -79,6 +90,11 @@ export class StateDeserializer {
 
                 stateManager.geometries.push(geomObj);
                 const currentIdx = stateManager.geometries.length - 1;
+
+                // Restaurer l'affectation à la légende
+                if (g.partId) {
+                    stateManager.assignGeometryToPart?.(currentIdx, g.partId);
+                }
 
                 layers.forEach(layer => {
                     if (layer.on) {

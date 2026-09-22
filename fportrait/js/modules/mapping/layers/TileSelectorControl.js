@@ -173,4 +173,14 @@ export class TileSelectorControl {
     toggleDropdown() {
         this._toggleMenu(this._button);
     }
+
+    setSelectedTile(tileValue) {
+        this.currentTile = tileValue;
+        if (this.dropdown) {
+            this.dropdown.querySelectorAll('.tile-option').forEach(opt => {
+                const isMatch = opt.getAttribute('data-value') === tileValue;
+                opt.classList.toggle('active', isMatch);
+            });
+        }
+    }
 }

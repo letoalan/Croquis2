@@ -177,4 +177,19 @@ export class TileSelectorControl {
             this.dropdown.style.display = 'none';
         }
     }
+
+    setSelectedTile(tileValue) {
+        this.currentTile = tileValue;
+        if (this.dropdown) {
+            this.dropdown.querySelectorAll('.tile-option').forEach(opt => {
+                const isMatch = opt.getAttribute('data-value') === tileValue;
+                opt.classList.toggle('active', isMatch);
+            });
+        }
+        document.querySelectorAll('.tile-grid-btn').forEach(btn => {
+            // Check if btn corresponds to tileValue
+            const label = btn.querySelector('.tile-label')?.textContent;
+            // Or if active class
+        });
+    }
 }
