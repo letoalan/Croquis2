@@ -63,18 +63,25 @@ export class MapEditingEvents {
             }
         });
 
-        map.on('pm:vertex:dragend pm:markerdragend pm:dragend', (e) => {
-            if (e.layer?._arrowType) {
-                const idx = stateManager.geometries.findIndex(g => g.layer === e.layer);
-                if (idx !== -1) {
-                    stateManager.updateGeometry(idx, e.layer.getLatLngs());
-                }
-            }
-        });
+        // Écouteur unifié pour toutes les déformations de calques (surfaces, lignes, marqueurs, multi-instances)
+        map.on('pm:vertex:dragend pm:markerdragend pm:dragend pm:edit pm:vertexadded pm:vertexremoved', (e) => {
+            const layer = e.layer;
+            if (!layer) return;
 
-        map.on('pm:dragend', (e) => {
-            if (e.layer?._arrowType) {
-                SVGUtils.restoreArrowsAfterDrag(e.layer);
+            // Récupérer les nouvelles coordonnées selon le type de calque
+            let newCoords = null;
+            if (typeof layer.getLatLngs === 'function') {
+                newCoords = layer.getLatLngs();
+            } else if (typeof layer.getLatLng === 'function') {
+                newCoords = layer.getLatLng();
+            }
+
+            if (newCoords) {
+                stateManager.updateLayerCoordinates(layer, newCoords);
+            }
+
+            if (layer._arrowType) {
+                SVGUtils.restoreArrowsAfterDrag(layer);
             }
         });
     }

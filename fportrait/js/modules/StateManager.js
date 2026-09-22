@@ -112,13 +112,50 @@ export class StateManager {
         this.updateUI();
     }
 
-    updateGeometry(index, newCoords) {
-        if (this.geometries[index]) {
-            this.geometries[index].coordinates = newCoords;
-            this.updateUI();
+    updateGeometry(index, newCoords, layerIndex = 0) {
+        const geom = this.geometries[index];
+        if (!geom) return;
+
+        let normalizedCoords = newCoords;
+        if (geom.type === 'Polygon' || geom.type === 'Rectangle') {
+            if (Array.isArray(normalizedCoords) && normalizedCoords.length > 0 && Array.isArray(normalizedCoords[0])) {
+                normalizedCoords = normalizedCoords[0];
+            }
+        }
+
+        if (!Array.isArray(geom.coordinatesList)) {
+            geom.coordinatesList = [geom.coordinates];
+        }
+
+        if (layerIndex >= 0 && layerIndex < geom.coordinatesList.length) {
+            geom.coordinatesList[layerIndex] = normalizedCoords;
+        } else if (layerIndex === geom.coordinatesList.length) {
+            geom.coordinatesList.push(normalizedCoords);
+        }
+
+        if (layerIndex === 0) {
+            geom.coordinates = normalizedCoords;
+        }
+
+        this.updateUI();
+    }
+
+    updateGeometryCoordinates(index, newCoords) {
+        this.updateGeometry(index, newCoords, 0);
+    }
+
+    updateLayerCoordinates(layer, newCoords) {
+        if (!layer) return;
+        for (let i = 0; i < this.geometries.length; i++) {
+            const geom = this.geometries[i];
+            const layers = geom.layers || (geom.layer ? [geom.layer] : []);
+            const lIdx = layers.indexOf(layer);
+            if (lIdx !== -1) {
+                this.updateGeometry(i, newCoords, lIdx);
+                return;
+            }
         }
     }
-    updateGeometryCoordinates(index, newCoords) { this.updateGeometry(index, newCoords); }
 
     startStamping(idx) { this.stampManager.startStamping(idx); }
     stopStamping() { this.stampManager.stopStamping(); }
