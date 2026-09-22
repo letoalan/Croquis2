@@ -1,6 +1,6 @@
 // StateDeserializer.js - Restauration et ré-instanciation des calques (support multi-instances)
 
-import { SVGUtils } from '../../utils/SVGUtils.js';
+import { SVGUtils } from '../../../utils/SVGUtils.js';
 
 export class StateDeserializer {
     static _createLayerForCoords(g, coords) {
@@ -27,7 +27,6 @@ export class StateDeserializer {
             });
             if (g.arrowType) {
                 layer._arrowType = g.arrowType;
-                SVGUtils.addArrowheadsToPolylineSVG(layer, g.arrowType);
             }
         } else if (g.type === 'Circle' || g.type === 'CircleMarker') {
             layer = L.circleMarker(coords, {
@@ -60,6 +59,10 @@ export class StateDeserializer {
                 const layer = StateDeserializer._createLayerForCoords(g, coords);
                 if (layer) {
                     layer.addTo(mapManager.map);
+                    if (g.arrowType && typeof SVGUtils?.addArrowheadsToPolylineSVG === 'function') {
+                        SVGUtils.addArrowheadsToPolylineSVG(layer, g.arrowType);
+                        SVGUtils.maskPolylineWhenReady?.(layer);
+                    }
                     layers.push(layer);
                 }
             });

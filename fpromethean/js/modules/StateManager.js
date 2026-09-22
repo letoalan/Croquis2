@@ -31,6 +31,9 @@ export class StateManager {
     setMapTitle(t) { this.mapTitle = t; }
 
     addGeometry(geom) {
+        if (this.isStamping()) {
+            this.stopStamping();
+        }
         if (!geom?.layer) return;
         geom.name = geom.name || `Figuré ${this.geometries.length + 1}`;
         const stableId = geom.layer._leaflet_id || `geom_${Date.now()}_${this.geometries.length}`;

@@ -79,7 +79,6 @@ export class GeometryDuplicator {
             });
             if (originalGeom.arrowType) {
                 newLayer._arrowType = originalGeom.arrowType;
-                SVGUtils.addArrowheadsToPolylineSVG(newLayer, originalGeom.arrowType);
             }
         } else if (type === 'Circle' || type === 'CircleMarker') {
             newLayer = L.circleMarker(newCoords, {
@@ -96,6 +95,11 @@ export class GeometryDuplicator {
 
         if (!newLayer) return null;
         newLayer.addTo(map);
+
+        if (originalGeom.arrowType && typeof SVGUtils?.addArrowheadsToPolylineSVG === 'function') {
+            SVGUtils.addArrowheadsToPolylineSVG(newLayer, originalGeom.arrowType);
+            SVGUtils.maskPolylineWhenReady?.(newLayer);
+        }
 
         if (onClick && newLayer.on) {
             newLayer.on('click', onClick);

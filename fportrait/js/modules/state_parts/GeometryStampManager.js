@@ -81,6 +81,8 @@ export class GeometryStampManager {
             geom.coordinatesList.push(result.coordinates);
 
             console.log(`[GeometryStampManager] Instance ajoutée au figuré index ${currentIdx} (total: ${geom.layers.length})`);
+            // Annuler le mode tampon après le premier copier/coller (l'utilisateur doit réappuyer sur le bouton pour recommencer)
+            this.stopStamping();
         }
     }
 
